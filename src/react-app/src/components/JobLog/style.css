@@ -1,0 +1,31 @@
+.JobLog {
+    min-height: 4em;
+    overflow-y: auto;
+    padding: 4px;
+
+    border: 1px solid silver;
+    /* max-height: 20em; */
+    /* overflow-y: auto; */
+}
+
+.JobLog-line {
+    border-bottom: 1px solid silver;
+}
+
+.JobLog-col {
+    display: inline-block;
+    vertical-align: top;
+    font-family: monospace;
+}
+
+.JobLog-errorText {
+    color: red;
+}
+
+.JobLog-errorRow {
+    background-color: transparent;
+}
+
+.JobLog-normalRow {
+    background-color: transparent;
+}

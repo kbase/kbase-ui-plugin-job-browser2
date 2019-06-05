@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+
+# The build plugin goes here. We don't want to check it it from 
+# a developer session, but we do like to keep the directory in the repo,
+# thus the placeholder README file.
+/src/plugin/iframe_root/*
+!/src/plugin/iframe_root/README.md 
+
+

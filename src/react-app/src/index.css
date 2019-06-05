@@ -1,0 +1,89 @@
+/*
+Styles in index.css apply to index.tsx and index.html.
+
+*/
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    /* -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; */
+    height: 100%;
+    width: 100%;
+    /* font-size: 14px;
+    font-family: 'Oxygen', sans-serif; */
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+#root {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.Row {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.Row-fullheight {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: row;
+}
+
+.Row-scrollable {
+    min-height: 0;
+    min-width: 0;
+}
+
+.Col-scrollable {
+    min-height: 0;
+    min-width: 0;
+}
+
+.Col {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.scrollable-flex-column {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* */
+.PreciseTable {
+    table-layout: fixed;
+}
+
+.PreciseTable-cell,
+.PreciseTable td {
+    max-width: 0;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.PreciseTable .ant-table-column-title {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.NumericColumn {
+    text-align: right;
+    padding-right: 1em;
+}

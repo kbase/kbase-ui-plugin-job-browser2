@@ -1,0 +1,21 @@
+.MyJobs {}
+
+.MyJobs-table {
+    table-layout: fixed;
+}
+
+.MyJobs-tableCell,
+.MyJobs-table td {
+    max-width: 0;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.MyJobs-table .ant-table-column-title {
+    /* max-width: 0; */
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

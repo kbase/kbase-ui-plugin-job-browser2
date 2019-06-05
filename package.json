@@ -1,0 +1,22 @@
+{
+    "name": "kbase-ui-plugin-job-browser2",
+    "version": "1.0.0",
+    "description": "A kbase-ui plugin to allow a KBase user to view their existing jobs; and for job admins to manage all jobs.",
+    "main": "index.js",
+    "devDependencies": {
+        "common-readme": "^1.1.0"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kbase/kbase-ui-plugin-job-browser2.git"
+    },
+    "author": "KBase Developers",
+    "license": "SEE LICENSE IN LICENSE",
+    "bugs": {
+        "url": "https://github.com/kbase/kbase-ui-plugin-job-browser2/issues"
+    },
+    "homepage": "https://github.com/kbase/kbase-ui-plugin-job-browser2#readme"
+}

@@ -1,0 +1,12 @@
+import React from 'react';
+import { shallow } from 'enzyme';
+import App from './App';
+
+it('renders without crashing', () => {
+    shallow(<App />);
+});
+
+it('is really the App component', () => {
+    const component = shallow(<App />);
+    expect(component.is('[data-k-b-testhook-component="App"]')).toBe(true);
+});
