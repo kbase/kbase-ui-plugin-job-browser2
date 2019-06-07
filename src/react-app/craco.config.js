@@ -10,7 +10,9 @@ module.exports = {
             addPlugins: true,
             configure: (jestConfig, { env, paths, resolve, rootDir }) => {
                 // jestConfig.transformIgnorePatterns = [`<rootDir>/node_modules/(?!${esModules})`];
+                console.log('CRACO, man', env, paths, resolve, rootDir);
                 jestConfig.transformIgnorePatterns = ['[/\\\\]node_modules[/\\\\](?!kbase-ui-lib|antd/).+\\.js$'];
+                jestConfig.rootDir = './src';
 
                 return jestConfig;
             }

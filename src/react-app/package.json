@@ -1,70 +1,70 @@
 {
-  "name": "react-app",
-  "version": "0.1.0",
-  "private": true,
-  "homepage": "./",
-  "dependencies": {
-    "@craco/craco": "5.2.1",
-    "@types/bluebird": "3.5.27",
-    "@types/enzyme": "3.9.3",
-    "@types/enzyme-adapter-react-16": "1.0.5",
-    "@types/jest": "24.0.13",
-    "@types/node": "12.0.4",
-    "@types/react": "16.8.19",
-    "@types/react-dom": "16.8.4",
-    "@types/react-redux": "7.0.9",
-    "@types/uuid": "3.4.4",
-    "antd": "3.19.2",
-    "bluebird": "3.5.5",
-    "craco-antd": "1.11.0",
-    "enzyme": "3.10.0",
-    "enzyme-adapter-react-16": "1.14.0",
-    "es-cookie": "1.2.0",
-    "kbase-ui-lib": "file:../../../kbase-ui-lib/kbase-ui-lib-0.1.0.tgz",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "react-redux": "7.0.3",
-    "react-scripts": "3.0.1",
-    "react-test-renderer": "16.8.6",
-    "redux": "4.0.1",
-    "redux-thunk": "2.3.0",
-    "typeface-oxygen": "0.0.72",
-    "typescript": "3.4.5",
-    "uuid": "3.3.2"
-  },
-  "scripts": {
-    "start": "nodemon -w ./craco.config.js -w ./src/custom/style/antd/theme.less --exec 'craco start'",
-    "build": "craco build",
-    "postbuild": "bash postbuild.sh",
-    "test": "react-scripts test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!kbase-ui-lib).+\\.js$\"",
-    "eject": "react-scripts eject"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{ts,tsx}",
-      "!/node_modules/",
-      "!src/index.tsx",
-      "!src/serviceWorker.ts"
-    ]
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "proxy": "https://ci.kbase.us",
-  "devDependencies": {
-    "nodemon": "^1.19.1",
-    "typedoc": "^0.14.2"
-  }
+    "name": "react-app",
+    "version": "0.1.0",
+    "private": true,
+    "homepage": "./",
+    "dependencies": {
+        "@craco/craco": "5.2.1",
+        "@types/bluebird": "3.5.27",
+        "@types/enzyme": "3.9.3",
+        "@types/enzyme-adapter-react-16": "1.0.5",
+        "@types/jest": "24.0.13",
+        "@types/node": "12.0.4",
+        "@types/react": "16.8.19",
+        "@types/react-dom": "16.8.4",
+        "@types/react-redux": "7.0.9",
+        "@types/uuid": "3.4.4",
+        "antd": "3.19.2",
+        "bluebird": "3.5.5",
+        "craco-antd": "1.11.0",
+        "enzyme": "3.10.0",
+        "enzyme-adapter-react-16": "1.14.0",
+        "es-cookie": "1.2.0",
+        "kbase-ui-lib": "file:../../../kbase-ui-lib/kbase-ui-lib-0.1.0.tgz",
+        "react": "16.8.6",
+        "react-dom": "16.8.6",
+        "react-redux": "7.0.3",
+        "react-scripts": "3.0.1",
+        "react-test-renderer": "16.8.6",
+        "redux": "4.0.1",
+        "redux-thunk": "2.3.0",
+        "typeface-oxygen": "0.0.72",
+        "typescript": "3.4.5",
+        "uuid": "3.3.2"
+    },
+    "scripts": {
+        "start": "nodemon -w ./craco.config.js -w ./src/custom/style/antd/theme.less --exec 'craco start'",
+        "build": "craco build",
+        "plugin": "bash scripts/postbuild.bash",
+        "test": "craco test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!kbase-ui-lib).+\\.js$\"",
+        "eject": "react-scripts eject"
+    },
+    "jest": {
+        "collectCoverageFrom": [
+            "./src/**/*.{ts,tsx}",
+            "!/node_modules/",
+            "!src/index.tsx",
+            "!src/serviceWorker.ts"
+        ]
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "proxy": "https://ci.kbase.us",
+    "devDependencies": {
+        "nodemon": "^1.19.1",
+        "typedoc": "^0.14.2"
+    }
 }
