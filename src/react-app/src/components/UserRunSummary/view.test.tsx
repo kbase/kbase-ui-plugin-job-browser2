@@ -13,12 +13,13 @@ import Adapter from 'enzyme-adapter-react-16';
 
 // We always need to import the component we are testing
 import Component from './view';
-import { SearchState, UserRunSummaryStat } from '../../redux/store';
+import { SearchState, UserRunSummaryStat, UserRunSummaryQuery } from '../../redux/store';
 
 configure({ adapter: new Adapter() });
 
 it('renders without crashing', () => {
     const searchState = SearchState.NONE;
     const userRunSummary: Array<UserRunSummaryStat> = [];
-    shallow(<Component searchState={searchState} userRunSummary={userRunSummary} />);
+    const search = (query: UserRunSummaryQuery) => {};
+    shallow(<Component search={search} searchState={searchState} userRunSummary={userRunSummary} />);
 });

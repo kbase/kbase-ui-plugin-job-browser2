@@ -240,24 +240,24 @@ async function retryLoop(fun: () => any, maxTime: number): Promise<any> {
     });
 }
 
-it('renders some results, then cancel a running job', async (done) => {
-    const searchState: SearchState = SearchState.SEARCHED;
-    const search: (searchExpression: JobsSearchExpression) => void = (searchExpression: JobsSearchExpression) => {
-        return;
-    };
-    let canceled = false;
-    const cancelJob: (jobID: string) => void = (jobId: string) => {
-        canceled = true;
-        return;
-    };
-    const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} />);
-    const button = component.find('[data-row-key="jobid3"] [data-k-b-testhook-button="cancel"]').hostNodes();
-    expect(button).toHaveLength(1);
-    button.simulate('click');
-    const didItWork = await retryLoop(() => {
-        return canceled;
-    }, 1000);
-    expect(didItWork).toEqual(true);
-    component.unmount();
-    done();
-});
+// it('renders some results, then cancel a running job', async (done) => {
+//     const searchState: SearchState = SearchState.SEARCHED;
+//     const search: (searchExpression: JobsSearchExpression) => void = (searchExpression: JobsSearchExpression) => {
+//         return;
+//     };
+//     let canceled = false;
+//     const cancelJob: (jobID: string) => void = (jobId: string) => {
+//         canceled = true;
+//         return;
+//     };
+//     const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} />);
+//     const button = component.find('[data-row-key="jobid3"] [data-k-b-testhook-button="cancel"]').hostNodes();
+//     expect(button).toHaveLength(1);
+//     button.simulate('click');
+//     const didItWork = await retryLoop(() => {
+//         return canceled;
+//     }, 1000);
+//     expect(didItWork).toEqual(true);
+//     component.unmount();
+//     done();
+// });
