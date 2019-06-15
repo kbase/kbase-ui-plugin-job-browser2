@@ -1,6 +1,6 @@
 import { mainLoadStart, mainLoadError, mainLoadSuccess } from './app';
 import { ActionType } from './index';
-import { AppError } from 'kbase-ui-lib/lib/redux/store';
+import { AppError } from '@kbase/ui-lib/lib/redux/store';
 
 it('generates start action', () => {
     const loadStartAction = mainLoadStart();

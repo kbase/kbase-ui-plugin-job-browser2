@@ -6,6 +6,8 @@
 @green-kbase: rgb(45, 135, 48);
 @gold-kbase: rgb(251, 116, 7);
 @red-kbase: rgb(163, 36, 36);
+@font-size-base-kbase: 16px;
+@font-family-kbase: 'Oxygen';
 
 // antd theme customization
 @primary-color: @blue-kbase;
@@ -26,7 +28,7 @@
 * Note: Currently the kbase ui uses oxygen for most text, and roboto for
 * headlines.
 */
-@font-family: 'Oxygen';
+@font-family: @font-family-kbase;
 @code-family: monospace;
 
 @text-color: fade(@black, 65%);
@@ -36,7 +38,7 @@
 @text-color-inverse: @white;
 
 
-@font-size-base: 14px;
+@font-size-base: @font-size-base-kbase;
 @font-size-lg: @font-size-base + 2px;
 @font-size-sm: 12px;
 @heading-1-size: ceil(@font-size-base * 2.71);

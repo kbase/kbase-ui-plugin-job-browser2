@@ -1,7 +1,7 @@
 import { Action } from 'redux';
 import { ActionType } from '.';
 import { JobsSearchExpression, Job, EpochTime, StoreState } from '../store';
-import { AppError, NarrativeJobServiceClient } from 'kbase-ui-lib';
+import { AppError, NarrativeJobServiceClient } from '@kbase/ui-lib';
 import MetricsServiceClient from '../../lib/MetricsServiceClient';
 import { serviceJobToUIJob, compareTimeRange, compareStatus, extractTimeRange } from './utils';
 import { ThunkDispatch } from 'redux-thunk';

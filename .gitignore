@@ -7,4 +7,7 @@ node_modules/
 /src/plugin/iframe_root/*
 !/src/plugin/iframe_root/README.md 
 
+# created by npm if install with --no-cache option
+false
+
 

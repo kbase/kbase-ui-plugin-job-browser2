@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { ActionType } from '.';
-import { AppError, CatalogClient } from 'kbase-ui-lib';
+import { AppError, CatalogClient } from '@kbase/ui-lib';
 import { ThunkDispatch } from 'redux-thunk';
 import { StoreState } from '../store';
 

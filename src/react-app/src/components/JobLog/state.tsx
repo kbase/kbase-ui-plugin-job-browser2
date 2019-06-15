@@ -2,7 +2,7 @@ import React from 'react';
 import { JobLog, JobLogLine } from '../../redux/store';
 import JobLogComponent from './view';
 import { Spin } from 'antd';
-import { NarrativeJobServiceClient } from 'kbase-ui-lib';
+import { NarrativeJobServiceClient } from '@kbase/ui-lib';
 
 // A simple state wrapper for job logs.
 

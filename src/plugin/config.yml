@@ -22,6 +22,8 @@ install:
               path: { literal: ['browse'] }
           widget: kb_plugin_jobbrowser
           authorization: true
+          params:
+                view: browse
     menu:
         - name: jobbrowser
           definition:

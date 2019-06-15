@@ -10,16 +10,16 @@
 import React from 'react';
 import { createReduxStore } from './redux/store';
 import { Provider } from 'react-redux';
-// import 'antd/dist/antd.css';
 
 // KBase external
-import { AppBase } from 'kbase-ui-lib';
+import { AppBase } from '@kbase/ui-lib';
 
 // project
 import Main from './components/Main';
 
 // file
 import './App.css';
+import { DevWrapper } from './components/DevWrapper';
 
 /**
  * The app currently has no props, but we establish
@@ -53,9 +53,11 @@ export default class App extends React.Component<AppProps, AppState> {
     render() {
         return (
             <Provider store={store}>
-                <AppBase>
-                    <Main />
-                </AppBase>
+                <DevWrapper>
+                    <AppBase>
+                        <Main />
+                    </AppBase>
+                </DevWrapper>
             </Provider>
         );
     }

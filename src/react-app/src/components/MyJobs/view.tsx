@@ -6,21 +6,7 @@
 /** imports */
 // 3rd party imports
 import React from 'react';
-import {
-    Table,
-    Form,
-    Input,
-    Button,
-    Tag,
-    Icon,
-    Checkbox,
-    Select,
-    DatePicker,
-    Alert,
-    Popconfirm,
-    Tooltip,
-    Progress
-} from 'antd';
+import { Table, Form, Input, Button, Tag, Icon, Checkbox, Select, DatePicker, Alert, Popconfirm, Tooltip } from 'antd';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import moment, { Moment } from 'moment';
@@ -29,8 +15,8 @@ import moment, { Moment } from 'moment';
 import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRangePresets, TimeRange } from '../../redux/store';
 
 // kbase imports (or should be kbase imports)
-import { NiceElapsedTime } from 'kbase-ui-lib';
-import { NiceTimeDuration } from 'kbase-ui-lib';
+import { NiceRelativeTime } from '@kbase/ui-lib';
+import { NiceTimeDuration } from '@kbase/ui-lib';
 
 // project imoprts
 import JobLog from '../JobLog';
@@ -658,7 +644,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                                 if (!date) {
                                     return <span>** empty **</span>;
                                 }
-                                return <NiceElapsedTime time={new Date(date)} />;
+                                return <NiceRelativeTime time={new Date(date)} />;
                             }}
                             defaultSortOrder="descend"
                             sorter={(a: Job, b: Job) => {

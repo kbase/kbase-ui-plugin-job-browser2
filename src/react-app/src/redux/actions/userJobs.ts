@@ -3,7 +3,7 @@ import MetricsServiceClient from '../../lib/MetricsServiceClient';
 import { serviceJobToUIJob, compareTimeRange, compareStatus, extractTimeRange } from './utils';
 import { Action } from 'redux';
 import { ActionType } from '.';
-import { AppError, NarrativeJobServiceClient } from 'kbase-ui-lib';
+import { AppError, NarrativeJobServiceClient } from '@kbase/ui-lib';
 import { ThunkDispatch } from 'redux-thunk';
 
 async function fetchAllUserJobs(

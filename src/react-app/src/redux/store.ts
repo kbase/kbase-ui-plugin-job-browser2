@@ -1,10 +1,10 @@
-import { makeAuthStoreInitialState } from 'kbase-ui-lib';
+import { makeAuthStoreInitialState } from '@kbase/ui-lib';
 import reducer from './reducers';
 import { createStore, compose, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
-import { AppError } from 'kbase-ui-lib';
-import { BaseStoreState } from 'kbase-ui-lib';
-import { makeIntegrationStoreInitialState } from 'kbase-ui-lib';
+import { AppError } from '@kbase/ui-lib';
+import { BaseStoreState } from '@kbase/ui-lib';
+import { makeIntegrationStoreInitialState } from '@kbase/ui-lib';
 
 export enum JobStatus {
     QUEUED = 'QUEUED',

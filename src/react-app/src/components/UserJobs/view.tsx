@@ -12,8 +12,8 @@ import { Table, Form, Input, Button, Tag, Icon, Checkbox, Select, DatePicker, Po
 import moment, { Moment } from 'moment';
 
 // project imports (should be shared lib)
-import { NiceElapsedTime } from 'kbase-ui-lib';
-import { NiceTimeDuration } from 'kbase-ui-lib';
+import { NiceRelativeTime } from '@kbase/ui-lib';
+import { NiceTimeDuration } from '@kbase/ui-lib';
 
 // project imports
 import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRange, TimeRangePresets } from '../../redux/store';
@@ -576,7 +576,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                                 if (!date) {
                                     return <span>** empty **</span>;
                                 }
-                                return <NiceElapsedTime time={new Date(date)} />;
+                                return <NiceRelativeTime time={new Date(date)} />;
                             }}
                             defaultSortOrder="descend"
                             sorter={(a: Job, b: Job) => {

@@ -1,4 +1,4 @@
-import { DynamicServiceClient, DynamicServiceClientParams } from 'kbase-ui-lib';
+import { DynamicServiceClient, DynamicServiceClientParams } from '@kbase/ui-lib';
 
 // Metrics client --
 // TODO: move

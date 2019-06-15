@@ -20,7 +20,7 @@ define(['module', './iframer', 'css!./panel.css'], function (module, Iframer) {
         attach(node) {
             this.hostNode = node;
             this.container = node.appendChild(document.createElement('div'));
-            this.container.classList.add('plugin_jobbrowser_panel');
+            this.container.classList.add('plugin_panel');
         }
 
         start(params) {
@@ -30,12 +30,12 @@ define(['module', './iframer', 'css!./panel.css'], function (module, Iframer) {
                 params.viewParams = JSON.parse(params.viewParams);
             }
 
-            if (params.orgId) {
-                params.view = 'org';
-                params.viewParams = {
-                    id: params.orgId
-                };
-            }
+            // if (params.orgId) {
+            //     params.view = 'org';
+            //     params.viewParams = {
+            //         id: params.orgId
+            //     };
+            // }
 
             this.iframer = new Iframer({
                 runtime: this.runtime,
@@ -50,7 +50,7 @@ define(['module', './iframer', 'css!./panel.css'], function (module, Iframer) {
                 }
             });
 
-            this.runtime.send('ui', 'setTitle', 'Jobs Browser');
+            // this.runtime.send('ui', 'setTitle', 'Jobs Browser');
 
             return this.iframer.start();
         }
