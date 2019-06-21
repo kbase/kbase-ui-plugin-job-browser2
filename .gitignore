@@ -10,4 +10,5 @@ node_modules/
 # created by npm if install with --no-cache option
 false
 
+_site
 

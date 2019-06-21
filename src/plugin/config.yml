@@ -4,6 +4,7 @@ package:
     author: KBase Developer
     name: jobbrowser
     description: The jobbrowser panel and associated widgets
+    type: legacy
 source:
     ## sources are relative to build/plugins/PACKAGE/source/javascript
     ## NB: need to quote file names, otherwise
@@ -11,19 +12,15 @@ source:
     styles:
         # - file: styles.css
 install:
-    widgets:
-        - module: ./panel
-          id: kb_plugin_jobbrowser
-          type: es6
-
     routes:
         - path: ['jobbrowser']
           queryParams:
               path: { literal: ['browse'] }
-          widget: kb_plugin_jobbrowser
+          widget: kb_iframe_loader
           authorization: true
           params:
                 view: browse
+                plugin: job-browser2
     menu:
         - name: jobbrowser
           definition:

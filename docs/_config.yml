@@ -1,0 +1,13 @@
+title: Job Browser Plugin
+remote_theme: eapearson/just-the-docs
+search_enabled: false
+aux_links: 
+    "Job Browser Plugin on Github":
+        - "//github.com/kbase/kbase-ui-plugin-job-browser2"
+    "About KBase":
+        - "//kbase.us/about"
+navigation:
+    menu:
+        - label: Overview
+        - label: For Users
+        - label: For Admins
