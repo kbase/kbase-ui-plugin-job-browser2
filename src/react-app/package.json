@@ -36,7 +36,8 @@
         "start": "nodemon -w ./craco.config.js -w ./src/custom/style/antd/theme.less --exec 'craco start'",
         "build": "craco build",
         "plugin": "bash scripts/postbuild.bash",
-        "test": "craco test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!@kbase/ui-lib).+\\.js$\"",
+        "testx": "craco test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!@kbase/ui-lib).+\\.js$\"",
+        "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
     "jest": {
