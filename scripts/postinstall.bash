@@ -6,6 +6,6 @@ npm run build && \
 echo "✓ built successfully" && \
 npm run test -- --watchAll=false && \
 echo "✓ tests run successfully" && \
-npm run build-plugin && \
+npm run install-plugin && \
 echo "✓ plugin setup successfully" && \
 echo "✓ plugin installed successfully"
