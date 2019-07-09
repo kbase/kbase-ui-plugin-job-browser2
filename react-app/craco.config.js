@@ -25,5 +25,17 @@ module.exports = {
                 customizeThemeLessPath: path.join(__dirname, 'src/custom/style/antd/theme.less')
             }
         }
-    ]
+    ],
+    webpack: {
+        alias: {
+            react: path.resolve('./node_modules/react'),
+            redux: path.resolve('./node_modules/redux'),
+            'react-redux': path.resolve('./node_modules/react-redux')
+        }
+    },
+    devServer: {
+        watchOptions: {
+            poll: 1000
+        }
+    }
 };

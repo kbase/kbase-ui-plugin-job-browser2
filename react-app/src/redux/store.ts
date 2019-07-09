@@ -1,10 +1,9 @@
-import { makeAuthStoreInitialState } from '@kbase/ui-lib';
+import { makeBaseStoreState } from '@kbase/ui-lib';
 import reducer from './reducers';
 import { createStore, compose, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { AppError } from '@kbase/ui-lib';
 import { BaseStoreState } from '@kbase/ui-lib';
-import { makeIntegrationStoreInitialState } from '@kbase/ui-lib';
 
 export enum JobStatus {
     QUEUED = 'QUEUED',
@@ -184,11 +183,9 @@ export interface UserRunSummaryView {
 
 export function makeInitialStoreState(): StoreState {
     const jobs: Array<Job> = [];
-    const appStore = makeIntegrationStoreInitialState();
-    const authStore = makeAuthStoreInitialState();
+    const baseState = makeBaseStoreState();
     return {
-        ...appStore,
-        ...authStore,
+        ...baseState,
         views: {
             mainView: {
                 loadingState: ComponentLoadingState.NONE,

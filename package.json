@@ -15,7 +15,7 @@
         "url": "git+https://github.com/kbase/kbase-ui-plugin-job-browser2.git"
     },
     "author": "KBase Developers",
-    "license": "SEE LICENSE IN LICENSE",
+    "license": "SEE LICENSE IN LICENSE.md",
     "bugs": {
         "url": "https://github.com/kbase/kbase-ui-plugin-job-browser2/issues"
     },

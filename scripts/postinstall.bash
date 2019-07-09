@@ -1,5 +1,5 @@
 echo "Running plugin post install script"
-cd src/react-app && \
+cd react-app && \
 npm install && \
 echo "✓ dependencies installed successfully" && \
 npm run build && \

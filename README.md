@@ -14,20 +14,27 @@ Generally, documentation for using this plugin with kbase-ui can be found in the
 
 For hacking on this plugin, the short version, however, goes like this:
 
--   Create a project directory, which we'll call `project`
+- Create a project directory, which we'll call `project`
+  
     ```bash
     mkdir project
     cd project
     ```
--   Clone kbase-ui:
+
+- Clone kbase-ui:
+
     ```bash
     clone -b develop https://github.com/kbase/kbase-ui
     ```
--   Clone this plugin:
+
+- Clone this plugin:
+
     ```bash
     clone https://github.com/kbase/kbase-ui-plugin-job-browser2
     ```
--   Start up kbase-ui with this plugin installed from the local source tree:
+
+- Start up kbase-ui with this plugin installed from the local source tree:
+  
     ```bash
     cd kbase-ui
     make dev-start plugins="jobbrowser"
@@ -55,16 +62,16 @@ The Job Browser is also suitable for KBase administrators, who are often called 
 
 ## Acknowledgments
 
--   Mike - original author as an embedded aspect of the [catalog plugin](https://github.com/kbase/kbase-ui-plugin-catalog)
--   Jim - separated the job browser from the catalog plugin into a standalone plugin
--   Erik - port to Typescript & React
+- Mike - original author as an embedded aspect of the [catalog plugin](https://github.com/kbase/kbase-ui-plugin-catalog)
+- Jim - separated the job browser from the catalog plugin into a standalone plugin
+- Erik - port to Typescript & React
 
 ## See Also
 
--   [KBase UI](https://github.com/kbase/kbase-ui)
--   [Catalog Plugin](https://github.com/kbase/kbase-ui-plugin-catalog)
--   [What is KBase?](http://kbase.us/what-is-kbase/)
+- [KBase UI](https://github.com/kbase/kbase-ui)
+- [Catalog Plugin](https://github.com/kbase/kbase-ui-plugin-catalog)
+- [What is KBase?](http://kbase.us/what-is-kbase/)
 
 ## License
 
-SEE LICENSE IN LICENSE
+SEE LICENSE IN LICENSE.md

@@ -14,12 +14,13 @@ import { Provider } from 'react-redux';
 // KBase external
 import { AppBase } from '@kbase/ui-lib';
 
+import { AuthGate } from '@kbase/ui-lib';
+
 // project
 import Main from './components/Main';
 
 // file
 import './App.css';
-import { DevWrapper } from './components/DevWrapper';
 
 /**
  * The app currently has no props, but we establish
@@ -53,11 +54,11 @@ export default class App extends React.Component<AppProps, AppState> {
     render() {
         return (
             <Provider store={store}>
-                <DevWrapper>
-                    <AppBase>
+                <AppBase>
+                    <AuthGate required={true}>
                         <Main />
-                    </AppBase>
-                </DevWrapper>
+                    </AuthGate>
+                </AppBase>
             </Provider>
         );
     }
