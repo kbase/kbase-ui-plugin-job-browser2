@@ -26,10 +26,10 @@
         "react-redux": "7.1.0",
         "react-scripts": "3.0.1",
         "react-test-renderer": "16.8.6",
-        "redux": "4.0.1",
+        "redux": "4.0.3",
         "redux-thunk": "2.3.0",
         "typeface-oxygen": "0.0.72",
-        "typescript": "3.5.2",
+        "typescript": "3.5.3",
         "uuid": "3.3.2"
     },
     "scripts": {
