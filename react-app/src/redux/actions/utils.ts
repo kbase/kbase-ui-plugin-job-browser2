@@ -16,9 +16,10 @@ function getJobStatus(job: JobState): JobStatus {
             if (job.status === 'Unknown error') {
                 return JobStatus.ERRORED;
             }
+            return JobStatus.ERRORED;
             // TODO: handle this error by creating a new job state - UNKNOWN
-            console.log('detection error', job);
-            throw new Error('Cannot detect job state');
+            // console.log('detection error', job);
+            // throw new Error('Cannot detect job state');
         }
     } else {
         if (!job.status || job.status === 'queued') {
