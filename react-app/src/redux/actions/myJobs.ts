@@ -299,7 +299,7 @@ export function myJobsCancelJob(jobID: string) {
                 dispatch(myJobsRefreshSearch());
             })
             .catch((err) => {
-                console.log('error canceling job', err);
+                console.error('error canceling job', err);
                 dispatch(
                     myJobsCancelJobError({
                         message: 'error canceling job: ' + err.message,

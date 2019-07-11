@@ -5,26 +5,15 @@ import UserJobs from '../UserJobs';
 import MyJobs from '../MyJobs';
 import PublicAppStats from '../PublicAppStats';
 import UserRunSummary from '../UserRunSummary';
-
-export interface TabPaneLifeCycleProps {
-    active: boolean;
-}
-
-export interface TabPaneLifeCycleState {}
-
-export class TabPaneLifeCycle extends React.Component<TabPaneLifeCycleProps, TabPaneLifeCycleState> {
-    render() {
-        if (!this.props.active) {
-            // console.log('LC: destroying');
-            return null;
-        }
-        // console.log('LC: rendering');
-        return this.props.children;
-    }
-}
+import { MainParams } from './state';
 
 export interface MainProps {
     isAdmin: boolean;
+    params: MainParams;
+    view: string;
+    setTitle: (title: string) => void;
+    setView: (view: string) => void;
+    setParams: (params: MainParams) => void;
 }
 
 interface MainState {
@@ -36,26 +25,25 @@ export default class Main extends React.Component<MainProps, MainState> {
     defaultTabKey: string;
     constructor(props: MainProps) {
         super(props);
-        // this.activeTabKey = 'myJobs';
         this.defaultTabKey = 'myJobs';
         this.state = {
-            activeTabKey: null,
-            defaultActiveTabKey: null
+            activeTabKey: this.defaultTabKey,
+            defaultActiveTabKey: this.defaultTabKey
         };
     }
 
     componentDidMount() {
-        this.setState({
-            activeTabKey: this.defaultTabKey,
-            defaultActiveTabKey: this.defaultTabKey
-        });
+        this.props.setTitle('Job Browser');
+
+        // window.setTimeout(() => {
+        //     this.props.setParams({ tab: 'userJobs' });
+        // }, 1000);
     }
 
     componentWillUnmount() {
-        // console.log('unmounting?');
         this.setState({
-            activeTabKey: null,
-            defaultActiveTabKey: null
+            activeTabKey: null
+            // defaultActiveTabKey: null
         });
     }
 
@@ -81,9 +69,7 @@ export default class Main extends React.Component<MainProps, MainState> {
             );
             userRunTab = (
                 <Tabs.TabPane tab={tabLabel} key="userRunSummary">
-                    <TabPaneLifeCycle active={this.state.activeTabKey === 'userRunSummary'}>
-                        <UserRunSummary />
-                    </TabPaneLifeCycle>
+                    <UserRunSummary />
                 </Tabs.TabPane>
             );
             const userJobsTabLabel = (
@@ -93,9 +79,7 @@ export default class Main extends React.Component<MainProps, MainState> {
             );
             userJobsTab = (
                 <Tabs.TabPane tab={userJobsTabLabel} key="userJobs">
-                    <TabPaneLifeCycle active={this.state.activeTabKey === 'userJobs'}>
-                        <UserJobs />
-                    </TabPaneLifeCycle>
+                    <UserJobs />
                 </Tabs.TabPane>
             );
         }
@@ -107,21 +91,19 @@ export default class Main extends React.Component<MainProps, MainState> {
         return (
             <Tabs
                 animated={false}
-                defaultActiveKey={this.state.defaultActiveTabKey || undefined}
+                // defaultActiveKey={this.state.activeTabKey || undefined}
+                activeKey={this.props.params.tab || this.state.activeTabKey || undefined}
                 className="FlexTabs"
                 onChange={this.onTabsChange.bind(this)}
             >
                 <Tabs.TabPane tab="My Jobs" key="myJobs">
-                    <TabPaneLifeCycle active={this.state.activeTabKey === 'myJobs'}>
-                        <MyJobs />
-                    </TabPaneLifeCycle>
+                    <MyJobs />
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Public App Stats" key="publicAppStats">
-                    <TabPaneLifeCycle active={this.state.activeTabKey === 'publicAppStats'}>
-                        <PublicAppStats />
-                    </TabPaneLifeCycle>
+                    <PublicAppStats />
                 </Tabs.TabPane>
+
                 {userJobsTab}
                 {userRunTab}
             </Tabs>
