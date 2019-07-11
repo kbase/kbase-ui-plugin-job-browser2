@@ -5,7 +5,7 @@
     "homepage": "./",
     "dependencies": {
         "@craco/craco": "5.2.3",
-        "@kbase/ui-lib": "0.1.0-alpha.39",
+        "@kbase/ui-lib": "0.1.0-alpha.49",
         "@types/bluebird": "3.5.27",
         "@types/enzyme": "3.10.1",
         "@types/enzyme-adapter-react-16": "1.0.5",
