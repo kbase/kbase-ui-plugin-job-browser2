@@ -13,10 +13,21 @@ import Adapter from 'enzyme-adapter-react-16';
 // We always need to import the component we are testing
 import Component from './view';
 import { JobLog } from '../../redux/store';
+import { MainParams } from './state';
 
 configure({ adapter: new Adapter() });
 
 it('renders without crashing', () => {
     const isAdmin: boolean = false;
-    shallow(<Component isAdmin={isAdmin} />);
+    function setView(view: string) {
+        return;
+    }
+    function setParams(params: MainParams) {
+        return;
+    }
+    function setTitle(title: string) {
+        return;
+    }
+
+    shallow(<Component view="main" params={{tab: 'myJobs'}} isAdmin={isAdmin} setView={setView} setParams={setParams} setTitle={setTitle} />);
 });
