@@ -13,9 +13,9 @@ source:
         # - file: styles.css
 install:
     routes:
-        - path: ['jobbrowser']
+        - path: ['jobbrowser', {type: 'rest', name: 'pathParams'}]
           queryParams:
-              path: { literal: ['browse'] }
+              tab: {}
           widget: kb_iframe_loader
           authorization: true
           params:
