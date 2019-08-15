@@ -499,7 +499,11 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             key="username"
                             width="10%"
                             render={(username: string) => {
-                                return <a href={`#people/${username}`}>{username}</a>;
+                                return (
+                                    <a href={`#people/${username}`} target="_parent">
+                                        {username}
+                                    </a>
+                                );
                             }}
                             sorter={(a: Job, b: Job) => {
                                 return a.username.localeCompare(b.username);
@@ -549,7 +553,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                                 const href = '/#catalog/apps/' + job.appID;
                                 return (
                                     <Tooltip title={title}>
-                                        <a href={href}>{title}</a>
+                                        <a href={href} target="_parent">
+                                            {title}
+                                        </a>
                                     </Tooltip>
                                 );
                             }}
