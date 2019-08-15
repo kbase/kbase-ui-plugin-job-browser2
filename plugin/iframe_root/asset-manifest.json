@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "./static/css/main.7e6b4902.chunk.css",
+    "main.js": "./static/js/main.a19018e8.chunk.js",
+    "main.js.map": "./static/js/main.a19018e8.chunk.js.map",
+    "runtime~main.js": "./static/js/runtime~main.d653cc00.js",
+    "runtime~main.js.map": "./static/js/runtime~main.d653cc00.js.map",
+    "static/css/2.cf558e40.chunk.css": "./static/css/2.cf558e40.chunk.css",
+    "static/js/2.86bd4031.chunk.js": "./static/js/2.86bd4031.chunk.js",
+    "static/js/2.86bd4031.chunk.js.map": "./static/js/2.86bd4031.chunk.js.map",
+    "index.html": "./index.html",
+    "precache-manifest.7353967b7f9a03a43f18a7db3fdf5f94.js": "./precache-manifest.7353967b7f9a03a43f18a7db3fdf5f94.js",
+    "service-worker.js": "./service-worker.js",
+    "static/css/2.cf558e40.chunk.css.map": "./static/css/2.cf558e40.chunk.css.map",
+    "static/css/main.7e6b4902.chunk.css.map": "./static/css/main.7e6b4902.chunk.css.map",
+    "static/media/fonts.css": "./static/media/Roboto-Black-webfont.dda74841.ttf"
+  }
+}
