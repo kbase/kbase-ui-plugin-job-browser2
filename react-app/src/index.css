@@ -131,7 +131,6 @@ body {
     flex-direction: column;
     height: 90%;
     top: unset;
-    border: 2px blue dashed;
     min-height: 0;
 }
 

@@ -64,11 +64,11 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
         throw new Error('Not authorized!');
     }
 
-    const { roles } = userAuthorization
-    const showMonitoringControls = roles.some((role) => {
-        return role === 'DevToken';
-    })
-
+    // const { roles } = userAuthorization
+    // const showMonitoringControls = roles.some((role) => {
+    //     return role === 'DevToken';
+    // })
+    const showMonitoringControls = true;
     return { jobs, searchState, showMonitoringControls };
 }
 
