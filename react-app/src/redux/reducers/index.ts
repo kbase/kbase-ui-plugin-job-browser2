@@ -1,8 +1,8 @@
 import { Action, Reducer } from 'redux';
 import { StoreState } from '../store';
 
-import { baseReducer } from '@kbase/ui-lib';
-import { BaseStoreState } from '@kbase/ui-lib';
+import { baseReducer } from '@kbase/ui-components';
+import { BaseStoreState } from '@kbase/ui-components';
 import myJobsReducer from './myJobs';
 import userJobsReducer from './userJobs';
 import appReducer from './app';

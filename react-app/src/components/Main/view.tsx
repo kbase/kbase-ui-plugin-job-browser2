@@ -53,9 +53,9 @@ export default class Main extends React.Component<MainProps, MainState> {
         // this.state.activeTabKey = activeKey;
     }
 
-    renderJobsTab() {}
+    renderJobsTab() { }
 
-    renderAdminJobsTab() {}
+    renderAdminJobsTab() { }
 
     renderTabs() {
         let userRunTab;
@@ -93,8 +93,9 @@ export default class Main extends React.Component<MainProps, MainState> {
                 animated={false}
                 // defaultActiveKey={this.state.activeTabKey || undefined}
                 activeKey={this.props.params.tab || this.state.activeTabKey || undefined}
-                className="FlexTabs"
+                // className="FlexTabs"
                 onChange={this.onTabsChange.bind(this)}
+                destroyInactiveTabPane={true}
             >
                 <Tabs.TabPane tab="My Jobs" key="myJobs">
                     <MyJobs />

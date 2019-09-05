@@ -2,13 +2,12 @@ import { Dispatch, Action } from 'redux';
 import { connect } from 'react-redux';
 import Main from './view';
 import { StoreState } from '../../redux/store';
-import { sendTitle, setView, setParams } from '@kbase/ui-lib';
+import { sendTitle, setView, setParams } from '@kbase/ui-components';
+import { Params } from '@kbase/ui-lib/lib/redux/integration/store';
 
-export interface OwnProps {}
+export interface OwnProps { }
 
-export interface MainParams {
-    tab: string;
-}
+export type MainParams = Params<'tab'>;
 
 interface StateProps {
     isAdmin: boolean;

@@ -7,21 +7,21 @@
 import React from 'react';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
-import { ExpandIconProps } from 'antd/lib/table';
-import { Table, Form, Input, Button, Tag, Icon, Checkbox, Select, DatePicker, Popconfirm, Tooltip } from 'antd';
+import { Table, Form, Input, Button, Checkbox, Select, DatePicker, Popconfirm, Tooltip, Modal, Switch } from 'antd';
 import moment, { Moment } from 'moment';
+import JobStatusBadge from '../JobStatus'
 
 // project imports (should be shared lib)
-import { NiceRelativeTime } from '@kbase/ui-lib';
-import { NiceTimeDuration } from '@kbase/ui-lib';
+import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
 
 // project imports
 import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRange, TimeRangePresets } from '../../redux/store';
-import JobLog from '../JobLog';
+import JobDetail from '../JobDetail';
 
 // file imports
 import './style.css';
 import Monitor from '../Monitor';
+import PubSub from '../../lib/PubSub';
 
 /*
     Props and State
@@ -81,58 +81,10 @@ function jobStatusFilterOptionsToJobStatus(filter: Array<JobStatusFilterKey>): A
     return jobStatuses;
 }
 
-function jobStatusLabel(status: JobStatus) {
-    switch (status) {
-        case JobStatus.QUEUED:
-            return (
-                <span>
-                    <Icon type="loading" spin /> Queued
-                </span>
-            );
-        case JobStatus.RUNNING:
-            return (
-                <span>
-                    <Icon type="loading-3-quarters" spin /> Running
-                </span>
-            );
-        case JobStatus.CANCELED:
-            return 'Canceled';
-        case JobStatus.FINISHED:
-            return 'Success';
-        case JobStatus.ERRORED:
-            return 'Errored';
-        default:
-            return 'UNKNOWN (' + status + ')';
-    }
-}
-
-function jobColor(status: JobStatus): string {
-    switch (status) {
-        case JobStatus.QUEUED:
-            return 'orange';
-        case JobStatus.RUNNING:
-            return 'blue';
-        case JobStatus.CANCELED:
-            return 'gray';
-        case JobStatus.FINISHED:
-            return 'green';
-        case JobStatus.ERRORED:
-            return 'red';
-        default:
-            return 'UNKNOWN';
-    }
-}
-
-function renderJobStatus(status: JobStatus) {
-    let label = jobStatusLabel(status);
-    let color = jobColor(status);
-
-    return <Tag color={color}>{label}</Tag>;
-}
-
 export interface UserJobsProps {
     jobs: Array<Job>;
     searchState: SearchState;
+    showMonitoringControls: boolean;
     search: (searchExpression: JobsSearchExpression) => void;
     cancelJob: (jobID: string) => void;
 }
@@ -141,27 +93,41 @@ interface UserJobsState {
     showDates: boolean;
     currentJobStatusFilter: Array<JobStatusFilterKey>;
     timeRange: TimeRange;
+    isFilterOpen: boolean;
+    selectedJob: Job | null;
 }
 
 export default class UserJobs extends React.Component<UserJobsProps, UserJobsState> {
     currentQuery?: string;
 
     static defaultTimeRange: TimeRangePresets = 'lastWeek';
+    pubsub: PubSub;
 
     constructor(props: UserJobsProps) {
         super(props);
 
         this.currentQuery = '';
+        this.pubsub = new PubSub();
 
         this.state = {
             showDates: false,
             currentJobStatusFilter: ['queued', 'running', 'canceled', 'success', 'error'],
-            timeRange: { kind: 'preset', preset: UserJobs.defaultTimeRange }
+            timeRange: { kind: 'preset', preset: UserJobs.defaultTimeRange },
+            isFilterOpen: false,
+            selectedJob: null
         };
     }
 
     componentDidMount() {
         this.doSearch(true);
+    }
+
+    componentDidUpdate() {
+        if (this.props.searchState === SearchState.SEARCHING) {
+            this.pubsub.send('searching', { is: true })
+        } else {
+            this.pubsub.send('searching', { is: false })
+        }
     }
 
     onChangeTimeRange(value: string) {
@@ -209,11 +175,25 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
             forceSearch
         };
 
+        this.pubsub.send('search', {});
+
         this.props.search(searchExpression);
         return false;
     }
 
-    onRangeFromChange(date: Moment) {
+    onRangeFromChange(date: Moment | null, dateString: string) {
+        // TODO: if the range ends up null (how?), should it default
+        // to the previously selected preset? For now, just go back to lastHourl.
+        if (date === null) {
+            this.setState({
+                timeRange: {
+                    kind: 'preset',
+                    preset: 'lastHour'
+                }
+            });
+            return;
+        }
+
         // handle logic of switching from 'preset' to 'literal'
         let existingTimeRange = this.state.timeRange;
         let timeRange: TimeRange;
@@ -241,7 +221,18 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         });
     }
 
-    onRangeToChange(date: Moment) {
+    onRangeToChange(date: Moment | null, dateString: string) {
+        // TODO: if the range ends up null (how?), should it default
+        // to the previously selected preset? For now, just go back to lastHourl.
+        if (date === null) {
+            this.setState({
+                timeRange: {
+                    kind: 'preset',
+                    preset: 'lastHour'
+                }
+            });
+            return;
+        }
         let existingTimeRange = this.state.timeRange;
         let timeRange: TimeRange;
         switch (existingTimeRange.kind) {
@@ -349,15 +340,27 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                 </Form.Item>
 
                 <Form.Item>
+                    <Switch checkedChildren="hide filters" unCheckedChildren="show filters" onChange={this.onToggleFilterArea.bind(this)} />
+                </Form.Item>
+
+                <Form.Item>
                     <Monitor
                         onPoll={() => {
                             this.doSearch(true);
                         }}
-                        startMonitoring={true}
+                        pubsub={this.pubsub}
+                        startPolling={true}
+                        isPollerRunning={this.props.searchState === SearchState.SEARCHING}
+                        showControls={this.props.showMonitoringControls}
+                        startOpen={true}
                     />
                 </Form.Item>
             </Form>
         );
+    }
+
+    onToggleFilterArea(isFilterOpen: boolean) {
+        this.setState({ isFilterOpen });
     }
 
     onFilterChange(filters: Array<CheckboxValueType>) {
@@ -422,290 +425,349 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
     renderFilterInput() {
         const options = jobStatusFilterOptions;
         return (
-            <div>
-                <div>
-                    <span style={{ color: 'gray', fontWeight: 'bold', marginRight: '10px' }}>Filter by Job Status</span>
-                    <Button size="small" onClick={this.onClickAny.bind(this)}>
-                        <i>Any</i>
-                    </Button>{' '}
-                    <Button size="small" onClick={this.onClickActive.bind(this)}>
-                        <i>Active</i>
-                    </Button>{' '}
-                    <Button size="small" onClick={this.onClickFinished.bind(this)} style={{ marginRight: '10px' }}>
-                        <i>Finished</i>
-                    </Button>
-                    <Checkbox.Group
-                        options={options}
-                        onChange={this.onFilterChange.bind(this)}
-                        value={this.state.currentJobStatusFilter}
-                    />
-                </div>
+            <div className="UserJobs-filterArea">
+                <span style={{ color: 'gray', fontWeight: 'bold', marginRight: '10px' }}>Filter by Job Status</span>
+                <Button size="small" onClick={this.onClickAny.bind(this)}>
+                    <i>Any</i>
+                </Button>{' '}
+                <Button size="small" onClick={this.onClickActive.bind(this)}>
+                    <i>Active</i>
+                </Button>{' '}
+                <Button size="small" onClick={this.onClickFinished.bind(this)} style={{ marginRight: '10px' }}>
+                    <i>Finished</i>
+                </Button>
+                <Checkbox.Group
+                    options={options}
+                    onChange={this.onFilterChange.bind(this)}
+                    value={this.state.currentJobStatusFilter}
+                />
             </div>
         );
     }
 
     renderControlBar() {
+        let filterRowStyle: React.CSSProperties = { margin: '10px 10px 10px 0' };
+        if (!this.state.isFilterOpen) {
+            filterRowStyle.display = 'none';
+        }
+        let filterRow;
+        if (this.state.isFilterOpen) {
+            filterRow = <div className="Row" style={filterRowStyle}>
+                {this.renderFilterInput()}
+            </div>
+        }
         return (
             <div className="Col">
                 <div className="Row">{this.renderSearchInput()}</div>
-                <div className="Row" style={{ margin: '10px auto' }}>
-                    {this.renderFilterInput()}
-                </div>
+                {filterRow}
             </div>
         );
     }
 
-    render() {
+    onClickDetail(job: Job) {
+        this.setState({
+            selectedJob: job
+        });
+    }
+
+    onCloseModal() {
+        this.setState({
+            selectedJob: null
+        });
+    }
+
+    renderJobDetail() {
+        if (!this.state.selectedJob) {
+            return;
+        }
+        const footer = (
+            <Button key="cancel" onClick={this.onCloseModal.bind(this)}>
+                Close
+            </Button>
+        )
+        const title = (
+            <span>
+                Detail for Job <span style={{ fontFamily: 'monospace' }}>${this.state.selectedJob.id}</span>
+                {' '}
+                <JobStatusBadge jobStatus={this.state.selectedJob.status} />
+            </span>
+        )
+        return (
+            <Modal className="FullScreenModal" title={title}
+                onCancel={this.onCloseModal.bind(this)} visible={true}
+                footer={footer}>
+                <JobDetail jobID={this.state.selectedJob.id} />
+            </Modal>
+        )
+    }
+
+    renderJobsTable() {
         const loading = this.props.searchState === SearchState.SEARCHING;
         return (
-            <div>
+            <Table
+                size="small"
+                className="UserJobs-table"
+                dataSource={this.props.jobs}
+                loading={loading}
+                rowKey={(job: Job) => {
+                    return job.id;
+                }}
+                pagination={{ position: 'bottom', showSizeChanger: true }}
+
+            >
+                <Table.Column
+                    title="Job ID"
+                    dataIndex="id"
+                    key="id"
+                    width="5%"
+                    render={(jobID: string, job: Job): any => {
+                        const title = jobID;
+                        return (
+                            <Tooltip title={title}>
+                                <a href="https://example.com" onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+                                    e.preventDefault();
+                                    this.onClickDetail(job)
+                                }}>{jobID}</a>
+                            </Tooltip>
+                        )
+                    }}
+                    sorter={(a: Job, b: Job) => {
+                        return a.id.localeCompare(b.id);
+                    }}
+                />
+                <Table.Column
+                    title="User"
+                    dataIndex="username"
+                    key="username"
+                    width="10%"
+                    render={(username: string) => {
+                        return (
+                            <a href={`#people/${username}`} target="_parent">
+                                {username}
+                            </a>
+                        );
+                    }}
+                    sorter={(a: Job, b: Job) => {
+                        return a.username.localeCompare(b.username);
+                    }}
+                />
+                <Table.Column
+                    title="Narrative"
+                    dataIndex="narrativeTitle"
+                    key="narrativeTitle"
+                    width="17%"
+                    // style={cellStyle}
+                    render={(title: string, job: Job): any => {
+                        if (!title || !job.narrativeID) {
+                            return 'n/a';
+                        }
+                        const href = ['/narrative', job.narrativeID].join('/');
+                        return (
+                            <a href={href} target="_blank" rel="noopener noreferrer">
+                                {title}
+                            </a>
+                        );
+                    }}
+                    sorter={(a: Job, b: Job) => {
+                        if (!a.narrativeTitle) {
+                            if (!b.narrativeTitle) {
+                                return 0;
+                            }
+                            return -1;
+                        } else {
+                            if (!b.narrativeTitle) {
+                                return 1;
+                            }
+                            return a.narrativeTitle.localeCompare(b.narrativeTitle);
+                        }
+                    }}
+                />
+                <Table.Column
+                    title="App"
+                    dataIndex="appTitle"
+                    key="appTitle"
+                    width="18%"
+                    // style={cellStyle}
+                    render={(title: string, job: Job): any => {
+                        if (!title) {
+                            return 'n/a';
+                        }
+                        const href = '/#catalog/apps/' + job.appID;
+                        return (
+                            <Tooltip title={title}>
+                                <a href={href} target="_parent">
+                                    {title}
+                                </a>
+                            </Tooltip>
+                        );
+                    }}
+                    sorter={(a: Job, b: Job) => {
+                        if (!a.appTitle) {
+                            if (!b.appTitle) {
+                                return 0;
+                            }
+                            return -1;
+                        } else {
+                            if (!b.appTitle) {
+                                return 1;
+                            }
+                            return a.appTitle.localeCompare(b.appTitle);
+                        }
+                    }}
+                />
+                <Table.Column
+                    title="Submitted"
+                    dataIndex="queuedAt"
+                    key="queuedAt"
+                    width="8%"
+                    render={(date: number, job: Job) => {
+                        if (!date) {
+                            return <span>** empty **</span>;
+                        }
+                        return <NiceRelativeTime time={new Date(date)} />;
+                    }}
+                    defaultSortOrder="descend"
+                    sorter={(a: Job, b: Job) => {
+                        if (a.queuedAt === null) {
+                            if (b.queuedAt === null) {
+                                return 0;
+                            }
+                            return -1;
+                        } else {
+                            if (b.queuedAt === null) {
+                                return 1;
+                            }
+                            return a.queuedAt - b.queuedAt;
+                        }
+                    }}
+                />
+                <Table.Column
+                    title="Queued for"
+                    dataIndex="queuedElapsed"
+                    key="queuedElapsed"
+                    width="8%"
+                    render={(duration: number, job: Job) => {
+                        switch (job.status) {
+                            case JobStatus.QUEUED:
+                                return <NiceElapsedTime from={job.queuedAt} precision={2} useClock={true} />;
+                        }
+
+                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     if (a.queuedElapsed === null) {
+                //         if (b.queuedElapsed === null) {
+                //             return 0;
+                //         }
+                //         return -1;
+                //     } else {
+                //         if (b.queuedElapsed === null) {
+                //             return 1;
+                //         }
+                //         return a.queuedElapsed - b.queuedElapsed;
+                //     }
+                // }}
+                />
+                <Table.Column
+                    title="Run for"
+                    // dataIndex="runElapsed"
+                    key="runElapsed"
+                    width="10%"
+                    render={(_, job: Job) => {
+                        switch (job.status) {
+                            case JobStatus.QUEUED:
+                                return '-';
+                            case JobStatus.RUNNING:
+                                return <NiceElapsedTime from={job.runAt} precision={2} useClock={true} />;
+                            case JobStatus.FINISHED:
+                            case JobStatus.CANCELED:
+                            case JobStatus.ERRORED:
+                                return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
+                        }
+                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     if (a.runElapsed === null) {
+                //         if (b.runElapsed === null) {
+                //             return 0;
+                //         }
+                //         return -1;
+                //     } else {
+                //         if (b.runElapsed === null) {
+                //             return 1;
+                //         }
+                //         return a.runElapsed - b.runElapsed;
+                //     }
+                // }}
+                />
+                <Table.Column
+                    title="Status"
+                    dataIndex="status"
+                    key="status"
+                    width="8%"
+                    render={(status: JobStatus) => {
+                        return <JobStatusBadge jobStatus={status} />
+                    }}
+                    sorter={(a: Job, b: Job) => {
+                        if (a.status === b.status) {
+                            return 0;
+                        }
+                        if (a.status === JobStatus.QUEUED) {
+                            return -1;
+                        }
+                        if (a.status === JobStatus.RUNNING) {
+                            if (b.status === JobStatus.QUEUED) {
+                                return 1;
+                            }
+                            return -1;
+                        }
+                        if (a.status === JobStatus.FINISHED) {
+                            if (b.status === JobStatus.QUEUED || b.status === JobStatus.RUNNING) {
+                                return 1;
+                            }
+                            return -1;
+                        }
+                        if (a.status === JobStatus.ERRORED) {
+                            if (b.status === JobStatus.CANCELED) {
+                                return -1;
+                            }
+                            return 1;
+                        }
+                        return 1;
+                    }}
+                />
+                <Table.Column
+                    title="Server Type"
+                    dataIndex="clientGroups"
+                    key="clientGroups"
+                    width="8%"
+                    render={(clientGroups: Array<string>) => {
+                        return clientGroups.join(',');
+                    }}
+                    sorter={(a: Job, b: Job) => {
+                        // TODO: sort client groups first...
+                        return a.clientGroups.join(',').localeCompare(b.clientGroups.join(','));
+                    }}
+                />
+                <Table.Column
+                    title="Cancel"
+                    dataIndex="action"
+                    key="action"
+                    width="5%"
+                    render={(status: JobStatus, job: Job) => {
+                        return this.renderJobAction(job);
+                    }}
+                />
+            </Table>
+        );
+    }
+
+    render() {
+        return (
+            <div data-k-b-testhook-component="MyJobs">
                 <div>{this.renderControlBar()}</div>
                 <div>
-                    <Table
-                        dataSource={this.props.jobs}
-                        loading={loading}
-                        rowKey={(job: Job) => {
-                            return job.id;
-                        }}
-                        pagination={{ position: 'bottom', showSizeChanger: true }}
-                        size="small"
-                        className="UserJobs-table"
-                        expandIcon={(props: ExpandIconProps<Job>) => {
-                            let icon;
-                            if (props.expanded) {
-                                icon = <Icon type="folder-open" />;
-                            } else {
-                                icon = <Icon type="folder" />;
-                            }
-                            return (
-                                <Button
-                                    type="link"
-                                    className="expand-row-icon"
-                                    onClick={(e) => {
-                                        return props.onExpand(props.record, (e as unknown) as MouseEvent);
-                                    }}
-                                >
-                                    {icon}
-                                </Button>
-                            );
-                        }}
-                        expandedRowRender={(job: Job) => {
-                            return <JobLog jobId={job.id} />;
-                        }}
-                    >
-                        <Table.Column
-                            title="User"
-                            dataIndex="username"
-                            key="username"
-                            width="10%"
-                            render={(username: string) => {
-                                return (
-                                    <a href={`#people/${username}`} target="_parent">
-                                        {username}
-                                    </a>
-                                );
-                            }}
-                            sorter={(a: Job, b: Job) => {
-                                return a.username.localeCompare(b.username);
-                            }}
-                        />
-                        <Table.Column
-                            title="Narrative"
-                            dataIndex="narrativeTitle"
-                            key="narrativeTitle"
-                            width="17%"
-                            // style={cellStyle}
-                            render={(title: string, job: Job): any => {
-                                if (!title || !job.narrativeID) {
-                                    return 'n/a';
-                                }
-                                const href = ['/narrative', job.narrativeID].join('/');
-                                return (
-                                    <a href={href} target="_blank" rel="noopener noreferrer">
-                                        {title}
-                                    </a>
-                                );
-                            }}
-                            sorter={(a: Job, b: Job) => {
-                                if (!a.narrativeTitle) {
-                                    if (!b.narrativeTitle) {
-                                        return 0;
-                                    }
-                                    return -1;
-                                } else {
-                                    if (!b.narrativeTitle) {
-                                        return 1;
-                                    }
-                                    return a.narrativeTitle.localeCompare(b.narrativeTitle);
-                                }
-                            }}
-                        />
-                        <Table.Column
-                            title="App"
-                            dataIndex="appTitle"
-                            key="appTitle"
-                            width="18%"
-                            // style={cellStyle}
-                            render={(title: string, job: Job): any => {
-                                if (!title) {
-                                    return 'n/a';
-                                }
-                                const href = '/#catalog/apps/' + job.appID;
-                                return (
-                                    <Tooltip title={title}>
-                                        <a href={href} target="_parent">
-                                            {title}
-                                        </a>
-                                    </Tooltip>
-                                );
-                            }}
-                            sorter={(a: Job, b: Job) => {
-                                if (!a.appTitle) {
-                                    if (!b.appTitle) {
-                                        return 0;
-                                    }
-                                    return -1;
-                                } else {
-                                    if (!b.appTitle) {
-                                        return 1;
-                                    }
-                                    return a.appTitle.localeCompare(b.appTitle);
-                                }
-                            }}
-                        />
-                        <Table.Column
-                            title="Submitted"
-                            dataIndex="queuedAt"
-                            key="queuedAt"
-                            width="8%"
-                            render={(date: number, job: Job) => {
-                                if (!date) {
-                                    return <span>** empty **</span>;
-                                }
-                                return <NiceRelativeTime time={new Date(date)} />;
-                            }}
-                            defaultSortOrder="descend"
-                            sorter={(a: Job, b: Job) => {
-                                if (a.queuedAt === null) {
-                                    if (b.queuedAt === null) {
-                                        return 0;
-                                    }
-                                    return -1;
-                                } else {
-                                    if (b.queuedAt === null) {
-                                        return 1;
-                                    }
-                                    return a.queuedAt - b.queuedAt;
-                                }
-                            }}
-                        />
-                        <Table.Column
-                            title="Queued for"
-                            dataIndex="queuedElapsed"
-                            key="queuedElapsed"
-                            width="8%"
-                            render={(duration: number) => {
-                                return <NiceTimeDuration duration={duration} precision={2} />;
-                            }}
-                            sorter={(a: Job, b: Job) => {
-                                if (a.queuedElapsed === null) {
-                                    if (b.queuedElapsed === null) {
-                                        return 0;
-                                    }
-                                    return -1;
-                                } else {
-                                    if (b.queuedElapsed === null) {
-                                        return 1;
-                                    }
-                                    return a.queuedElapsed - b.queuedElapsed;
-                                }
-                            }}
-                        />
-                        <Table.Column
-                            title="Run for"
-                            dataIndex="runElapsed"
-                            key="runElapsed"
-                            width="8%"
-                            render={(duration: number | null) => {
-                                if (duration === null) {
-                                    return '-';
-                                }
-                                return <NiceTimeDuration duration={duration} precision={2} />;
-                            }}
-                            sorter={(a: Job, b: Job) => {
-                                if (a.runElapsed === null) {
-                                    if (b.runElapsed === null) {
-                                        return 0;
-                                    }
-                                    return -1;
-                                } else {
-                                    if (b.runElapsed === null) {
-                                        return 1;
-                                    }
-                                    return a.runElapsed - b.runElapsed;
-                                }
-                            }}
-                        />
-                        <Table.Column
-                            title="Status"
-                            dataIndex="status"
-                            key="status"
-                            width="8%"
-                            render={(status: JobStatus) => {
-                                return renderJobStatus(status);
-                            }}
-                            sorter={(a: Job, b: Job) => {
-                                if (a.status === b.status) {
-                                    return 0;
-                                }
-                                if (a.status === JobStatus.QUEUED) {
-                                    return -1;
-                                }
-                                if (a.status === JobStatus.RUNNING) {
-                                    if (b.status === JobStatus.QUEUED) {
-                                        return 1;
-                                    }
-                                    return -1;
-                                }
-                                if (a.status === JobStatus.FINISHED) {
-                                    if (b.status === JobStatus.QUEUED || b.status === JobStatus.RUNNING) {
-                                        return 1;
-                                    }
-                                    return -1;
-                                }
-                                if (a.status === JobStatus.ERRORED) {
-                                    if (b.status === JobStatus.CANCELED) {
-                                        return -1;
-                                    }
-                                    return 1;
-                                }
-                                return 1;
-                            }}
-                        />
-                        <Table.Column
-                            title="Server Type"
-                            dataIndex="clientGroups"
-                            key="clientGroups"
-                            width="8%"
-                            render={(clientGroups: Array<string>) => {
-                                return clientGroups.join(',');
-                            }}
-                            sorter={(a: Job, b: Job) => {
-                                // TODO: sort client groups first...
-                                return a.clientGroups.join(',').localeCompare(b.clientGroups.join(','));
-                            }}
-                        />
-                        <Table.Column
-                            title="Cancel"
-                            dataIndex="action"
-                            key="action"
-                            width="5%"
-                            render={(status: JobStatus, job: Job) => {
-                                return this.renderJobAction(job);
-                            }}
-                        />
-                    </Table>
+                    {this.renderJobsTable()}
                 </div>
+                {this.renderJobDetail()}
             </div>
         );
     }

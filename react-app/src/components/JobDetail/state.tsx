@@ -1,6 +1,6 @@
 import React from 'react';
 import { Job, JobID, JobStatus } from '../../redux/store';
-import JobLogComponent from './view';
+import JobDetailComponent from './view';
 import { Spin, Alert } from 'antd';
 import { NarrativeJobServiceClient } from '@kbase/ui-lib';
 import MetricsServiceClient from '../../lib/MetricsServiceClient';
@@ -27,12 +27,14 @@ export enum JobLogState {
     ERROR
 }
 
+// TODO: rename this and other things to JobDetailView...
 export interface JobLogViewNone {
     status: JobLogState.NONE
 }
 
 export interface JobLogViewQueued {
     status: JobLogState.JOB_QUEUED
+    job: Job
 }
 
 export interface JobLogViewInitialLoading {
@@ -112,6 +114,17 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         });
     }
 
+    // async updateJobLog() {
+    //     const startingLines = this.state.log.length;
+    //     const lines = await this.getJobLog(startingLines);
+    //     this.setState({
+    //         log: {
+    //             isLoaded: this.state.log.isLoaded,
+    //             lines: this.state.log.lines.concat(lines)
+    //         }
+    //     })
+    // }
+
     startPolling() {
         const poller = async () => {
             const state = this.state;
@@ -135,6 +148,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 case JobStatus.QUEUED:
                     // should not occur!
                     this.startQueuedPolling();
+                    break;
                 case JobStatus.RUNNING:
                     this.setState({
                         status: JobLogState.ACTIVE_LOADED,
@@ -142,18 +156,21 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                         job
                     });
                     loop();
+                    break;
                 case JobStatus.FINISHED:
                     this.setState({
                         status: JobLogState.FINISHED_LOADED,
                         log: log.concat(newLog),
                         job
                     });
+                    break;
                 case JobStatus.ERRORED:
                     this.setState({
                         status: JobLogState.FINISHED_LOADED,
                         log: log.concat(newLog),
                         job
                     });
+                    break;
                 case JobStatus.CANCELED:
                     this.setState({
                         status: JobLogState.FINISHED_LOADED,
@@ -186,24 +203,28 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                                 job
                             });
                             loop();
+                            break;
                         case JobStatus.FINISHED:
                             this.setState({
                                 status: JobLogState.FINISHED_LOADED,
                                 log,
                                 job
                             });
+                            break;
                         case JobStatus.ERRORED:
                             this.setState({
                                 status: JobLogState.FINISHED_LOADED,
                                 log,
                                 job
                             });
+                            break;
                         case JobStatus.CANCELED:
                             this.setState({
                                 status: JobLogState.FINISHED_LOADED,
                                 log,
                                 job
                             });
+                            break;
                     }
             }
         }
@@ -220,13 +241,15 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             status: JobLogState.INITIAL_LOADING
         });
         const job = await this.getJob();
+        // const log = await this.getJobLog(0);
 
         let log;
         switch (job.status) {
             case JobStatus.QUEUED:
                 // still queued, eh?
                 this.setState({
-                    status: JobLogState.JOB_QUEUED
+                    status: JobLogState.JOB_QUEUED,
+                    job
                 });
                 this.startQueuedPolling();
                 return;
@@ -292,24 +315,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     }
 
     render() {
-        return this.renderLoading();
-    }
-
-    renderx() {
-        const state = this.state;
-        switch (state.status) {
-            case JobLogState.NONE:
-            case JobLogState.JOB_QUEUED:
-                return this.renderQueued();
-            case JobLogState.INITIAL_LOADING:
-                return this.renderLoading();
-            case JobLogState.ERROR:
-                return this.renderError(state);
-            case JobLogState.ACTIVE_LOADED:
-            case JobLogState.ACTIVE_LOADING:
-                return <JobLogComponent job={state.job} log={state.log} />;
-            case JobLogState.FINISHED_LOADED:
-                return <JobLogComponent job={state.job} log={state.log} />;
-        }
+        return <JobDetailComponent view={this.state} />;
     }
 }

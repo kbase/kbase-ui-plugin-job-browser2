@@ -1,10 +1,12 @@
 import { Action } from 'redux';
 import { ActionType } from '.';
 import { JobsSearchExpression, Job, EpochTime, StoreState } from '../store';
-import { AppError, NarrativeJobServiceClient } from '@kbase/ui-lib';
+import { NarrativeJobServiceClient } from '@kbase/ui-lib';
+import { AppError } from '@kbase/ui-components';
 import MetricsServiceClient from '../../lib/MetricsServiceClient';
 import { serviceJobToUIJob, compareTimeRange, compareStatus, extractTimeRange } from './utils';
 import { ThunkDispatch } from 'redux-thunk';
+import CancelableRequest, { Task } from '../../lib/CancelableRequest';
 
 // MY JOBS TAB
 
@@ -41,7 +43,7 @@ export function myJobsSearchSuccess(
     jobs: Array<Job>,
     jobsFetchedAt: EpochTime,
     searchExpression: JobsSearchExpression
-) {
+): MyJobsSearchSuccess {
     return {
         type: ActionType.MY_JOBS_SEARCH_SUCCESS,
         searchExpression,
@@ -58,30 +60,46 @@ export function myJobsSearchError(error: AppError) {
     };
 }
 
-async function fetchMyJobs(
+interface MyJobsParam {
     token: string,
     username: string,
-    serviceWizardUrl: string,
+    serviceWizardURL: string,
     from: number,
     to: number
-): Promise<Array<Job>> {
-    const client = new MetricsServiceClient({
-        url: serviceWizardUrl,
-        token: token
-    });
-    return client
-        .getAppMetrics({
-            epoch_range: [from, to],
-            user_ids: [username]
-        })
-        .then((metrics) => {
-            const converted = metrics.job_states.map((jobState) => {
-                return serviceJobToUIJob(jobState, username);
-            });
-            return converted;
-            // return fakeJobs();
-        });
 }
+
+type MyJobsResult = Array<Job>;
+
+class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
+    request({ token, username, serviceWizardURL, from, to }: MyJobsParam): Task<MyJobsResult> {
+        const client = new MetricsServiceClient({
+            url: serviceWizardURL,
+            token: token
+        });
+        const promise = client
+            .getJobs({
+                epoch_range: [from, to],
+                user_ids: [username]
+            })
+            .then((metrics) => {
+                const converted = metrics.job_states.map((jobState) => {
+                    return serviceJobToUIJob(jobState, username);
+                });
+                return converted;
+            })
+
+        const task: Task<MyJobsResult> = {
+            id: this.newID(),
+            promise,
+            isCanceled: false
+        }
+        this.pendingTasks.set(task.id, task);
+        return task;
+    }
+}
+
+
+const myJobsSearchRequests = new MyJobsRequests();
 
 export function myJobsSearch(searchExpression: JobsSearchExpression) {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
@@ -120,15 +138,24 @@ export function myJobsSearch(searchExpression: JobsSearchExpression) {
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
+        // Umm, there must be other conditions which make a real search happen, or is 
+        // forceSearch now the way to do this? ...
         if (!jobsFetchedAt || searchExpression.forceSearch) {
-            rawJobs = await fetchMyJobs(
-                userAuthorization.token,
-                userAuthorization.username,
+            const task = myJobsSearchRequests.spawn({
+                token: userAuthorization.token,
+                username: userAuthorization.username,
                 serviceWizardURL,
-                timeRangeStart,
-                timeRangeEnd
-            );
+                from: timeRangeStart,
+                to: timeRangeEnd
+            });
+
+            rawJobs = await task.promise;
+            if (task.isCanceled) {
+                // just do nothing
+                return;
+            }
             jobsFetchedAt = new Date().getTime();
+            myJobsSearchRequests.done(task);
             // UPDATE: update the raw jobs
         }
 
@@ -193,13 +220,29 @@ export function myJobsRefreshSearch() {
             return new RegExp(term, 'i');
         });
 
-        const rawJobs = await fetchMyJobs(
-            userAuthorization.token,
-            userAuthorization.username,
+        const task = myJobsSearchRequests.spawn({
+            token: userAuthorization.token,
+            username: userAuthorization.username,
             serviceWizardURL,
-            timeRangeStart,
-            timeRangeEnd
-        );
+            from: timeRangeStart,
+            to: timeRangeEnd
+        });
+
+        const rawJobs = await task.promise;
+        if (task.isCanceled) {
+            // just do nothing
+            return;
+        }
+        // jobsFetchedAt = new Date().getTime();
+        myJobsSearchRequests.done(task);
+
+        // const rawJobs = await fetchMyJobs(
+        //     userAuthorization.token,
+        //     userAuthorization.username,
+        //     serviceWizardURL,
+        //     timeRangeStart,
+        //     timeRangeEnd
+        // );
 
         const newJobs = rawJobs.filter((job) => {
             return (

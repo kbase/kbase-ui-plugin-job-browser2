@@ -1,11 +1,18 @@
 import * as React from 'react';
-import { Progress, Button } from 'antd';
+import { Progress, Button, Tooltip, Switch } from 'antd';
+import PubSub, { PubSubProxy } from '../lib/PubSub';
+import { Poller } from '../lib/Poller';
 
 const MONITORING_INTERVAL = 10000;
-const MONITORING_STATUS_INTERVAL = 100;
+const MONITORING_FEEDBACK_STEPS = 100;
+const WATCH_INTERVAL = 100;
 
 export interface MonitorProps {
-    startMonitoring: boolean;
+    showControls: boolean;
+    startPolling: boolean;
+    startOpen: boolean;
+    isPollerRunning: boolean;
+    pubsub: PubSub;
     onPoll: () => void;
 }
 
@@ -13,62 +20,128 @@ export interface MonitorState {
     /** Support for job monitoring */
     isMonitoring: boolean;
 
+    /**  */
+    isPollingInitiated: boolean;
+    pollingStartedAt: number;
+
     /** Monitoring progress */
-    monitoringStatusCount: number;
+    // monitoringStatusCount: number;
+    pollWaitProgress: number;
+
+    isPolling: boolean;
+
+    isOpen: boolean;
 }
 
 export default class Monitor extends React.Component<MonitorProps, MonitorState> {
     monitoringTimer: number | null;
     monitoringStatusTimer: number | null;
+    pollWatcherTimer: number | null;
+    searchListenerID: string | null;
+    pubsubProxy: PubSubProxy;
+
+    poller: Poller;
 
     constructor(props: MonitorProps) {
         super(props);
 
         this.monitoringTimer = null;
         this.monitoringStatusTimer = null;
+        this.pollWatcherTimer = null;
+        this.searchListenerID = null;
+        this.pubsubProxy = new PubSubProxy(this.props.pubsub);
+
+        this.poller = new Poller({
+            onPoll: this.props.onPoll,
+            onProgress: this.onProgress.bind(this),
+            pubsub: this.props.pubsub,
+            pollInterval: MONITORING_INTERVAL,
+            progressSteps: MONITORING_FEEDBACK_STEPS,
+            watchInterval: WATCH_INTERVAL
+        })
+
         this.state = {
             isMonitoring: false,
-            monitoringStatusCount: 0
+            // monitoringStatusCount: 0,
+            pollWaitProgress: 0,
+            isPollingInitiated: false,
+            pollingStartedAt: 0,
+            isPolling: false,
+            isOpen: this.props.startOpen
         };
     }
 
+    onProgress(progress: number) {
+        this.setState({
+            pollWaitProgress: progress
+        })
+    }
+
     componentDidMount() {
-        if (this.props.startMonitoring) {
+        if (this.props.startPolling) {
             this.startMonitoring();
         }
+        this.pubsubProxy.on('searching', ({ is }) => {
+            if (is) {
+                this.setState({
+                    isPolling: true
+                });
+                // this.poller.stopPolling();
+            } else {
+                this.setState({
+                    isPolling: false
+                });
+                // this.poller.startPolling();
+            }
+        })
+        // this.searchListenerID = this.props.pubsub.on(
+        //     'search',
+        //     () => {
+        //         //this.resetMonitoring();
+        //         console.log('skipping the search reset...');
+        //     }
+        // )
     }
 
     componentWillUnmount() {
         this.stopMonitoring();
+        this.poller.stop();
+        this.pubsubProxy.off();
+    }
+
+    componentDidUpdate() {
+
     }
 
     startMonitoring() {
-        this.monitoringTimer = window.setInterval(() => {
-            this.props.onPoll();
-            this.setState({
-                monitoringStatusCount: 0
-            });
-        }, MONITORING_INTERVAL);
         this.setState({
-            monitoringStatusCount: 0,
             isMonitoring: true
         });
-        this.monitoringStatusTimer = window.setInterval(() => {
-            this.setState({
-                monitoringStatusCount: this.state.monitoringStatusCount + 1
-            });
-        }, MONITORING_STATUS_INTERVAL);
+        this.poller.startPolling();
     }
 
+    // resetMonitoring() {
+    //     if (!this.state.isMonitoring) {
+    //         return;
+    //     }
+
+    //     // If waiting for a poll, do nothing.
+    //     if (!this.state.isPolling) {
+    //         return;
+    //     }
+
+    //     // If waiting to poll again, our only possible other state,
+    //     // restart the timers.
+    //     // clear the timers
+    //     this.poller.stopPolling();
+
+    //     // reset the count.
+    //     this.poller.startPolling();
+    // }
+
     stopMonitoring() {
-        if (this.monitoringTimer) {
-            window.clearInterval(this.monitoringTimer);
-        }
-        if (this.monitoringStatusTimer) {
-            window.clearInterval(this.monitoringStatusTimer);
-        }
+        this.poller.stopPolling();
         this.setState({
-            monitoringStatusCount: 0,
             isMonitoring: false
         });
     }
@@ -81,28 +154,86 @@ export default class Monitor extends React.Component<MonitorProps, MonitorState>
         }
     }
 
+    onToggleOpen(isOpen: boolean) {
+        this.setState({ isOpen });
+    }
+
     render() {
-        let monitoringStatus;
-        let label = 'Start Monitoring';
-        let buttonType: 'default' | 'danger' = 'default';
-        if (this.state.isMonitoring) {
-            label = 'Stop Monitoring';
-            buttonType = 'danger';
-            const progressPercent =
-                (100 * this.state.monitoringStatusCount) / (MONITORING_INTERVAL / MONITORING_STATUS_INTERVAL);
-            monitoringStatus = (
-                <span>
-                    {' '}
-                    <Progress percent={progressPercent} style={{ width: '10em' }} showInfo={false} />
-                </span>
-            );
+        if (!this.props.showControls) {
+            return null;
         }
-        return (
-            <span>
-                <Button onClick={this.toggleMonitoring.bind(this)} type={buttonType}>
+        let monitoringStatus;
+        let label = 'Start Polling';
+        let buttonType: 'default' | 'danger' = 'default';
+        // let opener;
+        // let openerStyle: React.CSSProperties = {};
+        // if (this.state.isMonitoring) {
+        //     openerStyle.color = 'red';
+        // }
+        // if (!this.state.isOpen) {
+        //     opener = <Tooltip title="Open the monitor">
+        //         <Button type="link" icon="sync" onClick={this.onToggleOpen.bind(this)} style={openerStyle} />
+        //     </Tooltip>
+        // } else {
+        //     openerStyle.backgroundColor = 'rgba(200, 200, 200, 0.3)';
+        //     opener = <Tooltip title="Close the monitor">
+        //         <Button type="link" icon="sync" onClick={this.onToggleOpen.bind(this)} style={openerStyle} />
+        //     </Tooltip>
+        // }
+        const opener = (
+            <Switch
+                defaultChecked={this.state.isOpen}
+                checkedChildren="hide monitor"
+                unCheckedChildren="show monitor"
+                onChange={this.onToggleOpen.bind(this)} />
+        );
+
+        if (this.state.isMonitoring) {
+            label = 'Stop Polling';
+            buttonType = 'danger';
+            if (!this.state.isPolling) {
+                monitoringStatus = (
+                    <span>
+                        {' '}
+                        <Progress type="circle" percent={this.state.pollWaitProgress} width={30} strokeWidth={30} showInfo={false} />
+                    </span>
+                );
+            } else {
+                monitoringStatus = (
+                    <span>
+                        {' '}<Progress type="circle" percent={100} width={30} showInfo={false} strokeWidth={30} strokeColor={'orange'} />
+                    </span>
+                )
+            }
+            // } else {
+            //     const spinnerIcon = <Icon type="loading" style={{ fontSize: '1em', color: 'orange' }} spin />;
+            //     monitoringStatus = (
+            //         <span>
+            //             {' '}<Spin size="small" indicator={spinnerIcon} />
+            //         </span>
+            //     )
+            // }
+        }
+        let title;
+        if (this.state.isMonitoring) {
+            title = `Polling is running, with an interval of ${MONITORING_INTERVAL}ms and ${MONITORING_FEEDBACK_STEPS} update steps.`
+        } else {
+            title = 'Polling is currently stopped.';
+        }
+        let monitor;
+        if (this.state.isOpen) {
+            monitor = <Tooltip title={title}>
+                <Button onClick={this.toggleMonitoring.bind(this)} type={buttonType} size="small" style={{ fontSize: "80%" }}>
                     {label}
                 </Button>
                 {monitoringStatus}
+            </Tooltip>
+        }
+        return (
+            <span>
+                {opener}
+                {' '}
+                {monitor}
             </span>
         );
     }

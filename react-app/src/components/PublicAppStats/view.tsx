@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppStat, PublicAppStatsQuery, SearchState } from '../../redux/store';
 import { Table, Form, Progress, Input, Button, Tooltip } from 'antd';
-import { NiceTimeDuration } from '@kbase/ui-lib';
+import { NiceTimeDuration } from '@kbase/ui-components';
 import { PaginationConfig, SorterResult } from 'antd/lib/table';
 
 export interface PublicAppStatsProps {
@@ -51,7 +51,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
             </Form>
         );
     }
-    onTableChange(pagination: PaginationConfig, filters: any, sorter: SorterResult<AppStat>) {}
+    onTableChange(pagination: PaginationConfig, filters: any, sorter: SorterResult<AppStat>) { }
     renderAppStatsTable() {
         return (
             <div>

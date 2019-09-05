@@ -1,9 +1,9 @@
-import { makeBaseStoreState } from '@kbase/ui-lib';
+import { makeBaseStoreState } from '@kbase/ui-components';
 import reducer from './reducers';
 import { createStore, compose, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
-import { AppError } from '@kbase/ui-lib';
-import { BaseStoreState } from '@kbase/ui-lib';
+import { AppError } from '@kbase/ui-components';
+import { BaseStoreState } from '@kbase/ui-components';
 
 export enum JobStatus {
     QUEUED = 'QUEUED',
@@ -13,35 +13,111 @@ export enum JobStatus {
     CANCELED = 'CANCELED'
 }
 
-export interface JobLogLine {
-    lineNumber: number;
-    line: string;
-    isError: boolean;
-}
+export type JobID = string;
 
-export interface JobLog {
-    isLoaded: boolean;
-    lines: Array<JobLogLine>;
-}
 
-export interface Job {
-    id: string;
+
+// export interface Job {
+//     id: JobID;
+//     key: string;
+//     narrativeID: number | null;
+//     narrativeTitle: string;
+//     appID: string;
+//     appTitle: string;
+//     queuedAt: EpochTime;
+//     runAt: EpochTime | null;
+//     finishAt: EpochTime | null;
+//     queuedElapsed: number;
+//     runElapsed: number | null;
+//     status: JobStatus;
+//     message: string;
+//     clientGroups: Array<string>;
+//     username: string;
+// }
+
+export interface JobQueued {
+    status: JobStatus.QUEUED;
+    id: JobID;
     key: string;
     narrativeID: number | null;
     narrativeTitle: string;
     appID: string;
     appTitle: string;
     queuedAt: EpochTime;
-    runAt: EpochTime | null;
-    finishAt: EpochTime | null;
     queuedElapsed: number;
-    runElapsed: number | null;
-    status: JobStatus;
+    clientGroups: Array<string>;
+    username: string;
+}
+
+export interface JobRunning {
+    status: JobStatus.RUNNING;
+    id: JobID;
+    key: string;
+    narrativeID: number | null;
+    narrativeTitle: string;
+    appID: string;
+    appTitle: string;
+    queuedAt: EpochTime;
+    runAt: EpochTime;
+    queuedElapsed: number;
+    runElapsed: number;
+    clientGroups: Array<string>;
+    username: string;
+}
+
+export interface JobFinished {
+    status: JobStatus.FINISHED;
+    id: JobID;
+    key: string;
+    narrativeID: number | null;
+    narrativeTitle: string;
+    appID: string;
+    appTitle: string;
+    queuedAt: EpochTime;
+    runAt: EpochTime;
+    finishAt: EpochTime;
+    queuedElapsed: number;
+    runElapsed: number;
+    clientGroups: Array<string>;
+    username: string;
+}
+
+export interface JobCanceled {
+    status: JobStatus.CANCELED;
+    id: JobID;
+    key: string;
+    narrativeID: number | null;
+    narrativeTitle: string;
+    appID: string;
+    appTitle: string;
+    queuedAt: EpochTime;
+    runAt: EpochTime;
+    finishAt: EpochTime;
+    queuedElapsed: number;
+    runElapsed: number;
+    clientGroups: Array<string>;
+    username: string;
+}
+
+export interface JobErrored {
+    status: JobStatus.ERRORED;
+    id: JobID;
+    key: string;
+    narrativeID: number | null;
+    narrativeTitle: string;
+    appID: string;
+    appTitle: string;
+    queuedAt: EpochTime;
+    runAt: EpochTime;
+    finishAt: EpochTime;
+    queuedElapsed: number;
+    runElapsed: number;
     message: string;
     clientGroups: Array<string>;
     username: string;
-    log: JobLog;
 }
+
+export type Job = JobQueued | JobRunning | JobFinished | JobCanceled | JobErrored;
 
 interface JobsState {
     jobs: Array<Job>;
@@ -117,12 +193,7 @@ export interface UserJobsView {
     jobs: Array<Job>;
 }
 
-export interface StoreState extends BaseStoreState {
-    // entities: {
-    //     jobs: {
-    //         byId: Map<string, Job>
-    //     }
-    // },
+export interface MyStoreState {
     views: {
         mainView: MainView;
         myJobsView: MyJobsView;
@@ -130,6 +201,15 @@ export interface StoreState extends BaseStoreState {
         publicAppStatsView: PublicAppStatsView;
         userRunSummaryView: UserRunSummaryView;
     };
+}
+
+export interface StoreState extends BaseStoreState, MyStoreState {
+    // entities: {
+    //     jobs: {
+    //         byId: Map<string, Job>
+    //     }
+    // },
+
 }
 
 // App Stats
