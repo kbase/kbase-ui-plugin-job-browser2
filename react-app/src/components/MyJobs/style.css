@@ -1,4 +1,6 @@
-.MyJobs {}
+.MyJobs {
+    min-height: 0;
+}
 
 .MyJobs-table {
     table-layout: fixed;
@@ -18,4 +20,16 @@
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.MyJobs-filterArea {
+    padding: 6px;
+    border: 1px solid rgba(150, 150, 150, 0.3);
+    /* box-shadow: 4px 4px 4px; */
+    border-radius: 4px;
+}
+
+.ant-modal-wrap {
+    display: flex;
+    flex-direction: column;
 }

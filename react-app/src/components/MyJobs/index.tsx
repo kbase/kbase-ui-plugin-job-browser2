@@ -5,11 +5,12 @@ import MyJobs from './view';
 import { StoreState, Job, JobsSearchExpression, SearchState } from '../../redux/store';
 import { myJobsSearch, myJobsRefreshSearch, myJobsCancelJob } from '../../redux/actions/myJobs';
 
-export interface OwnProps {}
+export interface OwnProps { }
 
 interface StateProps {
     jobs: Array<Job>;
     searchState: SearchState;
+    showMonitoringControls: boolean;
 }
 
 interface DispatchProps {
@@ -20,11 +21,22 @@ interface DispatchProps {
 
 function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
     const {
+        auth: { userAuthorization },
         views: {
             myJobsView: { searchState, jobs }
         }
     } = state;
-    return { jobs, searchState };
+
+    if (!userAuthorization) {
+        throw new Error('Not authorized!');
+    }
+
+    const { roles } = userAuthorization
+    const showMonitoringControls = roles.some((role) => {
+        return role === 'DevToken';
+    })
+
+    return { jobs, searchState, showMonitoringControls };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {

@@ -1,7 +1,9 @@
 import { Action } from 'redux';
 import { ActionType } from '.';
 import { StoreState, AppStat, PublicAppStatsQuery } from '../store';
-import { AppError, CatalogClient } from '@kbase/ui-lib';
+import { CatalogClient } from '@kbase/ui-lib';
+import { AppError } from '@kbase/ui-components';
+
 import { ThunkDispatch } from 'redux-thunk';
 
 function calcAverage(total: number, count: number) {

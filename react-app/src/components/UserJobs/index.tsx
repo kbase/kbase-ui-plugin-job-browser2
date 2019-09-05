@@ -26,7 +26,7 @@ import { userJobsSearch, userJobsCancelJob } from '../../redux/actions/userJobs'
  *
  * Current empty
  */
-export interface OwnProps {}
+export interface OwnProps { }
 
 /**
  * The props this redux adapter extracts from the store and injects in
@@ -37,6 +37,7 @@ export interface OwnProps {}
 interface StateProps {
     jobs: Array<Job>;
     searchState: SearchState;
+    showMonitoringControls: boolean;
     // searchExpression: JobsSearchExpression;
 }
 
@@ -53,11 +54,22 @@ interface DispatchProps {
 
 function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
     const {
+        auth: { userAuthorization },
         views: {
             userJobsView: { searchState, jobs }
         }
     } = state;
-    return { jobs, searchState };
+
+    if (!userAuthorization) {
+        throw new Error('Not authorized!');
+    }
+
+    const { roles } = userAuthorization
+    const showMonitoringControls = roles.some((role) => {
+        return role === 'DevToken';
+    })
+
+    return { jobs, searchState, showMonitoringControls };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {

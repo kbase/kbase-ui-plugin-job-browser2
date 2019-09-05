@@ -22,13 +22,13 @@ export interface LoaderProps {
     unload: () => void;
 }
 
-interface LoaderState {}
+interface LoaderState { }
 
 class Loader extends React.Component<LoaderProps, LoaderState> {
     renderLoading() {
         const message = (
             <div>
-                Loading ... <Spin />
+                Loading Main ... <Spin />
             </div>
         );
         return (
@@ -83,7 +83,7 @@ class Loader extends React.Component<LoaderProps, LoaderState> {
  * This is the redux interface -- the main entry point for the Main Component.
  */
 
-export interface OwnProps {}
+export interface OwnProps { }
 
 interface StateProps {
     view: MainView;

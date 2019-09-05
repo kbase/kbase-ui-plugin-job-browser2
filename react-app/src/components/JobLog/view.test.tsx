@@ -12,64 +12,95 @@ import Adapter from 'enzyme-adapter-react-16';
 
 // We always need to import the component we are testing
 import Component from './view';
-import { JobLog } from '../../redux/store';
+import { JobQueued, JobStatus } from '../../redux/store';
+import { JobLog } from './state';
 
 configure({ adapter: new Adapter() });
 
 it('renders without crashing', () => {
-    const jobLog: JobLog = {
-        isLoaded: false,
-        lines: []
-    };
-    shallow(<Component log={jobLog} />);
+    const jobLog: JobLog = [];
+    const job: JobQueued = {
+        id: '123',
+        appID: 'module/app',
+        appTitle: 'My App',
+        clientGroups: ['njs'],
+        narrativeID: 123,
+        narrativeTitle: 'My Great Narrative',
+        queuedAt: 123,
+        queuedElapsed: 123,
+        status: JobStatus.QUEUED,
+        username: 'user1',
+        key: '123'
+    }
+    shallow(<Component log={jobLog} job={job} />);
 });
 
 it('renders several lines', () => {
-    const jobLog: JobLog = {
-        isLoaded: false,
-        lines: [
-            {
-                isError: false,
-                lineNumber: 1,
-                line: 'first line'
-            },
-            {
-                isError: false,
-                lineNumber: 2,
-                line: 'second line'
-            },
-            {
-                isError: false,
-                lineNumber: 3,
-                line: 'third line'
-            }
-        ]
-    };
-    const theComponent = mount(<Component log={jobLog} />);
+    const jobLog: JobLog = [
+        {
+            isError: false,
+            lineNumber: 1,
+            line: 'first line'
+        },
+        {
+            isError: false,
+            lineNumber: 2,
+            line: 'second line'
+        },
+        {
+            isError: false,
+            lineNumber: 3,
+            line: 'third line'
+        }
+    ];
+    const job: JobQueued = {
+        id: '123',
+        appID: 'module/app',
+        appTitle: 'My App',
+        clientGroups: ['njs'],
+        narrativeID: 123,
+        narrativeTitle: 'My Great Narrative',
+        queuedAt: 123,
+        queuedElapsed: 123,
+        status: JobStatus.QUEUED,
+        username: 'user1',
+        key: '123'
+    }
+    const theComponent = mount(<Component log={jobLog} job={job} />);
     theComponent.unmount();
 });
 
 it('renders several lines including an error', () => {
-    const jobLog: JobLog = {
-        isLoaded: false,
-        lines: [
-            {
-                isError: false,
-                lineNumber: 1,
-                line: 'first line'
-            },
-            {
-                isError: false,
-                lineNumber: 2,
-                line: 'second line'
-            },
-            {
-                isError: true,
-                lineNumber: 3,
-                line: 'third line'
-            }
-        ]
-    };
-    const theComponent = mount(<Component log={jobLog} />);
+    const jobLog: JobLog = [
+        {
+            isError: false,
+            lineNumber: 1,
+            line: 'first line'
+        },
+        {
+            isError: false,
+            lineNumber: 2,
+            line: 'second line'
+        },
+        {
+            isError: true,
+            lineNumber: 3,
+            line: 'third line'
+        }
+    ];
+    const job: JobQueued = {
+        id: '123',
+        appID: 'module/app',
+        appTitle: 'My App',
+        clientGroups: ['njs'],
+        narrativeID: 123,
+        narrativeTitle: 'My Great Narrative',
+        queuedAt: 123,
+        queuedElapsed: 123,
+        status: JobStatus.QUEUED,
+        username: 'user1',
+        key: '123'
+    }
+    const theComponent = mount(<Component log={jobLog} job={job} />);
     theComponent.unmount();
 });

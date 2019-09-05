@@ -1,6 +1,8 @@
 import { Action } from 'redux';
 import { ActionType } from '.';
-import { AppError, CatalogClient } from '@kbase/ui-lib';
+import { CatalogClient } from '@kbase/ui-lib';
+import { AppError } from '@kbase/ui-components';
+
 import { ThunkDispatch } from 'redux-thunk';
 import { StoreState } from '../store';
 
@@ -51,7 +53,6 @@ export function mainLoadError(error: AppError): MainLoadError {
 export function mainLoad() {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
         dispatch(mainLoadStart());
-
         const {
             auth: { userAuthorization },
             app: {
@@ -80,19 +81,18 @@ export function mainLoad() {
             url: catalogURL,
             module: 'Catalog'
         });
-        catalogClient
-            .isAdmin()
-            .then((isAdmin) => {
-                dispatch(mainLoadSuccess(isAdmin ? true : false));
-            })
-            .catch((err) => {
-                dispatch(
-                    mainLoadError({
-                        message: err.message,
-                        code: 'error-checking-admin-status'
-                    })
-                );
-            });
+
+        try {
+            const isAdmin = await catalogClient.isAdmin();
+            dispatch(mainLoadSuccess(isAdmin ? true : false));
+        } catch (ex) {
+            dispatch(
+                mainLoadError({
+                    message: ex.message,
+                    code: 'error-checking-admin-status'
+                })
+            );
+        }
     };
 }
 

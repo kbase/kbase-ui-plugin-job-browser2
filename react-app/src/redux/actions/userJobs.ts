@@ -3,32 +3,10 @@ import MetricsServiceClient from '../../lib/MetricsServiceClient';
 import { serviceJobToUIJob, compareTimeRange, compareStatus, extractTimeRange } from './utils';
 import { Action } from 'redux';
 import { ActionType } from '.';
-import { AppError, NarrativeJobServiceClient } from '@kbase/ui-lib';
+import { NarrativeJobServiceClient } from '@kbase/ui-lib';
+import { AppError } from '@kbase/ui-components';
 import { ThunkDispatch } from 'redux-thunk';
-
-async function fetchAllUserJobs(
-    token: string,
-    serviceWizardUrl: string,
-    from: number,
-    to: number
-): Promise<Array<Job>> {
-    const client = new MetricsServiceClient({
-        url: serviceWizardUrl,
-        token: token
-    });
-    return client
-        .getAppMetrics({
-            epoch_range: [from, to],
-            user_ids: []
-        })
-        .then((metrics) => {
-            const converted = metrics.job_states.map((jobState) => {
-                return serviceJobToUIJob(jobState, 'UNKNOWN');
-            });
-            return converted;
-            // return fakeJobs();
-        });
-}
+import CancelableRequest, { Task } from '../../lib/CancelableRequest';
 
 export interface UserJobsSearch extends Action<ActionType.USER_JOBS_SEARCH> {
     type: ActionType.USER_JOBS_SEARCH;
@@ -80,6 +58,45 @@ export function userJobsSearchError(error: AppError): UserJobsSearchError {
     };
 }
 
+interface UserJobsParam {
+    token: string,
+    serviceWizardURL: string,
+    from: number,
+    to: number
+}
+
+type UserJobsResult = Array<Job>;
+
+class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
+    request({ token, serviceWizardURL, from, to }: UserJobsParam): Task<UserJobsResult> {
+        const client = new MetricsServiceClient({
+            url: serviceWizardURL,
+            token: token
+        });
+        const promise = client
+            .getJobs({
+                epoch_range: [from, to],
+                user_ids: []
+            })
+            .then((metrics) => {
+                const converted = metrics.job_states.map((jobState) => {
+                    return serviceJobToUIJob(jobState, 'UNKNOWN');
+                });
+                return converted;
+            })
+
+        const task: Task<UserJobsResult> = {
+            id: this.newID(),
+            promise,
+            isCanceled: false
+        }
+        this.pendingTasks.set(task.id, task);
+        return task;
+    }
+}
+
+const userJobsSearchRequest = new UserJobsRequest();
+
 export function userJobsSearch(searchExpression: JobsSearchExpression) {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
         dispatch(userJobsSearchStart());
@@ -118,7 +135,23 @@ export function userJobsSearch(searchExpression: JobsSearchExpression) {
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
         if (!jobsFetchedAt || searchExpression.forceSearch) {
-            rawJobs = await fetchAllUserJobs(userAuthorization.token, serviceWizardURL, timeRangeStart, timeRangeEnd);
+
+            const task = userJobsSearchRequest.spawn({
+                token: userAuthorization.token,
+                serviceWizardURL,
+                from: timeRangeStart,
+                to: timeRangeEnd
+            });
+
+            rawJobs = await task.promise;
+            if (task.isCanceled) {
+                // just do nothing
+                return;
+            }
+            jobsFetchedAt = new Date().getTime();
+            userJobsSearchRequest.done(task);
+
+            // rawJobs = await fetchAllUserJobs(userAuthorization.token, serviceWizardURL, timeRangeStart, timeRangeEnd);
             jobsFetchedAt = new Date().getTime();
             // UPDATE: update the raw jobs
         }
@@ -187,7 +220,21 @@ export function userJobsRefreshSearch() {
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
-        const rawJobs = await fetchAllUserJobs(userAuthorization.token, serviceWizardURL, timeRangeStart, timeRangeEnd);
+
+        const task = userJobsSearchRequest.spawn({
+            token: userAuthorization.token,
+            serviceWizardURL,
+            from: timeRangeStart,
+            to: timeRangeEnd
+        });
+
+        const rawJobs = await task.promise;
+        if (task.isCanceled) {
+            // just do nothing
+            return;
+        }
+
+        userJobsSearchRequest.done(task);
 
         const newJobs = rawJobs.filter((job) => {
             return (

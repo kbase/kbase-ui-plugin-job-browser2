@@ -19,3 +19,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.UserJobs-filterArea {
+    padding: 6px;
+    border: 1px solid rgba(150, 150, 150, 0.3);
+    box-shadow: 4px 4px 4px;
+    border-radius: 4px;
+}
