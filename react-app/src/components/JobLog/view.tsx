@@ -16,7 +16,7 @@ enum PlayState {
 
 export interface JobLogProps {
     job: Job;
-    log: Array<JobLogLine>;
+    log: JobLog;
 }
 
 interface JobLogState {

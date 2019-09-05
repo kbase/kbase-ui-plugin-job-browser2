@@ -42,14 +42,9 @@ const jobs: Array<Job> = [
         runAt: 12345,
         finishAt: 12345,
         status: JobStatus.FINISHED,
-        message: 'some message',
         queuedElapsed: 12345,
         runElapsed: 12345,
-        username: 'mmouse',
-        log: {
-            isLoaded: false,
-            lines: []
-        }
+        username: 'mmouse'
     },
     {
         id: 'jobid2',
@@ -63,14 +58,9 @@ const jobs: Array<Job> = [
         runAt: 12345,
         finishAt: 12345,
         status: JobStatus.FINISHED,
-        message: 'some message',
         queuedElapsed: 12345,
         runElapsed: 12345,
-        username: 'mmouse',
-        log: {
-            isLoaded: false,
-            lines: []
-        }
+        username: 'mmouse'
     },
     {
         id: 'jobid3',
@@ -82,16 +72,10 @@ const jobs: Array<Job> = [
         clientGroups: ['njs'],
         queuedAt: 12345,
         runAt: 12345,
-        finishAt: 12345,
         status: JobStatus.RUNNING,
-        message: 'some message',
         queuedElapsed: 12345,
         runElapsed: 12345,
         username: 'mmouse',
-        log: {
-            isLoaded: false,
-            lines: []
-        }
     },
     {
         id: 'jobid4',
@@ -102,17 +86,9 @@ const jobs: Array<Job> = [
         key: 'jobid4',
         clientGroups: ['njs'],
         queuedAt: 12345,
-        runAt: 12345,
-        finishAt: 12345,
         status: JobStatus.QUEUED,
-        message: 'some message',
         queuedElapsed: 12345,
-        runElapsed: 12345,
         username: 'mmouse',
-        log: {
-            isLoaded: false,
-            lines: []
-        }
     },
     {
         id: 'jobid5',
@@ -129,11 +105,7 @@ const jobs: Array<Job> = [
         message: 'some message',
         queuedElapsed: 12345,
         runElapsed: 12345,
-        username: 'mmouse',
-        log: {
-            isLoaded: false,
-            lines: []
-        }
+        username: 'mmouse'
     },
     {
         id: 'jobid6',
@@ -147,14 +119,9 @@ const jobs: Array<Job> = [
         runAt: 12345,
         finishAt: 12345,
         status: JobStatus.CANCELED,
-        message: 'some message',
         queuedElapsed: 12345,
         runElapsed: 12345,
-        username: 'mmouse',
-        log: {
-            isLoaded: false,
-            lines: []
-        }
+        username: 'mmouse'
     }
 ];
 
@@ -179,7 +146,7 @@ it('renders some results, then click filter all', () => {
     const cancelJob: (jobID: string) => void = (jobId: string) => {
         return;
     };
-    const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} />);
+    const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} showMonitoringControls={false} />);
     const anyButton = component.find('[data-k-b-testhook-button="any"]').hostNodes();
     expect(anyButton).toHaveLength(1);
     anyButton.simulate('click');
@@ -194,7 +161,7 @@ it('renders some results, then the click "filter active" button', () => {
     const cancelJob: (jobID: string) => void = (jobId: string) => {
         return;
     };
-    const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} />);
+    const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} showMonitoringControls={false} />);
     const button = component.find('[data-k-b-testhook-button="active"]').hostNodes();
     expect(button).toHaveLength(1);
     button.simulate('click');
@@ -209,7 +176,7 @@ it('renders some results, then the click "filter finished" button', () => {
     const cancelJob: (jobID: string) => void = (jobId: string) => {
         return;
     };
-    const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} />);
+    const component = mount(<Component jobs={jobs} searchState={searchState} search={search} cancelJob={cancelJob} showMonitoringControls={false} />);
     const button = component.find('[data-k-b-testhook-button="finished"]').hostNodes();
     expect(button).toHaveLength(1);
     button.simulate('click');
