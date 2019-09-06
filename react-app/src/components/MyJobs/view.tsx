@@ -745,7 +745,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         if (a.status === JobStatus.ERRORED) {
                             if (b.status === JobStatus.CANCELED_QUEUED || b.status === JobStatus.CANCELED_RUNNING) {
                                 return -1;
-                                return -1;
                             }
                             return 1;
                         }

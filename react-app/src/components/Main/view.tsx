@@ -1,5 +1,4 @@
 import React from 'react';
-import { Tabs, Icon } from 'antd';
 import './style.css';
 import UserJobs from '../UserJobs';
 import MyJobs from '../MyJobs';
@@ -7,7 +6,7 @@ import PublicAppStats from '../PublicAppStats';
 import UserRunSummary from '../UserRunSummary';
 import { MainParams } from './state';
 import FlexTabs, { Tab } from '../FlexTabs';
-import { relativeTimeThreshold } from 'moment';
+import { Icon } from 'antd';
 
 export interface MainProps {
     isAdmin: boolean;
@@ -76,8 +75,8 @@ export default class Main extends React.Component<MainProps, MainState> {
     }
 
     renderTabs() {
-        let userRunTab;
-        let userJobsTab;
+        // let userRunTab;
+        // let userJobsTab;
         // console.log('rendering, admin?', this.props.isAdmin);
         // if (this.props.isAdmin) {
         //     const tabLabel = (
