@@ -559,7 +559,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     dataIndex="narrativeTitle"
                     key="narrativeTitle"
                     width="17%"
-                    // style={cellStyle}
                     render={(title: string, job: Job): any => {
                         if (!title || !job.narrativeID) {
                             return 'n/a';
@@ -658,19 +657,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         }
 
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (a.queuedElapsed === null) {
-                //         if (b.queuedElapsed === null) {
-                //             return 0;
-                //         }
-                //         return -1;
-                //     } else {
-                //         if (b.queuedElapsed === null) {
-                //             return 1;
-                //         }
-                //         return a.queuedElapsed - b.queuedElapsed;
-                //     }
-                // }}
                 />
                 <Table.Column
                     title="Run for"
@@ -690,19 +676,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
                         }
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (a.runElapsed === null) {
-                //         if (b.runElapsed === null) {
-                //             return 0;
-                //         }
-                //         return -1;
-                //     } else {
-                //         if (b.runElapsed === null) {
-                //             return 1;
-                //         }
-                //         return a.runElapsed - b.runElapsed;
-                //     }
-                // }}
                 />
                 <Table.Column
                     title="Status"
