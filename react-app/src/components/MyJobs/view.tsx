@@ -688,8 +688,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(_, job: Job) => {
                         switch (job.status) {
                             case JobStatus.QUEUED:
-                            case JobStatus.CANCELED_QUEUED:
                                 return <NiceElapsedTime from={job.queuedAt} precision={2} useClock={true} />;
+                            case JobStatus.CANCELED_QUEUED:
+                                return <NiceElapsedTime from={job.queuedAt} to={job.finishAt} precision={2} />;
                             default:
                                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
                         }
