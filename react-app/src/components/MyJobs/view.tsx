@@ -693,7 +693,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             default:
                                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
                         }
-
                     }}
                 />
                 <Table.Column

@@ -650,12 +650,14 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     dataIndex="queuedElapsed"
                     key="queuedElapsed"
                     width="8%"
-                    render={(duration: number, job: Job) => {
+                    render={(_, job: Job) => {
                         switch (job.status) {
                             case JobStatus.QUEUED:
+                            case JobStatus.CANCELED_QUEUED:
                                 return <NiceElapsedTime from={job.queuedAt} precision={2} useClock={true} />;
+                            default:
+                                return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
                         }
-
                     }}
                 />
                 <Table.Column
