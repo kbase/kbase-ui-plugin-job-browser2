@@ -220,27 +220,35 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         function logToJSON(log: JobLog): string {
             return JSON.stringify(log);
         }
+        function logToText(log: JobLog): string {
+            return log.map((line) => {
+                return line.line;
+            }).join('\n');
+        }
 
         let contentType: string;
         let content: string;
         switch (type) {
             case 'tsv':
-                contentType = 'application/octet-stream'
+                contentType = 'application/octet-stream';
                 content = logToTSV(log);
                 break;
             case 'json':
-                contentType = 'application/octet-stream'
+                contentType = 'application/octet-stream';
                 content = logToJSON(log);
+                break;
+            case 'text':
+                contentType = 'text/plain';
+                content = logToText(log);
                 break;
             default:
             case 'csv':
-                contentType = 'application/octet-stream'
+                contentType = 'application/octet-stream';
                 content = logToCSV(log);
                 break;
         }
 
         download('job-log.' + type, contentType, content)
-
     }
     onMenuClick(param: ClickParam | undefined) {
         if (!param) {
@@ -316,6 +324,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 <Menu.Item key="csv" disabled={disabled}>CSV</Menu.Item>
                 <Menu.Item key="tsv" disabled={disabled}>TSV</Menu.Item>
                 <Menu.Item key="json" disabled={disabled}>JSON</Menu.Item>
+                <Menu.Item key="text" disabled={disabled}>TEXT</Menu.Item>
             </Menu>
         )
         return (
