@@ -42,9 +42,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
     }
     componentDidMount() {
         this.currentJobStatus = this.props.job.status;
-        if (this.bodyRef.current === null) {
-            return;
-        }
+
         // if (this.state.playState !== PlayState.PLAYING) {
         //     return;
         // }
@@ -54,15 +52,18 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         if (!this.isActive()) {
             return;
         }
-        this.bodyRef.current.scrollTop = this.bodyRef.current.clientHeight;
-
+        this.scrollToBottom();
+    }
+    scrollToBottom() {
+        if (this.bodyRef.current === null) {
+            return;
+        }
+        // console.log('scroll to bottom!', this.bodyRef.current.scrollTop, this.bodyRef.current.scrollHeight, this.bodyRef.current.clientHeight);
+        this.bodyRef.current.scrollTop = this.bodyRef.current.scrollHeight;
     }
     componentDidUpdate() {
         const lastJobStatus = this.currentJobStatus;
         this.currentJobStatus = this.props.job.status;
-        if (this.bodyRef.current === null) {
-            return;
-        }
         // if (this.state.playState !== PlayState.PLAYING) {
         //     return;
         // }
@@ -75,7 +76,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 return;
             }
         }
-        this.bodyRef.current.scrollTop = this.bodyRef.current.clientHeight;
+        this.scrollToBottom();
     }
     isActive() {
         return this.props.job.status === JobStatus.QUEUED ||
@@ -85,7 +86,10 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         let message;
 
         if (this.isActive()) {
-            message = <Spin size="small" />
+            message = <span>
+                Polling for additional log entries...{' '}
+                <Spin size="small" />
+            </span>
         } else {
             message = <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Log complete</div>
         }
@@ -246,6 +250,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
     }
     onPlayLog() {
         // this.props.updateJobLog();
+        this.scrollToBottom();
         this.setState({
             playState: PlayState.PLAYING,
             isPaused: false
@@ -270,7 +275,8 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 break;
             case JobStatus.FINISHED:
             case JobStatus.ERRORED:
-            case JobStatus.CANCELED:
+            case JobStatus.CANCELED_QUEUED:
+            case JobStatus.CANCELED_RUNNING:
             default:
                 irrelevant = true;
         }

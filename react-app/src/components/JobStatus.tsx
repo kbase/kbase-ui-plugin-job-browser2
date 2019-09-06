@@ -24,7 +24,8 @@ function jobStatusLabel(status: JobStatus): JSX.Element | string {
                     <Icon type="loading-3-quarters" spin /> Running
                 </span>
             );
-        case JobStatus.CANCELED:
+        case JobStatus.CANCELED_QUEUED:
+        case JobStatus.CANCELED_RUNNING:
             return 'Canceled';
         case JobStatus.FINISHED:
             return 'Success';
@@ -47,7 +48,8 @@ export function jobColor(status: JobStatus): string {
             return 'orange';
         case JobStatus.RUNNING:
             return 'blue';
-        case JobStatus.CANCELED:
+        case JobStatus.CANCELED_QUEUED:
+        case JobStatus.CANCELED_RUNNING:
             return 'gray';
         case JobStatus.FINISHED:
             return 'green';

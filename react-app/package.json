@@ -6,7 +6,7 @@
     "dependencies": {
         "@craco/craco": "5.4.0",
         "@kbase/ui-lib": "0.2.0-alpha.3",
-        "@kbase/ui-components": "0.2.0-alpha.2",
+        "@kbase/ui-components": "0.2.0-alpha.3",
         "@types/bluebird": "*",
         "@types/enzyme": "*",
         "@types/enzyme-adapter-react-16": "*",

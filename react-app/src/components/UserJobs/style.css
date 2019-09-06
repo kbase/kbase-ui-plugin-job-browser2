@@ -1,11 +1,17 @@
-.UserJobs {}
+.UserJobs {
+    min-height: 0;
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
 
 .UserJobs-table {
     table-layout: fixed;
 }
 
 .UserJobs-tableCell,
-.UserJobs-table td {
+.UserJobs-table td,
+.UserJobs-table th {
     max-width: 0;
     overflow-x: hidden;
     text-overflow: ellipsis;

@@ -1,7 +1,7 @@
 import React from 'react';
-
 import { UserRunSummaryStat, SearchState, UserRunSummaryQuery } from '../../redux/store';
 import { Table, Form, Input, Button, Tooltip } from 'antd';
+import './style.css';
 
 export interface UserRunSummaryProps {
     searchState: SearchState;
@@ -9,7 +9,7 @@ export interface UserRunSummaryProps {
     search: (query: UserRunSummaryQuery) => void;
 }
 
-interface UserRunSummaryState {}
+interface UserRunSummaryState { }
 
 export default class UserRunSummary extends React.Component<UserRunSummaryProps, UserRunSummaryState> {
     currentQuery: UserRunSummaryQuery;
@@ -54,9 +54,11 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                 rowKey={(stat: UserRunSummaryStat) => {
                     return stat.username + '.' + stat.appId;
                 }}
-                pagination={{ position: 'bottom', showSizeChanger: true }}
+                // pagination={{ position: 'bottom', showSizeChanger: true }}
+                pagination={false}
+                scroll={{ y: '100%' }}
                 size="small"
-                className="PreciseTable"
+                className="PreciseTable ScrollingFlexTable"
             >
                 <Table.Column
                     title="User"
@@ -137,9 +139,9 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
     }
     render() {
         return (
-            <div>
-                <div>{this.renderControlBar()}</div>
-                <div> {this.renderTable()}</div>
+            <div className="UserRunSummary">
+                {this.renderControlBar()}
+                {this.renderTable()}
             </div>
         );
     }

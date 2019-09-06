@@ -1,4 +1,4 @@
-import { JobStatus, Job, EpochTime, TimeRangePresets, TimeRange, JobQueued, JobRunning, JobFinished, JobCanceled, JobErrored } from '../store';
+import { JobStatus, Job, EpochTime, TimeRangePresets, TimeRange, JobQueued, JobRunning, JobFinished, JobCanceledWhileQueued, JobCanceledWhileRunning, JobErrored } from '../store';
 import { JobState } from '../../lib/MetricsServiceClient';
 
 function getJobStatus(job: JobState): JobStatus {
@@ -6,10 +6,12 @@ function getJobStatus(job: JobState): JobStatus {
         case 'QUEUED': return JobStatus.QUEUED;
         case 'RUNNING': return JobStatus.RUNNING;
         case 'FINISHED': return JobStatus.FINISHED;
-        case 'CANCELED': return JobStatus.CANCELED;
+        case 'CANCELED_QUEUED': return JobStatus.CANCELED_QUEUED;
+        case 'CANCELED_RUNNING': return JobStatus.CANCELED_QUEUED;
+
         case 'ERRORED': return JobStatus.ERRORED;
-        case 'QUEUE_ERRORED':
-            console.warn('QUEUE_ERRORED', job);
+        case 'ERRORED_QUEUED':
+            console.warn('ERRORED_QUEUED', job);
             return JobStatus.ERRORED;
         default:
             throw new Error('Unknown job state: ' + job.state)
@@ -139,7 +141,36 @@ function makeJobFinished(job: JobState, username: string): JobFinished {
     };
 }
 
-function makeJobCanceled(job: JobState, username: string): JobCanceled {
+function makeJobCanceledQueued(job: JobState, username: string): JobCanceledWhileQueued {
+    let narrativeID;
+    if (job.wsid) {
+        narrativeID = parseInt(job.wsid, 10);
+    } else {
+        narrativeID = null;
+    }
+
+    if (!job.finish_time) {
+        throw new Error('Canceled job without finish_time!')
+    }
+    return {
+        key: job.job_id,
+        id: job.job_id,
+        status: JobStatus.CANCELED_QUEUED,
+        appID: job.app_id,
+        appTitle: job.app_id,
+        narrativeID,
+        narrativeTitle: job.narrative_name,
+        queuedAt: job.creation_time,
+        queuedElapsed: Date.now() - job.creation_time,
+        clientGroups: job.client_groups,
+        finishAt: job.finish_time,
+        // TODO: a more affirmative method of providing current username
+        // for querying for own...?
+        username: job.user || username
+    };
+}
+
+function makeJobCanceledRunning(job: JobState, username: string): JobCanceledWhileRunning {
     let narrativeID;
     if (job.wsid) {
         narrativeID = parseInt(job.wsid, 10);
@@ -155,7 +186,7 @@ function makeJobCanceled(job: JobState, username: string): JobCanceled {
     return {
         key: job.job_id,
         id: job.job_id,
-        status: JobStatus.CANCELED,
+        status: JobStatus.CANCELED_RUNNING,
         appID: job.app_id,
         appTitle: job.app_id,
         narrativeID,
@@ -217,8 +248,10 @@ export function serviceJobToUIJob(job: JobState, username: string): Job {
             return makeJobFinished(job, username);
         case JobStatus.ERRORED:
             return makeJobErrored(job, username);
-        case JobStatus.CANCELED:
-            return makeJobCanceled(job, username);
+        case JobStatus.CANCELED_QUEUED:
+            return makeJobCanceledQueued(job, username);
+        case JobStatus.CANCELED_RUNNING:
+            return makeJobCanceledRunning(job, username);
         default:
             throw new Error('Invalid job status: ' + job.status);
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Spin, Alert } from 'antd';
-import FlexTabs from './FlexTabs';
+import FlexTabs from '../FlexTabs';
 import JobLog from '../JobLog/view';
 import JobInfo from '../JobInfo';
 import './style.css'
