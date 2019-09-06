@@ -107,7 +107,8 @@ function jobStatusFilterOptionsToJobStatus(filter: Array<JobStatusFilterKey>): A
                 jobStatuses.push(JobStatus.RUNNING);
                 break;
             case 'canceled':
-                jobStatuses.push(JobStatus.CANCELED);
+                jobStatuses.push(JobStatus.CANCELED_QUEUED);
+                jobStatuses.push(JobStatus.CANCELED_RUNNING);
                 break;
             case 'success':
                 jobStatuses.push(JobStatus.FINISHED);
@@ -577,20 +578,22 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return (
             <Table
                 size="small"
-                className="MyJobs-table"
+                className="MyJobs-table ScrollingFlexTable"
                 dataSource={this.props.jobs}
                 loading={loading}
                 rowKey={(job: Job) => {
                     return job.id;
                 }}
-                pagination={{ position: 'bottom', showSizeChanger: true }}
+                // pagination={{ position: 'bottom', showSizeChanger: true }}
+                pagination={false}
+                scroll={{ y: '100%' }}
 
             >
                 <Table.Column
-                    title="Job ID"
+                    title="ID"
                     dataIndex="id"
                     key="id"
-                    width="5%"
+                    width="10%"
                     render={(jobID: string, job: Job): any => {
                         const title = jobID;
                         return (
@@ -635,7 +638,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     title="App"
                     dataIndex="appTitle"
                     key="appTitle"
-                    width="18%"
+                    width="20%"
                     render={(title: string, job: Job): any => {
                         if (!title) {
                             return 'n/a';
@@ -685,25 +688,13 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(_, job: Job) => {
                         switch (job.status) {
                             case JobStatus.QUEUED:
+                            case JobStatus.CANCELED_QUEUED:
                                 return <NiceElapsedTime from={job.queuedAt} precision={2} useClock={true} />;
                             default:
                                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
                         }
 
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (a.queuedElapsed === null) {
-                //         if (b.queuedElapsed === null) {
-                //             return 0;
-                //         }
-                //         return -1;
-                //     } else {
-                //         if (b.queuedElapsed === null) {
-                //             return 1;
-                //         }
-                //         return a.queuedElapsed - b.queuedElapsed;
-                //     }
-                // }}
                 />
                 <Table.Column
                     title="Run for"
@@ -713,28 +704,16 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(_, job: Job) => {
                         switch (job.status) {
                             case JobStatus.QUEUED:
+                            case JobStatus.CANCELED_QUEUED:
                                 return '-';
                             case JobStatus.RUNNING:
                                 return <NiceElapsedTime from={job.runAt} precision={2} useClock={true} />;
                             case JobStatus.FINISHED:
-                            case JobStatus.CANCELED:
+                            case JobStatus.CANCELED_RUNNING:
                             case JobStatus.ERRORED:
                                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
                         }
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (a.runElapsed === null) {
-                //         if (b.runElapsed === null) {
-                //             return 0;
-                //         }
-                //         return -1;
-                //     } else {
-                //         if (b.runElapsed === null) {
-                //             return 1;
-                //         }
-                //         return a.runElapsed - b.runElapsed;
-                //     }
-                // }}
                 />
                 <Table.Column
                     title="Status"
@@ -764,7 +743,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             return -1;
                         }
                         if (a.status === JobStatus.ERRORED) {
-                            if (b.status === JobStatus.CANCELED) {
+                            if (b.status === JobStatus.CANCELED_QUEUED || b.status === JobStatus.CANCELED_RUNNING) {
+                                return -1;
                                 return -1;
                             }
                             return 1;
@@ -773,10 +753,10 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     }}
                 />
                 <Table.Column
-                    title="Server Type"
+                    title="Server"
                     dataIndex="clientGroups"
                     key="clientGroups"
-                    width="10%"
+                    width="8%"
                     render={(clientGroups: Array<string>) => {
                         return clientGroups.join(',');
                     }}
@@ -825,11 +805,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     render() {
         return (
-            <div data-k-b-testhook-component="MyJobs">
+            <div data-k-b-testhook-component="MyJobs" className="MyJobs">
                 <div>{this.renderControlBar()}</div>
-                <div>
-                    {this.renderJobsTable()}
-                </div>
+                {this.renderJobsTable()}
                 {this.renderJobDetail()}
             </div>
         );

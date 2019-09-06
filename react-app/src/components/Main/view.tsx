@@ -6,6 +6,8 @@ import MyJobs from '../MyJobs';
 import PublicAppStats from '../PublicAppStats';
 import UserRunSummary from '../UserRunSummary';
 import { MainParams } from './state';
+import FlexTabs, { Tab } from '../FlexTabs';
+import { relativeTimeThreshold } from 'moment';
 
 export interface MainProps {
     isAdmin: boolean;
@@ -57,57 +59,118 @@ export default class Main extends React.Component<MainProps, MainState> {
 
     renderAdminJobsTab() { }
 
+    renderMyJobsTab() {
+        return <MyJobs />
+    }
+
+    renderUserJobsTab() {
+        return <UserJobs />
+    }
+
+    renderPublicAppStatsTab() {
+        return <PublicAppStats />
+    }
+
+    renderUserRunSummaryTab() {
+        return <UserRunSummary />
+    }
+
     renderTabs() {
         let userRunTab;
         let userJobsTab;
         // console.log('rendering, admin?', this.props.isAdmin);
+        // if (this.props.isAdmin) {
+        //     const tabLabel = (
+        //         <span>
+        //             User Run Summary <Icon type="unlock" />
+        //         </span>
+        //     );
+        //     userRunTab = (
+        //         <Tabs.TabPane tab={tabLabel} key="userRunSummary">
+        //             <UserRunSummary />
+        //         </Tabs.TabPane>
+        //     );
+        //     const userJobsTabLabel = (
+        //         <span>
+        //             User Jobs <Icon type="unlock" />
+        //         </span>
+        //     );
+        //     userJobsTab = (
+        //         <Tabs.TabPane tab={userJobsTabLabel} key="userJobs">
+        //             <UserJobs />
+        //         </Tabs.TabPane>
+        //     );
+        // }
+
+        // FIXME: The animated flag is set to false below because for some reason antd (on safari at least) is not
+        // correctly rendering any tab other than the first one with animation enabled (which is default).
+        // Please investigate and either find what we have done wrong or antd has.
+        // console.log('default active tab key?', this.state.defaultActiveTabKey);
+        // return (
+        //     <Tabs
+        //         animated={false}
+        //         // defaultActiveKey={this.state.activeTabKey || undefined}
+        //         activeKey={this.props.params.tab || this.state.activeTabKey || undefined}
+        //         // className="FlexTabs"
+        //         onChange={this.onTabsChange.bind(this)}
+        //         destroyInactiveTabPane={true}
+        //     >
+        //         <Tabs.TabPane tab="My Jobs" key="myJobs">
+        //             <MyJobs />
+        //         </Tabs.TabPane>
+
+        //         <Tabs.TabPane tab="Public App Stats" key="publicAppStats">
+        //             <PublicAppStats />
+        //         </Tabs.TabPane>
+
+        //         {userJobsTab}
+        //         {userRunTab}
+        //     </Tabs>
+        // );
+        const tabs: Array<Tab> = [];
+
+        tabs.push({
+            tab: 'myjobs',
+            title: 'My Jobs',
+            component: this.renderMyJobsTab()
+        });
+
+        if (this.props.isAdmin) {
+            const userJobsTabLabel = (
+                <span>
+                    User Jobs <Icon type="unlock" />
+                </span>
+            );
+            tabs.push({
+                tab: 'userjobs',
+                title: userJobsTabLabel,
+                component: <UserJobs />
+            })
+        }
+
+        tabs.push({
+            tab: 'appstats',
+            title: 'Public AppStats',
+            component: this.renderPublicAppStatsTab()
+        });
+
         if (this.props.isAdmin) {
             const tabLabel = (
                 <span>
                     User Run Summary <Icon type="unlock" />
                 </span>
             );
-            userRunTab = (
-                <Tabs.TabPane tab={tabLabel} key="userRunSummary">
-                    <UserRunSummary />
-                </Tabs.TabPane>
-            );
-            const userJobsTabLabel = (
-                <span>
-                    User Jobs <Icon type="unlock" />
-                </span>
-            );
-            userJobsTab = (
-                <Tabs.TabPane tab={userJobsTabLabel} key="userJobs">
-                    <UserJobs />
-                </Tabs.TabPane>
-            );
+            tabs.push({
+                tab: 'userrunsummary',
+                title: tabLabel,
+                component: <UserRunSummary />
+            })
         }
 
-        // FIXME: The animated flag is set to false below because for some reason antd (on safari at least) is not
-        // correctly rendering any tab other than the first one with animation enabled (which is default).
-        // Please investigate and either find what we have done wrong or antd has.
-        // console.log('default active tab key?', this.state.defaultActiveTabKey);
         return (
-            <Tabs
-                animated={false}
-                // defaultActiveKey={this.state.activeTabKey || undefined}
-                activeKey={this.props.params.tab || this.state.activeTabKey || undefined}
-                // className="FlexTabs"
-                onChange={this.onTabsChange.bind(this)}
-                destroyInactiveTabPane={true}
-            >
-                <Tabs.TabPane tab="My Jobs" key="myJobs">
-                    <MyJobs />
-                </Tabs.TabPane>
-
-                <Tabs.TabPane tab="Public App Stats" key="publicAppStats">
-                    <PublicAppStats />
-                </Tabs.TabPane>
-
-                {userJobsTab}
-                {userRunTab}
-            </Tabs>
+            <FlexTabs
+                tabs={tabs}
+            />
         );
     }
 

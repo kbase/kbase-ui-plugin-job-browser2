@@ -10,7 +10,8 @@ export enum JobStatus {
     RUNNING = 'RUNNING',
     FINISHED = 'FINISHED',
     ERRORED = 'ERRORED',
-    CANCELED = 'CANCELED'
+    CANCELED_QUEUED = 'CANCELED_QUEUED',
+    CANCELED_RUNNING = 'CANCELED_RUNNING'
 }
 
 export type JobID = string;
@@ -34,6 +35,92 @@ export type JobID = string;
 //     clientGroups: Array<string>;
 //     username: string;
 // }
+
+// export enum TemporalState {
+//     NONE,
+//     QUEUED,
+//     RUNNING
+// }
+
+// export enum PermanentState {
+//     NONE,
+//     SUCCESS,
+//     ERROR,
+//     CANCEL
+// }
+
+// export interface JobQueuedState {
+//     tstate: TemporalState.QUEUED;
+//     pstate: PermanentState.NONE;
+
+//     id: JobID;
+//     key: string;
+//     narrativeID: number | null;
+//     narrativeTitle: string;
+//     appID: string;
+//     appTitle: string;
+//     queuedAt: EpochTime;
+//     queuedElapsed: number;
+//     clientGroups: Array<string>;
+//     username: string;
+// }
+
+// export interface JobRunningState {
+//     tstate: TemporalState.RUNNING;
+//     pstate: PermanentState.NONE;
+
+//     id: JobID;
+//     key: string;
+//     narrativeID: number | null;
+//     narrativeTitle: string;
+//     appID: string;
+//     appTitle: string;
+//     queuedAt: EpochTime;
+//     runAt: EpochTime;
+//     queuedElapsed: number;
+//     runElapsed: number;
+//     clientGroups: Array<string>;
+//     username: string;
+// }
+
+// export interface JobFinishedState {
+//     tstate: TemporalState.NONE;
+//     pstate: PermanentState.SUCCESS;
+
+//     id: JobID;
+//     key: string;
+//     narrativeID: number | null;
+//     narrativeTitle: string;
+//     appID: string;
+//     appTitle: string;
+//     queuedAt: EpochTime;
+//     runAt: EpochTime;
+//     finishAt: EpochTime;
+//     queuedElapsed: number;
+//     runElapsed: number;
+//     clientGroups: Array<string>;
+//     username: string;
+// }
+
+// export interface JobCanceledWhileQueuedState {
+//     tstate: TemporalState.QUEUED;
+//     pstate: PermanentState.SUCCESS;
+
+//     id: JobID;
+//     key: string;
+//     narrativeID: number | null;
+//     narrativeTitle: string;
+//     appID: string;
+//     appTitle: string;
+//     queuedAt: EpochTime;
+//     runAt: EpochTime;
+//     finishAt: EpochTime;
+//     queuedElapsed: number;
+//     runElapsed: number;
+//     clientGroups: Array<string>;
+//     username: string;
+// }
+
 
 export interface JobQueued {
     status: JobStatus.QUEUED;
@@ -82,8 +169,23 @@ export interface JobFinished {
     username: string;
 }
 
-export interface JobCanceled {
-    status: JobStatus.CANCELED;
+export interface JobCanceledWhileQueued {
+    status: JobStatus.CANCELED_QUEUED;
+    id: JobID;
+    key: string;
+    narrativeID: number | null;
+    narrativeTitle: string;
+    appID: string;
+    appTitle: string;
+    queuedAt: EpochTime;
+    finishAt: EpochTime;
+    queuedElapsed: number;
+    clientGroups: Array<string>;
+    username: string;
+}
+
+export interface JobCanceledWhileRunning {
+    status: JobStatus.CANCELED_RUNNING;
     id: JobID;
     key: string;
     narrativeID: number | null;
@@ -117,7 +219,7 @@ export interface JobErrored {
     username: string;
 }
 
-export type Job = JobQueued | JobRunning | JobFinished | JobCanceled | JobErrored;
+export type Job = JobQueued | JobRunning | JobFinished | JobCanceledWhileQueued | JobCanceledWhileRunning | JobErrored;
 
 interface JobsState {
     jobs: Array<Job>;

@@ -122,7 +122,7 @@ body {
     width: unset !important;
     top: unset !important;
     padding-bottom: 0;
-    margin: 10%;
+    margin: 5%;
 }
 
 .ant-modal.FullScreenModal .ant-modal-content {
@@ -248,4 +248,52 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+
+.ScrollingFlexTable.ant-table-wrapper {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.ScrollingFlexTable.ant-table-wrapper>.ant-spin-nested-loading {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.ScrollingFlexTable.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.ScrollingFlexTable.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.ScrollingFlexTable.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table>.ant-table-content {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.ScrollingFlexTable.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table>.ant-table-content>.ant-table-scroll {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+
+.ScrollingFlexTable.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table>.ant-table-content>.ant-table-scroll>.ant-table-header {
+    flex: 0 0 auto;
 }

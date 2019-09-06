@@ -68,7 +68,8 @@ function jobStatusFilterOptionsToJobStatus(filter: Array<JobStatusFilterKey>): A
                 jobStatuses.push(JobStatus.RUNNING);
                 break;
             case 'canceled':
-                jobStatuses.push(JobStatus.CANCELED);
+                jobStatuses.push(JobStatus.CANCELED_QUEUED);
+                jobStatuses.push(JobStatus.CANCELED_RUNNING);
                 break;
             case 'success':
                 jobStatuses.push(JobStatus.FINISHED);
@@ -506,20 +507,22 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         return (
             <Table
                 size="small"
-                className="UserJobs-table"
+                className="UserJobs-table ScrollingFlexTable"
                 dataSource={this.props.jobs}
                 loading={loading}
                 rowKey={(job: Job) => {
                     return job.id;
                 }}
-                pagination={{ position: 'bottom', showSizeChanger: true }}
+                // pagination={{ position: 'bottom', showSizeChanger: true }}
+                pagination={false}
+                scroll={{ y: '100%' }}
 
             >
                 <Table.Column
-                    title="Job ID"
+                    title="ID"
                     dataIndex="id"
                     key="id"
-                    width="5%"
+                    width="8%"
                     render={(jobID: string, job: Job): any => {
                         const title = jobID;
                         return (
@@ -675,11 +678,12 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     render={(_, job: Job) => {
                         switch (job.status) {
                             case JobStatus.QUEUED:
+                            case JobStatus.CANCELED_QUEUED:
                                 return '-';
                             case JobStatus.RUNNING:
                                 return <NiceElapsedTime from={job.runAt} precision={2} useClock={true} />;
                             case JobStatus.FINISHED:
-                            case JobStatus.CANCELED:
+                            case JobStatus.CANCELED_RUNNING:
                             case JobStatus.ERRORED:
                                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
                         }
@@ -726,7 +730,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             return -1;
                         }
                         if (a.status === JobStatus.ERRORED) {
-                            if (b.status === JobStatus.CANCELED) {
+                            if (b.status === JobStatus.CANCELED_QUEUED || b.status === JobStatus.CANCELED_RUNNING) {
                                 return -1;
                             }
                             return 1;
@@ -735,7 +739,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     }}
                 />
                 <Table.Column
-                    title="Server Type"
+                    title="Server"
                     dataIndex="clientGroups"
                     key="clientGroups"
                     width="8%"
@@ -762,11 +766,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
 
     render() {
         return (
-            <div data-k-b-testhook-component="MyJobs">
+            <div data-k-b-testhook-component="UserJobs" className="UserJobs">
                 <div>{this.renderControlBar()}</div>
-                <div>
-                    {this.renderJobsTable()}
-                </div>
+                {this.renderJobsTable()}
                 {this.renderJobDetail()}
             </div>
         );

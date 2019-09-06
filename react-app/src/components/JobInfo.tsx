@@ -29,7 +29,9 @@ export default class JobInfo extends React.Component<Props, State> {
                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
             case JobStatus.FINISHED:
                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
-            case JobStatus.CANCELED:
+            case JobStatus.CANCELED_QUEUED:
+                return <NiceElapsedTime from={job.queuedAt} to={job.finishAt} precision={2} />;
+            case JobStatus.CANCELED_RUNNING:
                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
             case JobStatus.ERRORED:
                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
@@ -44,7 +46,9 @@ export default class JobInfo extends React.Component<Props, State> {
                 return <NiceElapsedTime from={job.runAt} precision={2} useClock={true} />;
             case JobStatus.FINISHED:
                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
-            case JobStatus.CANCELED:
+            case JobStatus.CANCELED_QUEUED:
+                return <span>-</span>;
+            case JobStatus.CANCELED_RUNNING:
                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
             case JobStatus.ERRORED:
                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
