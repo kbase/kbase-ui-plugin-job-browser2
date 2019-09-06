@@ -566,9 +566,11 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         }
                         const href = ['/narrative', job.narrativeID].join('/');
                         return (
-                            <a href={href} target="_blank" rel="noopener noreferrer">
-                                {title}
-                            </a>
+                            <Tooltip title={title}>
+                                <a href={href} target="_blank" rel="noopener noreferrer">
+                                    {title}
+                                </a>
+                            </Tooltip>
                         );
                     }}
                     sorter={(a: Job, b: Job) => {
