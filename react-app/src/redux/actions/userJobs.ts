@@ -159,7 +159,7 @@ export function userJobsSearch(searchExpression: JobsSearchExpression) {
         const newJobs = rawJobs.filter((job) => {
             return (
                 searchTerms.every((term) => {
-                    return term.test(job.appTitle) || term.test(job.narrativeTitle) || term.test(job.id);
+                    return term.test(job.appTitle) || term.test(job.narrativeTitle) || term.test(job.id) || term.test(job.username)
                 }) &&
                 compareTimeRange(
                     job,
