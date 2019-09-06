@@ -142,7 +142,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     }}
                 />
                 <Table.Column
-                    title="Success Rate"
+                    title="Success"
                     dataIndex="successRate"
                     key="successRate"
                     width="10%"
@@ -163,7 +163,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     }}
                 />
                 <Table.Column
-                    title="Avg Run Time"
+                    title="Avg Run"
                     dataIndex="averageRunTime"
                     key="averageRunTime"
                     width="10%"
@@ -175,7 +175,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     }}
                 />
                 <Table.Column
-                    title="Avg Queue Time"
+                    title="Avg Queue"
                     dataIndex="averageQueueTime"
                     key="averageQueueTime"
                     width="10%"
@@ -187,7 +187,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     }}
                 />
                 <Table.Column
-                    title="Total Run Time"
+                    title="Total Run"
                     dataIndex="totalRunTime"
                     key="totalRunTime"
                     width="10%"
