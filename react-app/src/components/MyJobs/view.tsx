@@ -549,6 +549,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         <Button
                             icon="close"
                             type="danger"
+                            size="small"
                             // onClick={() => {
                             //     this.onJobCancel(job);
                             // }}
@@ -681,7 +682,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     }}
                 />
                 <Table.Column
-                    title="Queued for"
+                    title="Queued"
                     dataIndex="queuedElapsed"
                     key="queuedElapsed"
                     width="10%"
@@ -697,7 +698,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     }}
                 />
                 <Table.Column
-                    title="Run for"
+                    title="Run"
                     // dataIndex="runElapsed"
                     key="runElapsed"
                     width="10%"
@@ -720,8 +721,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     dataIndex="status"
                     key="status"
                     width="10%"
-                    render={(status: JobStatus) => {
-                        return <JobStatusBadge jobStatus={status} />;
+                    render={(status: JobStatus, job: Job) => {
+                        return <JobStatusBadge job={job} />;
                     }}
                     sorter={(a: Job, b: Job) => {
                         if (a.status === b.status) {
@@ -788,9 +789,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         )
         const title = (
             <span>
-                Detail for Job <span style={{ fontFamily: 'monospace' }}>${this.state.selectedJob.id}</span>
-                {' '}
-                <JobStatusBadge jobStatus={this.state.selectedJob.status} />
+                Detail for Job <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{this.state.selectedJob.id}</span>
             </span>
         )
         return (

@@ -6,15 +6,16 @@ import JobLog from '../JobLog/view';
 import JobInfo from '../JobInfo';
 import './style.css'
 import { JobLogView, JobLogState, JobLogViewError } from './state';
+import JobStatusBadge from '../JobStatus';
 
-export interface Props {
+export interface JobDetailProps {
     view: JobLogView
 }
 
-interface State {
+interface JobDetailState {
 }
 
-export default class JobDetail extends React.Component<Props, State> {
+export default class JobDetail extends React.Component<JobDetailProps, JobDetailState> {
     renderLoading() {
         return (
             <div className="FullyCenteredBox">
@@ -110,6 +111,23 @@ export default class JobDetail extends React.Component<Props, State> {
             </div>
         )
     }
+    renderStatus() {
+        switch (this.props.view.status) {
+            case JobLogState.NONE:
+            case JobLogState.INITIAL_LOADING:
+                return <Spin size="small" />
+            case JobLogState.ERROR:
+                return <Alert type="error" message={this.props.view.error} />
+            default:
+                return <JobStatusBadge job={this.props.view.job} showTiming={true} />
+        }
+    }
+    renderMiniDetails() {
+        return <div style={{ flex: '0 0 auto' }}>
+            {this.renderStatus()}
+        </div>
+
+    }
     render() {
         const tabs = [
             {
@@ -122,31 +140,12 @@ export default class JobDetail extends React.Component<Props, State> {
                 title: 'Detail',
                 component: this.renderJobInfo()
             },
-            // {
-            //     tab: 'test',
-            //     title: 'Test',
-            //     component: this.renderTest()
-            // },
-            // {
-            //     tab: 'test2',
-            //     title: 'Test2',
-            //     component: this.renderTest2()
-            // }
         ]
         return (
-            <FlexTabs tabs={tabs} />
+            <React.Fragment>
+                {this.renderMiniDetails()}
+                <FlexTabs tabs={tabs} />
+            </React.Fragment>
         )
     }
-    // render() {
-    //     return (
-    //         <Tabs className="FullHeightTabs" defaultActiveKey="log" animated={false} >
-    //             <Tabs.TabPane tab="log" key="log" forceRender={false}>
-    //                 {this.renderJobLog()}
-    //             </Tabs.TabPane>
-    //             <Tabs.TabPane tab="detail" key="detail" forceRender={false}>
-    //                 {this.renderJobInfo()}
-    //             </Tabs.TabPane>
-    //         </Tabs>
-    //     )
-    // }
 }

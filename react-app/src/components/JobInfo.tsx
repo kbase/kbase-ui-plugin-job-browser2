@@ -85,7 +85,7 @@ export default class JobInfo extends React.Component<Props, State> {
                         Status
                     </div>
                     <div className="InfoTable-dataCol">
-                        <JobStatusBadge jobStatus={this.props.job.status} />
+                        <JobStatusBadge job={this.props.job} />
                     </div>
                 </div>
                 <div className="InfoTable-row">

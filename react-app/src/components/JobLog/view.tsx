@@ -250,12 +250,14 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
 
         download('job-log.' + type, contentType, content)
     }
+
     onMenuClick(param: ClickParam | undefined) {
         if (!param) {
             return
         }
         this.downloadLog(param.key, this.props.log);
     }
+
     onPlayLog() {
         // this.props.updateJobLog();
         this.scrollToBottom();
@@ -264,12 +266,43 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             isPaused: false
         })
     }
+
     onPauseLog() {
         this.setState({
             playState: PlayState.PAUSED,
             isPaused: true
         })
     }
+
+    renderPlayPauseTooltips() {
+        let playTooltip: string;
+        let pauseTooltip: string;
+        const isPaused = this.state.isPaused;
+
+        switch (this.props.job.status) {
+            case JobStatus.RUNNING:
+                if (isPaused) {
+                    playTooltip = 'Click to automatically scroll to the bottom of the logs when new entries arrive';
+                    pauseTooltip = 'Automatic scrolling is already paused';
+                } else {
+                    playTooltip = 'Automatic scrolling is already active';
+                    pauseTooltip = 'Click to pause automatic scrolling to the bottom of the logs when new entries arrive';
+                }
+                break;
+            case JobStatus.QUEUED:
+            case JobStatus.FINISHED:
+            case JobStatus.ERRORED:
+            case JobStatus.CANCELED_QUEUED:
+            case JobStatus.CANCELED_RUNNING:
+            default:
+                playTooltip = 'Log playing only available when the job is running';
+                pauseTooltip = 'Log playing only available when the job is running';
+                break;
+
+        }
+        return [playTooltip, pauseTooltip];
+    }
+
     renderPlayPause() {
         let irrelevant: boolean;
 
@@ -289,31 +322,16 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 irrelevant = true;
         }
 
-        let spinning: boolean;
-        // switch (this.state.playState) {
-        //     case PlayState.NONE:
-        //         spinning = false;
-        //         break;
-        //     case PlayState.PLAYING:
-        //         spinning = true;
-        //         break;
-        //     case PlayState.PAUSED:
-        //     case PlayState.DISABLED:
-        //     default:
-        //         spinning = false;
-        // }
-        if (this.state.isPaused || !(this.props.job.status === JobStatus.QUEUED || this.props.job.status === JobStatus.RUNNING)) {
-            spinning = false;
-        } else {
-            spinning = true;
-        }
+        const [playTooltip, pauseTooltip] = this.renderPlayPauseTooltips();
 
         return (
             <ButtonGroup >
-                <Button icon="caret-right" disabled={irrelevant || !this.state.isPaused} onClick={this.onPlayLog.bind(this)} />
-                <Button icon="pause" disabled={irrelevant || this.state.isPaused} onClick={this.onPauseLog.bind(this)} />
-                {' '}
-                <Spin spinning={spinning} />
+                <Tooltip title={playTooltip}>
+                    <Button icon="caret-right" disabled={irrelevant || !this.state.isPaused} onClick={this.onPlayLog.bind(this)} />
+                </Tooltip>
+                <Tooltip title={pauseTooltip}>
+                    <Button icon="pause" disabled={irrelevant || this.state.isPaused} onClick={this.onPauseLog.bind(this)} />
+                </Tooltip>
             </ButtonGroup>
         )
     }
