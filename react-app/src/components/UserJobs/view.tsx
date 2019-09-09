@@ -488,9 +488,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         )
         const title = (
             <span>
-                Detail for Job <span style={{ fontFamily: 'monospace' }}>${this.state.selectedJob.id}</span>
-                {' '}
-                <JobStatusBadge jobStatus={this.state.selectedJob.status} />
+                Detail for Job <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{this.state.selectedJob.id}</span>
             </span>
         )
         return (
@@ -646,7 +644,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     }}
                 />
                 <Table.Column
-                    title="Queued for"
+                    title="Queued"
                     dataIndex="queuedElapsed"
                     key="queuedElapsed"
                     width="8%"
@@ -662,7 +660,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     }}
                 />
                 <Table.Column
-                    title="Run for"
+                    title="Run"
                     // dataIndex="runElapsed"
                     key="runElapsed"
                     width="10%"
@@ -685,8 +683,8 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     dataIndex="status"
                     key="status"
                     width="8%"
-                    render={(status: JobStatus) => {
-                        return <JobStatusBadge jobStatus={status} />
+                    render={(status: JobStatus, job: Job) => {
+                        return <JobStatusBadge job={job} />
                     }}
                     sorter={(a: Job, b: Job) => {
                         if (a.status === b.status) {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tag, Icon } from 'antd';
-import { JobStatus } from '../redux/store';
+import { JobStatus, Job } from '../redux/store';
+import { NiceElapsedTime, NiceRelativeTime } from '@kbase/ui-components';
 
 /**
 * Translates a job status value to a label, with optional icon, suitable for
@@ -61,7 +62,8 @@ export function jobColor(status: JobStatus): string {
 }
 
 export interface JobStatusProps {
-    jobStatus: JobStatus
+    job: Job
+    showTiming?: boolean
 }
 
 interface JobStatusState {
@@ -69,9 +71,40 @@ interface JobStatusState {
 }
 
 export default class JobStatusComponent extends React.Component<JobStatusProps, JobStatusState> {
+
+    renderTag() {
+        const label = jobStatusLabel(this.props.job.status);
+        const color = jobColor(this.props.job.status);
+        return <Tag color={color}>{label}</Tag>
+    }
+
+    renderTiming() {
+        switch (this.props.job.status) {
+            case JobStatus.QUEUED:
+                return <span>
+                    <NiceElapsedTime from={this.props.job.queuedAt} useClock={true} />
+                </span>
+            case JobStatus.RUNNING:
+                return <span>
+                    <NiceElapsedTime from={this.props.job.runAt} useClock={true} />
+                </span>
+            case JobStatus.FINISHED:
+            case JobStatus.ERRORED:
+            case JobStatus.CANCELED_QUEUED:
+            case JobStatus.CANCELED_RUNNING:
+                return <span>
+                    <NiceRelativeTime time={new Date(this.props.job.finishAt)} />
+                </span>
+        }
+    }
+
     render() {
-        const label = jobStatusLabel(this.props.jobStatus);
-        const color = jobColor(this.props.jobStatus);
-        return <Tag color={color}>{label}</Tag>;
+        const timing = this.props.showTiming ? this.renderTiming() : '';
+        return (
+            <span>
+                {this.renderTag()}
+                {timing}
+            </span>
+        )
     }
 }
