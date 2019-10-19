@@ -52,18 +52,23 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                 dataSource={this.props.userRunSummary}
                 loading={this.props.searchState === SearchState.SEARCHING}
                 rowKey={(stat: UserRunSummaryStat) => {
-                    return stat.username + '.' + stat.appId;
+                    return [
+                        stat.username,
+                        stat.appId,
+                        stat.moduleName,
+                        stat.functionName
+                    ].join(':');
                 }}
-                // pagination={{ position: 'bottom', showSizeChanger: true }}
-                pagination={false}
-                scroll={{ y: '100%' }}
+                pagination={{ position: 'bottom', showSizeChanger: true }}
+                // pagination={false}
+                // scroll={{ y: '100%' }}
                 size="small"
                 className="PreciseTable ScrollingFlexTable"
             >
                 <Table.Column
                     title="User"
                     dataIndex="username"
-                    key="username"
+                    // key="username"
                     width="30%"
                     render={(username: string, stat: UserRunSummaryStat) => {
                         return (
@@ -80,44 +85,44 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                 />
                 <Table.Column
                     title="Module"
-                    dataIndex="moduleId"
-                    key="moduleId"
+                    dataIndex="moduleName"
+                    // key="moduleId"
                     width="30%"
-                    render={(moduleId: string) => {
+                    render={(moduleName: string) => {
                         return (
-                            <Tooltip title={moduleId}>
-                                <a href={`#catalog/module/${moduleId}`} target="_parent">
-                                    {moduleId}
+                            <Tooltip title={moduleName}>
+                                <a href={`#catalog/module/${moduleName}`} target="_parent">
+                                    {moduleName}
                                 </a>
                             </Tooltip>
                         );
                     }}
                     sorter={(a: UserRunSummaryStat, b: UserRunSummaryStat) => {
-                        return a.moduleId.localeCompare(b.moduleId);
+                        return a.moduleName.localeCompare(b.moduleName);
                     }}
                 />
                 <Table.Column
                     title="Function"
-                    dataIndex="functionId"
-                    key="functionId"
+                    dataIndex="functionName"
+                    // key="functionId"
                     width="30%"
-                    render={(functionId: string, stat: UserRunSummaryStat) => {
+                    render={(functionName: string, stat: UserRunSummaryStat) => {
                         return (
-                            <Tooltip title={functionId}>
+                            <Tooltip title={functionName}>
                                 <a href={`#catalog/apps/${stat.appId}`} target="_parent">
-                                    {functionId}
+                                    {functionName}
                                 </a>
                             </Tooltip>
                         );
                     }}
                     sorter={(a: UserRunSummaryStat, b: UserRunSummaryStat) => {
-                        return a.functionId.localeCompare(b.functionId);
+                        return a.functionName.localeCompare(b.functionName);
                     }}
                 />
                 <Table.Column
                     title="Runs"
                     dataIndex="runCount"
-                    key="runCount"
+                    // key="runCount"
                     width="10%"
                     align="right"
                     render={(runCount: number, stat: UserRunSummaryStat) => {

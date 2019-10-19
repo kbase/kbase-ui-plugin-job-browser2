@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Main from './view';
 import { StoreState } from '../../redux/store';
 import { sendTitle, setView, setParams } from '@kbase/ui-components';
-import { Params } from '@kbase/ui-lib/lib/redux/integration/store';
+import { Params } from '@kbase/ui-components/lib/redux/integration/store';
 
 export interface OwnProps { }
 

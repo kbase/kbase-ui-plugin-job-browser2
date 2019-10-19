@@ -4,9 +4,9 @@
     "private": true,
     "homepage": "./",
     "dependencies": {
-        "@craco/craco": "5.4.0",
-        "@kbase/ui-lib": "0.2.0-alpha.3",
-        "@kbase/ui-components": "0.2.0-alpha.3",
+        "@craco/craco": "5.5.0",
+        "@kbase/ui-lib": "0.2.0-alpha.5",
+        "@kbase/ui-components": "0.2.1-alpha.6",
         "@types/bluebird": "*",
         "@types/enzyme": "*",
         "@types/enzyme-adapter-react-16": "*",
@@ -18,22 +18,22 @@
         "@types/react-redux": "*",
         "@types/react-transition-group": "*",
         "@types/uuid": "*",
-        "antd": "3.23.1",
-        "bluebird": "3.5.5",
-        "craco-antd": "1.12.0",
+        "antd": "3.24.1",
+        "bluebird": "3.7.1",
+        "craco-antd": "1.14.1",
         "enzyme": "3.10.0",
-        "enzyme-adapter-react-16": "1.14.0",
-        "es-cookie": "1.2.0",
-        "papaparse": "5.0.2",
-        "react": "16.9.0",
-        "react-dom": "16.9.0",
+        "enzyme-adapter-react-16": "1.15.1",
+        "es-cookie": "1.3.0",
+        "papaparse": "5.1.0",
+        "react": "16.10.2",
+        "react-dom": "16.10.2",
         "react-redux": "7.1.1",
-        "react-scripts": "3.1.1",
-        "react-test-renderer": "16.9.0",
+        "react-scripts": "3.2.0",
+        "react-test-renderer": "16.10.2",
         "react-transition-group": "4.3.0",
         "redux": "4.0.4",
         "redux-thunk": "2.3.0",
-        "typescript": "3.6.2",
+        "typescript": "3.6.4",
         "uuid": "3.3.3"
     },
     "scripts": {
@@ -67,9 +67,11 @@
             "last 1 safari version"
         ]
     },
-    "proxy": "https://ci.kbase.us",
+    "xproxy": "https://ci.kbase.us",
     "devDependencies": {
-        "nodemon": "^1.19.2",
-        "typedoc": "^0.15.0"
+        "nodemon": "1.19.4",
+        "typedoc": "0.15.0",
+        "morgan": "1.9.1",
+        "http-proxy-middleware": "0.20.0"
     }
 }

@@ -61,9 +61,9 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                 rowKey={(stat: AppStat) => {
                     return stat.appId;
                 }}
-                // pagination={{ position: 'bottom', showSizeChanger: true }}
-                pagination={false}
-                scroll={{ y: '100%' }}
+                pagination={{ position: 'bottom', showSizeChanger: true }}
+                // pagination={false}
+                // scroll={{ y: '100%' }}
                 size="small"
                 className="PreciseTable ScrollingFlexTable"
                 onChange={this.onTableChange}

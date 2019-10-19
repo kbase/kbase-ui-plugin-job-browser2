@@ -1,5 +1,6 @@
 .DS_Store
 node_modules/
+.yarn-cache
 
 # The built plugin app goes here during a top level build; we don't want to check
 # that is as it is build during install in kbase-ui
