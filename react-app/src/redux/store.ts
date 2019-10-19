@@ -351,9 +351,10 @@ export interface UserRunSummaryQuery {
 
 export interface UserRunSummaryStat {
     username: string;
-    appId: string;
-    moduleId: string;
-    functionId: string;
+    isApp: boolean;
+    appId: string | null;
+    moduleName: string;
+    functionName: string;
     runCount: number;
 }
 

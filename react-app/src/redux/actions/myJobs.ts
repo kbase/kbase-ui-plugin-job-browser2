@@ -74,7 +74,10 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
     request({ token, username, serviceWizardURL, from, to }: MyJobsParam): Task<MyJobsResult> {
         const client = new MetricsServiceClient({
             url: serviceWizardURL,
-            token: token
+            token: token,
+            version: 'dev',
+            // urlBaseOverride: 'http://localhost:3000',
+            timeout: 60000
         });
         const promise = client
             .getJobs({
@@ -85,6 +88,8 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
                 const converted = metrics.job_states.map((jobState) => {
                     return serviceJobToUIJob(jobState, username);
                 });
+
+                console.log('got jobs', metrics, converted);
                 return converted;
             })
 

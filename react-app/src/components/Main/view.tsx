@@ -174,6 +174,11 @@ export default class Main extends React.Component<MainProps, MainState> {
     }
 
     render() {
-        return <div className="Col Col-scrollable">{this.renderTabs()}</div>;
+        return <div
+            className="Col Col-scrollable"
+            data-k-b-testhook-plugin="job-browser2"
+        >
+            {this.renderTabs()}
+        </div>;
     }
 }

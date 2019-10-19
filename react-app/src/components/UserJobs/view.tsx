@@ -15,7 +15,7 @@ import JobStatusBadge from '../JobStatus'
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
 
 // project imports
-import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRange, TimeRangePresets } from '../../redux/store';
+import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRange, TimeRangePresets, TimeRangeLiteral } from '../../redux/store';
 import JobDetail from '../JobDetail';
 
 // file imports
@@ -101,7 +101,7 @@ interface UserJobsState {
 export default class UserJobs extends React.Component<UserJobsProps, UserJobsState> {
     currentQuery?: string;
 
-    static defaultTimeRange: TimeRangePresets = 'lastWeek';
+    static defaultTimeRange: TimeRangePresets = 'last48Hours';
     pubsub: PubSub;
 
     constructor(props: UserJobsProps) {
@@ -273,7 +273,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button icon="close" type="danger" />
+                        <Button icon="close" type="danger" size="small" />
                     </Popconfirm>
                 );
             default:
@@ -281,31 +281,48 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         }
     }
 
+    renderTimeRangeSelectionControl() {
+        return <Select
+            defaultValue={UserJobs.defaultTimeRange}
+            onChange={this.onChangeTimeRange.bind(this)}
+            dropdownMatchSelectWidth={true}
+            style={{ width: '11em' }}
+        >
+            <Select.Option value="lastHour">Previous Hour</Select.Option>
+            <Select.Option value="last48Hours">Previous 48 Hours</Select.Option>
+            <Select.Option value="lastWeek">Previous Week</Select.Option>
+            <Select.Option value="lastMonth">Previous Month</Select.Option>
+            <Select.Option value="customRange">Custom Range</Select.Option>
+        </Select>;
+    }
+
+    renderTimeRangeControl(timeRange: TimeRangeLiteral) {
+        return <React.Fragment>
+            <Form.Item label="From">
+                <DatePicker
+                    showTime={true}
+                    allowClear={false}
+                    value={moment(timeRange.start)}
+                    onChange={this.onRangeFromChange.bind(this)}
+                />
+            </Form.Item>
+            <Form.Item label="To">
+                <DatePicker
+                    showTime={true}
+                    allowClear={false}
+                    value={moment(timeRange.end)}
+                    onChange={this.onRangeToChange.bind(this)}
+                />
+            </Form.Item>
+        </React.Fragment>
+    }
+
     renderSearchInput() {
         let dateControls;
         if (this.state.showDates) {
             const timeRange = this.state.timeRange;
             if (timeRange.kind === 'literal') {
-                dateControls = (
-                    <React.Fragment>
-                        <Form.Item label="From">
-                            <DatePicker
-                                showTime={true}
-                                allowClear={false}
-                                value={moment(timeRange.start)}
-                                onChange={this.onRangeFromChange.bind(this)}
-                            />
-                        </Form.Item>
-                        <Form.Item label="To">
-                            <DatePicker
-                                showTime={true}
-                                allowClear={false}
-                                value={moment(timeRange.end)}
-                                onChange={this.onRangeToChange.bind(this)}
-                            />
-                        </Form.Item>
-                    </React.Fragment>
-                );
+                dateControls = this.renderTimeRangeControl(timeRange);
             }
         }
         return (
@@ -321,19 +338,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
 
                 <Form.Item label="TimeRange" />
                 <Form.Item>
-                    <Select
-                        defaultValue={UserJobs.defaultTimeRange}
-                        onChange={this.onChangeTimeRange.bind(this)}
-                        dropdownMatchSelectWidth={true}
-                        style={{ width: '11em' }}
-                    >
-                        <Select.Option value="lastHour">Previous Hour</Select.Option>
-                        <Select.Option value="last48Hours">Previous 48 Hours</Select.Option>
-                        <Select.Option value="lastWeek">Previous Week</Select.Option>
-                        <Select.Option value="lastMonth">Previous Month</Select.Option>
-                        <Select.Option value="customRange">Custom Range</Select.Option>
-                    </Select>
+                    {this.renderTimeRangeSelectionControl()}
                 </Form.Item>
+
                 {dateControls}
 
                 <Form.Item>
@@ -511,9 +518,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                 rowKey={(job: Job) => {
                     return job.id;
                 }}
-                // pagination={{ position: 'bottom', showSizeChanger: true }}
-                pagination={false}
-                scroll={{ y: '100%' }}
+                pagination={{ position: 'bottom', showSizeChanger: true }}
+            // pagination={false}
+            // scroll={{ y: '100%' }}
 
             >
                 <Table.Column

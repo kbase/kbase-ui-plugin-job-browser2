@@ -74,17 +74,6 @@ const jobStatusFilterOptions: Array<JobStatusFilterOption> = [
     }
 ];
 
-// const jobStatusFilterOptionsActive: Array<JobStatusFilterOption> = [
-//     {
-//         label: 'Queued',
-//         value: 'queued'
-//     },
-//     {
-//         label: 'Running',
-//         value: 'running'
-//     }
-// ];
-
 /**
  * Translates an array of job status filter keys, as provided by the ui job status
  * filter checkboxes, to an array of job statuses suitable for passing to the job
@@ -158,9 +147,6 @@ interface MyJobsState {
     /** Contains the current selection of job statuses in the checkbox control */
     currentJobStatusFilter: Array<JobStatusFilterKey>;
     /** Contains the initial timestamp (ms epoch time) for time range */
-    // rangeFrom: EpochTime;
-    // /** The ending timestamp (ms epoch time) for the time range */
-    // rangeTo: EpochTime;
     timeRange: TimeRange;
 
     isFilterOpen: boolean;
@@ -550,9 +536,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             icon="close"
                             type="danger"
                             size="small"
-                            // onClick={() => {
-                            //     this.onJobCancel(job);
-                            // }}
                             data-k-b-testhook-button="cancel"
                         />
                     </Popconfirm>

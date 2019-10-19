@@ -92,26 +92,18 @@ export function search(query: UserRunSummaryQuery) {
             end: Date.now()
         };
         const rawStats = await catalogClient.getExecAggrTable(params);
-        const stats = rawStats.map((stat) => {
-            let appId, moduleId, functionId;
-            if (!stat.app) {
-                moduleId = stat.func_mod;
-                functionId = stat.func;
-                appId = [moduleId, functionId].join('/');
-            } else {
-                [moduleId, functionId] = stat.app.split('/');
-                appId = stat.app;
-            }
-
-            if (!moduleId || !functionId) {
-                console.warn('bad app!', stat);
+        const stats: Array<UserRunSummaryStat> = rawStats.map((stat) => {
+            let appId: string | null = stat.app;
+            if (!appId) {
+                appId = null;
             }
 
             return {
                 username: stat.user,
-                appId: appId,
-                moduleId: moduleId,
-                functionId: functionId,
+                isApp: stat.app ? true : false,
+                appId: stat.app || null,
+                moduleName: stat.func_mod,
+                functionName: stat.func,
                 runCount: stat.n
             } as UserRunSummaryStat;
         });
@@ -122,9 +114,9 @@ export function search(query: UserRunSummaryQuery) {
         const filtered = stats.filter((stat) => {
             return expression.every((term) => {
                 return (
-                    term.test(stat.appId) ||
-                    term.test(stat.moduleId) ||
-                    term.test(stat.functionId) ||
+                    (stat.appId && term.test(stat.appId)) ||
+                    term.test(stat.moduleName) ||
+                    term.test(stat.functionName) ||
                     term.test(stat.username)
                 );
             });

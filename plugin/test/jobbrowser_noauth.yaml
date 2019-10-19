@@ -16,4 +16,3 @@ specs:
           - type: field
             value: requested-path
         text: jobbrowser
-
