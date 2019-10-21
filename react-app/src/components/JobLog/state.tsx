@@ -131,9 +131,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             const startingLines = log.length;
             const newLog = await this.getJobLog(startingLines);
 
-
-            console.log('got job', job, newLog);
-
             switch (job.status) {
                 case JobStatus.QUEUED:
                     // should not occur!

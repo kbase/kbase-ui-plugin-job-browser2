@@ -4,7 +4,7 @@ yarn install --no-lockfile --cache-folder=".yarn-cache" && \
 echo "✓ dependencies installed successfully" && \
 yarn run build && \
 echo "✓ built successfully" && \
-echo "SKIPPING TESTS" %% \
+echo "SKIPPING TESTS" && \
 yarn run install-plugin && \
 echo "✓ plugin setup successfully" && \
 echo "✓ plugin installed successfully"

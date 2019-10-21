@@ -89,7 +89,6 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
                     return serviceJobToUIJob(jobState, username);
                 });
 
-                console.log('got jobs', metrics, converted);
                 return converted;
             })
 
