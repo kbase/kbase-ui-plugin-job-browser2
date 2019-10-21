@@ -10,13 +10,21 @@ module.exports = {
             addPlugins: true,
             configure: (jestConfig, { env, paths, resolve, rootDir }) => {
                 // jestConfig.transformIgnorePatterns = [`<rootDir>/node_modules/(?!${esModules})`];
-                jestConfig.transformIgnorePatterns = ['[/\\\\]node_modules[/\\\\](?!kbase-ui-lib|antd/).+\\.js$'];
+                jestConfig.transformIgnorePatterns = ['[/\\\\]node_modules[/\\\\](?!kbase-ui-lib|kbase-ui-components|antd/).+\\.js$'];
                 jestConfig.rootDir = './src';
+                jestConfig.moduleFileExtensions = ['ts', 'tsx', 'json', 'js'];
 
                 return jestConfig;
             }
         }
     },
+    // jest: {
+    //     configure: {
+    //         globals: {
+    //             "CONFIG": true
+    //         }
+    //     }
+    // },
     plugins: [
         {
             plugin: CracoAntDesignPlugin,

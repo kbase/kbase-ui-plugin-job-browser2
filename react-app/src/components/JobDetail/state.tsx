@@ -128,7 +128,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     startRunningPolling() {
         const poller = async () => {
             const state = this.state;
-            console.log('poller');
             if (state.status !== JobLogState.ACTIVE_LOADED) {
                 this.setState({
                     status: JobLogState.ERROR,
@@ -144,7 +143,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             const job = await this.getJob();
             const startingLines = log.length;
             const newLog = await this.getJobLog(startingLines);
-            console.log('  job', job, newLog);
             switch (job.status) {
                 case JobStatus.QUEUED:
                     // should not occur!
@@ -178,7 +176,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     startQueuedPolling() {
         const poller = async () => {
             const job = await this.getJob();
-            console.log('queued polling...');
             switch (job.status) {
                 case JobStatus.QUEUED:
                     // still queued, eh?
