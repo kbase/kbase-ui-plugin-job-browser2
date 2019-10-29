@@ -562,15 +562,15 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return (
             <Table
                 size="small"
-                className="MyJobs-table ScrollingFlexTable"
+                className="MyJobs-table xScrollingFlexTable"
                 dataSource={this.props.jobs}
                 loading={loading}
                 rowKey={(job: Job) => {
                     return job.id;
                 }}
-                // pagination={{ position: 'bottom', showSizeChanger: true }}
-                pagination={false}
-                scroll={{ y: '100%' }}
+                pagination={{ position: 'bottom', showSizeChanger: true }}
+            // pagination={false}
+            // scroll={{ y: '100%' }}
 
             >
                 <Table.Column

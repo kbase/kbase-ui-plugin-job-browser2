@@ -512,7 +512,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         return (
             <Table
                 size="small"
-                className="UserJobs-table ScrollingFlexTable"
+                className="UserJobs-table xScrollingFlexTable"
                 dataSource={this.props.jobs}
                 loading={loading}
                 rowKey={(job: Job) => {
@@ -555,9 +555,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             </a>
                         );
                     }}
-                    sorter={(a: Job, b: Job) => {
-                        return a.username.localeCompare(b.username);
-                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     return a.username.localeCompare(b.username);
+                // }}
                 />
                 <Table.Column
                     title="Narrative"
@@ -577,19 +577,19 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             </Tooltip>
                         );
                     }}
-                    sorter={(a: Job, b: Job) => {
-                        if (!a.narrativeTitle) {
-                            if (!b.narrativeTitle) {
-                                return 0;
-                            }
-                            return -1;
-                        } else {
-                            if (!b.narrativeTitle) {
-                                return 1;
-                            }
-                            return a.narrativeTitle.localeCompare(b.narrativeTitle);
-                        }
-                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     if (!a.narrativeTitle) {
+                //         if (!b.narrativeTitle) {
+                //             return 0;
+                //         }
+                //         return -1;
+                //     } else {
+                //         if (!b.narrativeTitle) {
+                //             return 1;
+                //         }
+                //         return a.narrativeTitle.localeCompare(b.narrativeTitle);
+                //     }
+                // }}
                 />
                 <Table.Column
                     title="App"
@@ -610,19 +610,19 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             </Tooltip>
                         );
                     }}
-                    sorter={(a: Job, b: Job) => {
-                        if (!a.appTitle) {
-                            if (!b.appTitle) {
-                                return 0;
-                            }
-                            return -1;
-                        } else {
-                            if (!b.appTitle) {
-                                return 1;
-                            }
-                            return a.appTitle.localeCompare(b.appTitle);
-                        }
-                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     if (!a.appTitle) {
+                //         if (!b.appTitle) {
+                //             return 0;
+                //         }
+                //         return -1;
+                //     } else {
+                //         if (!b.appTitle) {
+                //             return 1;
+                //         }
+                //         return a.appTitle.localeCompare(b.appTitle);
+                //     }
+                // }}
                 />
                 <Table.Column
                     title="Submitted"
@@ -693,33 +693,33 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     render={(status: JobStatus, job: Job) => {
                         return <JobStatusBadge job={job} />
                     }}
-                    sorter={(a: Job, b: Job) => {
-                        if (a.status === b.status) {
-                            return 0;
-                        }
-                        if (a.status === JobStatus.QUEUED) {
-                            return -1;
-                        }
-                        if (a.status === JobStatus.RUNNING) {
-                            if (b.status === JobStatus.QUEUED) {
-                                return 1;
-                            }
-                            return -1;
-                        }
-                        if (a.status === JobStatus.FINISHED) {
-                            if (b.status === JobStatus.QUEUED || b.status === JobStatus.RUNNING) {
-                                return 1;
-                            }
-                            return -1;
-                        }
-                        if (a.status === JobStatus.ERRORED) {
-                            if (b.status === JobStatus.CANCELED_QUEUED || b.status === JobStatus.CANCELED_RUNNING) {
-                                return -1;
-                            }
-                            return 1;
-                        }
-                        return 1;
-                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     if (a.status === b.status) {
+                //         return 0;
+                //     }
+                //     if (a.status === JobStatus.QUEUED) {
+                //         return -1;
+                //     }
+                //     if (a.status === JobStatus.RUNNING) {
+                //         if (b.status === JobStatus.QUEUED) {
+                //             return 1;
+                //         }
+                //         return -1;
+                //     }
+                //     if (a.status === JobStatus.FINISHED) {
+                //         if (b.status === JobStatus.QUEUED || b.status === JobStatus.RUNNING) {
+                //             return 1;
+                //         }
+                //         return -1;
+                //     }
+                //     if (a.status === JobStatus.ERRORED) {
+                //         if (b.status === JobStatus.CANCELED_QUEUED || b.status === JobStatus.CANCELED_RUNNING) {
+                //             return -1;
+                //         }
+                //         return 1;
+                //     }
+                //     return 1;
+                // }}
                 />
                 <Table.Column
                     title="Server"
@@ -729,10 +729,10 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     render={(clientGroups: Array<string>) => {
                         return clientGroups.join(',');
                     }}
-                    sorter={(a: Job, b: Job) => {
-                        // TODO: sort client groups first...
-                        return a.clientGroups.join(',').localeCompare(b.clientGroups.join(','));
-                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     // TODO: sort client groups first...
+                //     return a.clientGroups.join(',').localeCompare(b.clientGroups.join(','));
+                // }}
                 />
                 <Table.Column
                     title="Cancel"
