@@ -1,4 +1,4 @@
-import { JobStatus, Job, EpochTime, TimeRangePresets, TimeRange, JobQueued, JobRunning, JobFinished, JobCanceledWhileQueued, JobCanceledWhileRunning, JobErrored } from '../store';
+import { JobStatus, Job, EpochTime, TimeRangePresets, TimeRange, JobQueued, JobRunning, JobFinished, JobCanceledWhileQueued, JobCanceledWhileRunning, JobErroredWhileQueued, JobErroredWhileRunning } from '../store';
 import { JobState } from '../../lib/MetricsServiceClient';
 
 function getJobStatus(job: JobState): JobStatus {
@@ -9,10 +9,12 @@ function getJobStatus(job: JobState): JobStatus {
         case 'CANCELED_QUEUED': return JobStatus.CANCELED_QUEUED;
         case 'CANCELED_RUNNING': return JobStatus.CANCELED_QUEUED;
 
-        case 'ERRORED': return JobStatus.ERRORED;
+        // case 'ERRORED': return JobStatus.ERRORED;
         case 'ERRORED_QUEUED':
-            console.warn('ERRORED_QUEUED', job);
-            return JobStatus.ERRORED;
+            console.warn('QUEUE_ERRORED', job);
+            return JobStatus.ERRORED_QUEUED;
+        case 'ERRORED_RUNNING':
+            return JobStatus.ERRORED_RUNNING;
         default:
             throw new Error('Unknown job state: ' + job.state)
     }
@@ -87,7 +89,8 @@ function makeJobRunning(job: JobState, username: string): JobRunning {
         narrativeID = null;
     }
     if (!job.exec_start_time) {
-        throw new Error('Running job without exec_start_time!')
+        console.error('ERROR: Running job without exec_start_time!', job);
+        throw new Error('Running job without exec_start_time!');
     }
     return {
         key: job.job_id,
@@ -203,7 +206,36 @@ function makeJobCanceledRunning(job: JobState, username: string): JobCanceledWhi
     };
 }
 
-function makeJobErrored(job: JobState, username: string): JobErrored {
+function makeJobErroredQueued(job: JobState, username: string): JobErroredWhileQueued {
+    let narrativeID;
+    if (job.wsid) {
+        narrativeID = parseInt(job.wsid, 10);
+    } else {
+        narrativeID = null;
+    }
+    if (!job.finish_time) {
+        throw new Error('Errored job without finish_time!')
+    }
+    return {
+        key: job.job_id,
+        id: job.job_id,
+        status: JobStatus.ERRORED_QUEUED,
+        appID: job.app_id,
+        appTitle: job.app_id,
+        narrativeID,
+        narrativeTitle: job.narrative_name,
+        queuedAt: job.creation_time,
+        finishAt: job.finish_time,
+        queuedElapsed: Date.now() - job.creation_time,
+        clientGroups: job.client_groups,
+        message: job.status,
+        // TODO: a more affirmative method of providing current username
+        // for querying for own...?
+        username: job.user || username
+    };
+}
+
+function makeJobErroredRunning(job: JobState, username: string): JobErroredWhileRunning {
     let narrativeID;
     if (job.wsid) {
         narrativeID = parseInt(job.wsid, 10);
@@ -211,6 +243,7 @@ function makeJobErrored(job: JobState, username: string): JobErrored {
         narrativeID = null;
     }
     if (!job.exec_start_time) {
+        console.error('ERROR: Errored job without exec_start_time!', job);
         throw new Error('Errored job without exec_start_time!')
     }
     if (!job.finish_time) {
@@ -219,7 +252,7 @@ function makeJobErrored(job: JobState, username: string): JobErrored {
     return {
         key: job.job_id,
         id: job.job_id,
-        status: JobStatus.ERRORED,
+        status: JobStatus.ERRORED_RUNNING,
         appID: job.app_id,
         appTitle: job.app_id,
         narrativeID,
@@ -246,8 +279,10 @@ export function serviceJobToUIJob(job: JobState, username: string): Job {
             return makeJobRunning(job, username);
         case JobStatus.FINISHED:
             return makeJobFinished(job, username);
-        case JobStatus.ERRORED:
-            return makeJobErrored(job, username);
+        case JobStatus.ERRORED_QUEUED:
+            return makeJobErroredQueued(job, username);
+        case JobStatus.ERRORED_RUNNING:
+            return makeJobErroredRunning(job, username);
         case JobStatus.CANCELED_QUEUED:
             return makeJobCanceledQueued(job, username);
         case JobStatus.CANCELED_RUNNING:

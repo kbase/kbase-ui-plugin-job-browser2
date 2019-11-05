@@ -18,6 +18,7 @@ import { AuthGate } from '@kbase/ui-components';
 
 // project
 import Main from './components/Main';
+import ErrorBoundary from './components/ErrorBoundary'
 
 // file
 import './App.css';
@@ -53,13 +54,15 @@ export default class App extends React.Component<AppProps, AppState> {
 
     render() {
         return (
-            <Provider store={store}>
-                <AppBase>
-                    <AuthGate required={true}>
-                        <Main />
-                    </AuthGate>
-                </AppBase>
-            </Provider>
+            <ErrorBoundary>
+                <Provider store={store}>
+                    <AppBase>
+                        <AuthGate required={true}>
+                            <Main />
+                        </AuthGate>
+                    </AppBase>
+                </Provider>
+            </ErrorBoundary>
         );
     }
 }

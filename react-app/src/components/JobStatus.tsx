@@ -30,7 +30,8 @@ function jobStatusLabel(status: JobStatus): JSX.Element | string {
             return 'Canceled';
         case JobStatus.FINISHED:
             return 'Success';
-        case JobStatus.ERRORED:
+        case JobStatus.ERRORED_QUEUED:
+        case JobStatus.ERRORED_RUNNING:
             return 'Errored';
         default:
             throw new Error('Invalid job status');
@@ -54,7 +55,8 @@ export function jobColor(status: JobStatus): string {
             return 'gray';
         case JobStatus.FINISHED:
             return 'green';
-        case JobStatus.ERRORED:
+        case JobStatus.ERRORED_QUEUED:
+        case JobStatus.ERRORED_RUNNING:
             return 'red';
         default:
             throw new Error('Invalid job status');
@@ -89,7 +91,8 @@ export default class JobStatusComponent extends React.Component<JobStatusProps, 
                     <NiceElapsedTime from={this.props.job.runAt} useClock={true} />
                 </span>
             case JobStatus.FINISHED:
-            case JobStatus.ERRORED:
+            case JobStatus.ERRORED_QUEUED:
+            case JobStatus.ERRORED_RUNNING:
             case JobStatus.CANCELED_QUEUED:
             case JobStatus.CANCELED_RUNNING:
                 return <span>
