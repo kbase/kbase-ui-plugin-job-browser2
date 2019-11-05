@@ -12,7 +12,7 @@ import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import moment, { Moment } from 'moment';
 
 // project imports
-import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRangePresets, TimeRange } from '../../redux/store';
+import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRangePresets, TimeRange, SortSpec } from '../../redux/store';
 
 // kbase imports (or should be kbase imports)
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
@@ -25,6 +25,7 @@ import JobDetail from '../JobDetail';
 import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
+import { PaginationConfig, SortOrder } from 'antd/lib/table';
 
 /**
  * This version of the job status defines the set of strings that may be used
@@ -103,7 +104,8 @@ function jobStatusFilterOptionsToJobStatus(filter: Array<JobStatusFilterKey>): A
                 jobStatuses.push(JobStatus.FINISHED);
                 break;
             case 'error':
-                jobStatuses.push(JobStatus.ERRORED);
+                jobStatuses.push(JobStatus.ERRORED_QUEUED);
+                jobStatuses.push(JobStatus.ERRORED_RUNNING);
                 break;
         }
     });
@@ -152,6 +154,7 @@ interface MyJobsState {
     isFilterOpen: boolean;
 
     selectedJob: Job | null;
+    currentSort: SortSpec | null;
 }
 
 /**
@@ -180,7 +183,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             currentJobStatusFilter: ['queued', 'running', 'canceled', 'success', 'error'],
             timeRange: { kind: 'preset', preset: MyJobs.defaultTimeRangePreset },
             isFilterOpen: false,
-            selectedJob: null
+            selectedJob: null,
+            currentSort: null
         };
     }
 
@@ -227,6 +231,21 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.doSearch(true);
     }
 
+    // onTableChanged(pagination: PaginationConfig, filters: any, sorter: any) {
+    //     console.log('table changed', pagination, filters, sorter);
+    //     this.setState(
+    //         {
+    //             currentSort: {
+    //                 field: sorter.field,
+    //                 direction: sorter.order === 'ascend' ? 'ascending' : 'descending'
+    //             }
+    //         },
+    //         () => {
+    //             this.doSearch(false);
+    //         }
+    //     );
+    // }
+
     doSearch(forceSearch: boolean) {
         if (typeof this.currentQuery === 'undefined') {
             return;
@@ -238,9 +257,12 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             query: this.currentQuery,
             timeRange: this.state.timeRange,
             jobStatus: jobStatusFilter,
-            forceSearch
+            forceSearch,
+            sort: null
+            // sort: this.state.currentSort
         };
 
+        // TODO: document wth is happening here.
         this.pubsub.send('search', {});
 
         this.props.search(searchExpression);
@@ -569,6 +591,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     return job.id;
                 }}
                 pagination={{ position: 'bottom', showSizeChanger: true }}
+            // onChange={this.onTableChanged.bind(this)}
             // pagination={false}
             // scroll={{ y: '100%' }}
 
@@ -589,9 +612,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             </Tooltip>
                         )
                     }}
-                    sorter={(a: Job, b: Job) => {
-                        return a.id.localeCompare(b.id);
-                    }}
+                // sorter={(a: Job, b: Job) => {
+                //     return a.id.localeCompare(b.id);
+                // }}
                 />
                 <Table.Column
                     title="Narrative"
@@ -650,17 +673,24 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         return <NiceRelativeTime time={new Date(date)} />;
                     }}
                     defaultSortOrder="descend"
-                    sorter={(a: Job, b: Job) => {
+                    // sorter={true}
+                    sorter={(a: Job, b: Job, sortOrder?: SortOrder) => {
+                        let direction: number;
+                        if (sortOrder === 'ascend') {
+                            direction = -1;
+                        } else {
+                            direction = 1;
+                        }
                         if (a.queuedAt === null) {
                             if (b.queuedAt === null) {
                                 return 0;
                             }
-                            return -1;
+                            return -1 * direction;
                         } else {
                             if (b.queuedAt === null) {
-                                return 1;
+                                return 1 * direction;
                             }
-                            return a.queuedAt - b.queuedAt;
+                            return (a.queuedAt - b.queuedAt) * direction;
                         }
                     }}
                 />
@@ -672,11 +702,11 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(_, job: Job) => {
                         switch (job.status) {
                             case JobStatus.QUEUED:
-                                return <NiceElapsedTime from={job.queuedAt} precision={2} useClock={true} />;
+                            case JobStatus.ERRORED_QUEUED:
                             case JobStatus.CANCELED_QUEUED:
-                                return <NiceElapsedTime from={job.queuedAt} to={job.finishAt} precision={2} />;
+                                return <NiceElapsedTime from={job.queuedAt} precision={2} useClock={true} />;
                             default:
-                                return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
+                                return <span>-</span>;
                         }
                     }}
                 />
@@ -688,13 +718,14 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(_, job: Job) => {
                         switch (job.status) {
                             case JobStatus.QUEUED:
+                            case JobStatus.ERRORED_QUEUED:
                             case JobStatus.CANCELED_QUEUED:
                                 return '-';
                             case JobStatus.RUNNING:
                                 return <NiceElapsedTime from={job.runAt} precision={2} useClock={true} />;
                             case JobStatus.FINISHED:
                             case JobStatus.CANCELED_RUNNING:
-                            case JobStatus.ERRORED:
+                            case JobStatus.ERRORED_RUNNING:
                                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
                         }
                     }}

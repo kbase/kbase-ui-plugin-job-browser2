@@ -291,7 +291,8 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 break;
             case JobStatus.QUEUED:
             case JobStatus.FINISHED:
-            case JobStatus.ERRORED:
+            case JobStatus.ERRORED_QUEUED:
+            case JobStatus.ERRORED_RUNNING:
             case JobStatus.CANCELED_QUEUED:
             case JobStatus.CANCELED_RUNNING:
             default:
@@ -315,7 +316,8 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 irrelevant = false;
                 break;
             case JobStatus.FINISHED:
-            case JobStatus.ERRORED:
+            case JobStatus.ERRORED_QUEUED:
+            case JobStatus.ERRORED_RUNNING:
             case JobStatus.CANCELED_QUEUED:
             case JobStatus.CANCELED_RUNNING:
             default:

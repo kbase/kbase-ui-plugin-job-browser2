@@ -85,7 +85,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     async getJob(): Promise<Job> {
         const metricsClient = new MetricsServiceClient({
             token: this.props.token,
-            url: this.props.serviceWizardURL
+            url: this.props.serviceWizardURL,
+            // version: 'dev'
         });
 
         const job_id = this.props.jobID;
@@ -145,7 +146,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     loop();
                     break;
                 case JobStatus.FINISHED:
-                case JobStatus.ERRORED:
+                case JobStatus.ERRORED_QUEUED:
+                case JobStatus.ERRORED_RUNNING:
                 case JobStatus.CANCELED_QUEUED:
                 case JobStatus.CANCELED_RUNNING:
                     this.setState({
@@ -181,7 +183,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                             loop();
                             break;
                         case JobStatus.FINISHED:
-                        case JobStatus.ERRORED:
+                        case JobStatus.ERRORED_QUEUED:
+                        case JobStatus.ERRORED_RUNNING:
                         case JobStatus.CANCELED_QUEUED:
                         case JobStatus.CANCELED_RUNNING:
                             this.setState({
@@ -224,7 +227,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 });
                 return;
             case JobStatus.FINISHED:
-            case JobStatus.ERRORED:
+            case JobStatus.ERRORED_QUEUED:
+            case JobStatus.ERRORED_RUNNING:
             case JobStatus.CANCELED_QUEUED:
             case JobStatus.CANCELED_RUNNING:
                 log = await this.getJobLog(0);

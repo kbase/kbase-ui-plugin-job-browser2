@@ -87,7 +87,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     async getJob(): Promise<Job> {
         const metricsClient = new MetricsServiceClient({
             token: this.props.token,
-            url: this.props.serviceWizardURL
+            url: this.props.serviceWizardURL,
+            // version: 'dev'
         });
 
         const job_id = this.props.jobID;
@@ -157,7 +158,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     loop();
                     break;
                 case JobStatus.FINISHED:
-                case JobStatus.ERRORED:
+                case JobStatus.ERRORED_QUEUED:
+                case JobStatus.ERRORED_RUNNING:
                 case JobStatus.CANCELED_RUNNING:
                 case JobStatus.CANCELED_QUEUED:
                     this.setState({
@@ -175,34 +177,53 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
 
     startQueuedPolling() {
         const poller = async () => {
-            const job = await this.getJob();
-            switch (job.status) {
-                case JobStatus.QUEUED:
-                    // still queued, eh?
-                    loop();
-                    return;
-                default:
-                    const log = await this.getJobLog(0);
-                    switch (job.status) {
-                        case JobStatus.RUNNING:
-                            this.setState({
-                                status: JobLogState.ACTIVE_LOADED,
-                                log,
-                                job
-                            });
-                            this.startRunningPolling();
-                            break;
-                        case JobStatus.FINISHED:
-                        case JobStatus.ERRORED:
-                        case JobStatus.CANCELED_QUEUED:
-                        case JobStatus.CANCELED_RUNNING:
-                            this.setState({
-                                status: JobLogState.FINISHED_LOADED,
-                                log,
-                                job
-                            });
-                            break;
-                    }
+            try {
+                const job = await this.getJob();
+                switch (job.status) {
+                    case JobStatus.QUEUED:
+                        // still queued, eh?
+                        loop();
+                        return;
+                    default:
+                        const log = await this.getJobLog(0);
+                        switch (job.status) {
+                            case JobStatus.RUNNING:
+                                this.setState({
+                                    status: JobLogState.ACTIVE_LOADED,
+                                    log,
+                                    job
+                                });
+                                this.startRunningPolling();
+                                break;
+                            case JobStatus.FINISHED:
+                                // case JobStatus.CANCELED_RUNNING:
+                                this.setState({
+                                    status: JobLogState.FINISHED_LOADED,
+                                    log,
+                                    job
+                                });
+                                break;
+
+                            case JobStatus.CANCELED_QUEUED:
+                            case JobStatus.CANCELED_RUNNING:
+                                this.setState({
+                                    status: JobLogState.FINISHED_LOADED,
+                                    log,
+                                    job
+                                });
+                                break;
+                            case JobStatus.ERRORED_QUEUED:
+                            case JobStatus.ERRORED_RUNNING:
+                                this.setState({
+                                    status: JobLogState.ERROR,
+                                    log,
+                                    job
+                                });
+                                break;
+                        }
+                }
+            } catch (ex) {
+                console.error('ERROR', ex);
             }
         }
 
@@ -240,7 +261,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 this.startRunningPolling();
                 return;
             case JobStatus.FINISHED:
-            case JobStatus.ERRORED:
+            case JobStatus.ERRORED_QUEUED:
+            case JobStatus.ERRORED_RUNNING:
             case JobStatus.CANCELED_QUEUED:
             case JobStatus.CANCELED_RUNNING:
                 log = await this.getJobLog(0);

@@ -33,7 +33,9 @@ export default class JobInfo extends React.Component<Props, State> {
                 return <NiceElapsedTime from={job.queuedAt} to={job.finishAt} precision={2} />;
             case JobStatus.CANCELED_RUNNING:
                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
-            case JobStatus.ERRORED:
+            case JobStatus.ERRORED_QUEUED:
+                return <NiceElapsedTime from={job.queuedAt} to={job.finishAt} precision={2} />;
+            case JobStatus.ERRORED_RUNNING:
                 return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
         }
     }
@@ -50,7 +52,9 @@ export default class JobInfo extends React.Component<Props, State> {
                 return <span>-</span>;
             case JobStatus.CANCELED_RUNNING:
                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
-            case JobStatus.ERRORED:
+            case JobStatus.ERRORED_QUEUED:
+                return <span>-</span>;
+            case JobStatus.ERRORED_RUNNING:
                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
         }
         // console.log('run for', this.props.job);

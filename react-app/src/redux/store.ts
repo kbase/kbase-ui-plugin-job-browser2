@@ -9,7 +9,8 @@ export enum JobStatus {
     QUEUED = 'QUEUED',
     RUNNING = 'RUNNING',
     FINISHED = 'FINISHED',
-    ERRORED = 'ERRORED',
+    ERRORED_QUEUED = 'ERRORED_QUEUED',
+    ERRORED_RUNNING = 'ERRORED_RUNNING',
     CANCELED_QUEUED = 'CANCELED_QUEUED',
     CANCELED_RUNNING = 'CANCELED_RUNNING'
 }
@@ -201,8 +202,24 @@ export interface JobCanceledWhileRunning {
     username: string;
 }
 
-export interface JobErrored {
-    status: JobStatus.ERRORED;
+export interface JobErroredWhileQueued {
+    status: JobStatus.ERRORED_QUEUED;
+    id: JobID;
+    key: string;
+    narrativeID: number | null;
+    narrativeTitle: string;
+    appID: string;
+    appTitle: string;
+    queuedAt: EpochTime;
+    finishAt: EpochTime;
+    queuedElapsed: number;
+    message: string;
+    clientGroups: Array<string>;
+    username: string;
+}
+
+export interface JobErroredWhileRunning {
+    status: JobStatus.ERRORED_RUNNING;
     id: JobID;
     key: string;
     narrativeID: number | null;
@@ -219,7 +236,7 @@ export interface JobErrored {
     username: string;
 }
 
-export type Job = JobQueued | JobRunning | JobFinished | JobCanceledWhileQueued | JobCanceledWhileRunning | JobErrored;
+export type Job = JobQueued | JobRunning | JobFinished | JobCanceledWhileQueued | JobCanceledWhileRunning | JobErroredWhileQueued | JobErroredWhileRunning;
 
 interface JobsState {
     jobs: Array<Job>;
@@ -248,9 +265,15 @@ export interface TimeRange2 {
     end: EpochTime | null;
 }
 
+export interface SortSpec {
+    field: string;
+    direction: 'ascending' | 'descending';
+}
+
 export interface JobsSearchExpression {
     query: string;
     timeRange: TimeRange;
+    sort: SortSpec | null;
     // timeRangeStart: EpochTime;
     // timeRangeEnd: EpochTime;
     jobStatus: Array<JobStatus>;
