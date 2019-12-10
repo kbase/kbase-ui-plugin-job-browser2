@@ -71,8 +71,8 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
     request({ token, serviceWizardURL, from, to }: UserJobsParam): Task<UserJobsResult> {
         const client = new MetricsServiceClient({
             url: serviceWizardURL,
-            token: token,
-            version: 'dev'
+            token: token
+            // version: 'dev'
         });
         const promise = client
             .getJobs({

@@ -6,13 +6,19 @@
 /** imports */
 // 3rd party imports
 import React from 'react';
-import { Table, Form, Input, Button, Checkbox, Select, DatePicker, Popconfirm, Tooltip, Modal, Switch } from 'antd';
+import {
+    Table, Form, Input, Button, Checkbox, Select, DatePicker,
+    Popconfirm, Tooltip, Modal, Switch
+} from 'antd';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import moment, { Moment } from 'moment';
 
 // project imports
-import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRangePresets, TimeRange, SortSpec } from '../../redux/store';
+import {
+    Job, JobStatus, JobsSearchExpression, SearchState,
+    TimeRangePresets, TimeRange, SortSpec
+} from '../../redux/store';
 
 // kbase imports (or should be kbase imports)
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
@@ -25,7 +31,7 @@ import JobDetail from '../JobDetail';
 import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
-import { PaginationConfig, SortOrder } from 'antd/lib/table';
+import { SortOrder } from 'antd/lib/table';
 
 /**
  * This version of the job status defines the set of strings that may be used
@@ -230,21 +236,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         event.preventDefault();
         this.doSearch(true);
     }
-
-    // onTableChanged(pagination: PaginationConfig, filters: any, sorter: any) {
-    //     console.log('table changed', pagination, filters, sorter);
-    //     this.setState(
-    //         {
-    //             currentSort: {
-    //                 field: sorter.field,
-    //                 direction: sorter.order === 'ascend' ? 'ascending' : 'descending'
-    //             }
-    //         },
-    //         () => {
-    //             this.doSearch(false);
-    //         }
-    //     );
-    // }
 
     doSearch(forceSearch: boolean) {
         if (typeof this.currentQuery === 'undefined') {
@@ -591,7 +582,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     return job.id;
                 }}
                 pagination={{ position: 'bottom', showSizeChanger: true }}
-            // onChange={this.onTableChanged.bind(this)}
             // pagination={false}
             // scroll={{ y: '100%' }}
 
@@ -612,9 +602,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             </Tooltip>
                         )
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     return a.id.localeCompare(b.id);
-                // }}
                 />
                 <Table.Column
                     title="Narrative"
@@ -637,9 +624,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             </Tooltip>
                         );
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     return a.narrativeTitle.localeCompare(b.narrativeTitle);
-                // }}
                 />
                 <Table.Column
                     title="App"
@@ -657,9 +641,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             </Tooltip>
                         );
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     return a.appTitle.localeCompare(b.appTitle);
-                // }}
                 />
                 <Table.Column
                     title="Submitted"
@@ -673,7 +654,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         return <NiceRelativeTime time={new Date(date)} />;
                     }}
                     defaultSortOrder="descend"
-                    // sorter={true}
                     sorter={(a: Job, b: Job, sortOrder?: SortOrder) => {
                         let direction: number;
                         if (sortOrder === 'ascend') {
@@ -738,33 +718,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(status: JobStatus, job: Job) => {
                         return <JobStatusBadge job={job} />;
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (a.status === b.status) {
-                //         return 0;
-                //     }
-                //     if (a.status === JobStatus.QUEUED) {
-                //         return -1;
-                //     }
-                //     if (a.status === JobStatus.RUNNING) {
-                //         if (b.status === JobStatus.QUEUED) {
-                //             return 1;
-                //         }
-                //         return -1;
-                //     }
-                //     if (a.status === JobStatus.FINISHED) {
-                //         if (b.status === JobStatus.QUEUED || b.status === JobStatus.RUNNING) {
-                //             return 1;
-                //         }
-                //         return -1;
-                //     }
-                //     if (a.status === JobStatus.ERRORED) {
-                //         if (b.status === JobStatus.CANCELED_QUEUED || b.status === JobStatus.CANCELED_RUNNING) {
-                //             return -1;
-                //         }
-                //         return 1;
-                //     }
-                //     return 1;
-                // }}
                 />
                 <Table.Column
                     title="Server"
@@ -774,10 +727,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(clientGroups: Array<string>) => {
                         return clientGroups.join(',');
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     // TODO: sort client groups first...
-                //     return a.clientGroups.join(',').localeCompare(b.clientGroups.join(','));
-                // }}
                 />
                 <Table.Column
                     title="Cancel"
