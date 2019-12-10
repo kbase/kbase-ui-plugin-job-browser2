@@ -57,7 +57,6 @@ export default class JobInfo extends React.Component<Props, State> {
             case JobStatus.ERRORED_RUNNING:
                 return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
         }
-        // console.log('run for', this.props.job);
         // if (!this.props.job.runElapsed) {
         //     return <span>-</span>
         // }

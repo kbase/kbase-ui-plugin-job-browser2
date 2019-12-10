@@ -75,7 +75,7 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
         const client = new MetricsServiceClient({
             url: serviceWizardURL,
             token: token,
-            version: 'dev',
+            // version: 'dev',
             // urlBaseOverride: 'http://localhost:3000',
             timeout: 60000
         });

@@ -11,7 +11,7 @@ function getJobStatus(job: JobState): JobStatus {
 
         // case 'ERRORED': return JobStatus.ERRORED;
         case 'ERRORED_QUEUED':
-            console.warn('QUEUE_ERRORED', job);
+            // console.warn('QUEUE_ERRORED', job);
             return JobStatus.ERRORED_QUEUED;
         case 'ERRORED_RUNNING':
             return JobStatus.ERRORED_RUNNING;

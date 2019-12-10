@@ -25,7 +25,7 @@ import JobDetail from '../JobDetail';
 import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
-import { PaginationConfig, SortOrder } from 'antd/lib/table';
+import { SortOrder } from 'antd/lib/table';
 
 /**
  * This version of the job status defines the set of strings that may be used
@@ -230,21 +230,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         event.preventDefault();
         this.doSearch(true);
     }
-
-    // onTableChanged(pagination: PaginationConfig, filters: any, sorter: any) {
-    //     console.log('table changed', pagination, filters, sorter);
-    //     this.setState(
-    //         {
-    //             currentSort: {
-    //                 field: sorter.field,
-    //                 direction: sorter.order === 'ascend' ? 'ascending' : 'descending'
-    //             }
-    //         },
-    //         () => {
-    //             this.doSearch(false);
-    //         }
-    //     );
-    // }
 
     doSearch(forceSearch: boolean) {
         if (typeof this.currentQuery === 'undefined') {

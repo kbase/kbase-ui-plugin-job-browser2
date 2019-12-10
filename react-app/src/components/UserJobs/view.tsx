@@ -513,7 +513,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
     }
 
     onTableChanged(pagination: PaginationConfig, filters: any, sorter: any) {
-        console.log('table changed', pagination, filters, sorter);
         this.setState(
             {
                 currentSort: {
