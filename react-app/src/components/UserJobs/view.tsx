@@ -7,7 +7,10 @@
 import React from 'react';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
-import { Table, Form, Input, Button, Checkbox, Select, DatePicker, Popconfirm, Tooltip, Modal, Switch } from 'antd';
+import {
+    Table, Form, Input, Button, Checkbox, Select, DatePicker,
+    Popconfirm, Tooltip, Modal, Switch
+} from 'antd';
 import moment, { Moment } from 'moment';
 import JobStatusBadge from '../JobStatus'
 
@@ -15,14 +18,16 @@ import JobStatusBadge from '../JobStatus'
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
 
 // project imports
-import { Job, JobStatus, JobsSearchExpression, SearchState, TimeRange, TimeRangePresets, TimeRangeLiteral, SortSpec } from '../../redux/store';
+import {
+    Job, JobStatus, JobsSearchExpression, SearchState, TimeRange,
+    TimeRangePresets, TimeRangeLiteral, SortSpec
+} from '../../redux/store';
 import JobDetail from '../JobDetail';
 
 // file imports
 import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
-import { PaginationConfig } from 'antd/lib/table';
 
 /*
     Props and State
@@ -512,20 +517,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         )
     }
 
-    onTableChanged(pagination: PaginationConfig, filters: any, sorter: any) {
-        this.setState(
-            {
-                currentSort: {
-                    field: sorter.field,
-                    direction: sorter.order === 'ascend' ? 'ascending' : 'descending'
-                }
-            },
-            () => {
-                this.doSearch(false);
-            }
-        );
-    }
-
     renderJobsTable() {
         const loading = this.props.searchState === SearchState.SEARCHING;
         return (
@@ -538,7 +529,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     return job.id;
                 }}
                 pagination={{ position: 'bottom', showSizeChanger: true }}
-                onChange={this.onTableChanged.bind(this)}
+            // onChange={this.onTableChanged.bind(this)}
             // pagination={false}
             // scroll={{ y: '100%' }}
 
@@ -559,9 +550,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             </Tooltip>
                         )
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     return a.id.localeCompare(b.id);
-                // }}
                 />
                 <Table.Column
                     title="User"
@@ -575,9 +563,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             </a>
                         );
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     return a.username.localeCompare(b.username);
-                // }}
                 />
                 <Table.Column
                     title="Narrative"
@@ -597,19 +582,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             </Tooltip>
                         );
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (!a.narrativeTitle) {
-                //         if (!b.narrativeTitle) {
-                //             return 0;
-                //         }
-                //         return -1;
-                //     } else {
-                //         if (!b.narrativeTitle) {
-                //             return 1;
-                //         }
-                //         return a.narrativeTitle.localeCompare(b.narrativeTitle);
-                //     }
-                // }}
                 />
                 <Table.Column
                     title="App"
@@ -630,19 +602,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             </Tooltip>
                         );
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (!a.appTitle) {
-                //         if (!b.appTitle) {
-                //             return 0;
-                //         }
-                //         return -1;
-                //     } else {
-                //         if (!b.appTitle) {
-                //             return 1;
-                //         }
-                //         return a.appTitle.localeCompare(b.appTitle);
-                //     }
-                // }}
                 />
                 <Table.Column
                     title="Submitted"
@@ -656,20 +615,19 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         return <NiceRelativeTime time={new Date(date)} />;
                     }}
                     defaultSortOrder="descend"
-                    sorter={true}
-                // sorter={(a: Job, b: Job) => {
-                //     if (a.queuedAt === null) {
-                //         if (b.queuedAt === null) {
-                //             return 0;
-                //         }
-                //         return -1;
-                //     } else {
-                //         if (b.queuedAt === null) {
-                //             return 1;
-                //         }
-                //         return a.queuedAt - b.queuedAt;
-                //     }
-                // }}
+                    sorter={(a: Job, b: Job) => {
+                        if (a.queuedAt === null) {
+                            if (b.queuedAt === null) {
+                                return 0;
+                            }
+                            return -1;
+                        } else {
+                            if (b.queuedAt === null) {
+                                return 1;
+                            }
+                            return a.queuedAt - b.queuedAt;
+                        }
+                    }}
                 />
                 <Table.Column
                     title="Queued"
@@ -715,33 +673,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     render={(status: JobStatus, job: Job) => {
                         return <JobStatusBadge job={job} />
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     if (a.status === b.status) {
-                //         return 0;
-                //     }
-                //     if (a.status === JobStatus.QUEUED) {
-                //         return -1;
-                //     }
-                //     if (a.status === JobStatus.RUNNING) {
-                //         if (b.status === JobStatus.QUEUED) {
-                //             return 1;
-                //         }
-                //         return -1;
-                //     }
-                //     if (a.status === JobStatus.FINISHED) {
-                //         if (b.status === JobStatus.QUEUED || b.status === JobStatus.RUNNING) {
-                //             return 1;
-                //         }
-                //         return -1;
-                //     }
-                //     if (a.status === JobStatus.ERRORED) {
-                //         if (b.status === JobStatus.CANCELED_QUEUED || b.status === JobStatus.CANCELED_RUNNING) {
-                //             return -1;
-                //         }
-                //         return 1;
-                //     }
-                //     return 1;
-                // }}
                 />
                 <Table.Column
                     title="Server"
@@ -751,10 +682,6 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     render={(clientGroups: Array<string>) => {
                         return clientGroups.join(',');
                     }}
-                // sorter={(a: Job, b: Job) => {
-                //     // TODO: sort client groups first...
-                //     return a.clientGroups.join(',').localeCompare(b.clientGroups.join(','));
-                // }}
                 />
                 <Table.Column
                     title="Cancel"
