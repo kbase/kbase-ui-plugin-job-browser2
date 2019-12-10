@@ -4,8 +4,8 @@
     "private": true,
     "homepage": "./",
     "dependencies": {
-        "@craco/craco": "5.6.1",
-        "@kbase/ui-components": "0.2.1-alpha.9",
+        "@craco/craco": "5.6.2",
+        "@kbase/ui-components": "0.2.1-alpha.10",
         "@kbase/ui-lib": "0.2.1-alpha.2",
         "@types/bluebird": "*",
         "@types/enzyme": "*",
@@ -18,22 +18,22 @@
         "@types/react-redux": "*",
         "@types/react-transition-group": "*",
         "@types/uuid": "*",
-        "antd": "3.23.6",
-        "bluebird": "3.7.1",
+        "antd": "3.26.2",
+        "bluebird": "3.7.2",
         "craco-antd": "1.14.1",
         "enzyme": "3.10.0",
         "enzyme-adapter-react-16": "1.15.1",
         "es-cookie": "1.3.0",
         "papaparse": "5.1.0",
-        "react": "16.11.0",
-        "react-dom": "16.11.0",
-        "react-redux": "7.1.1",
-        "react-scripts": "3.2.0",
-        "react-test-renderer": "16.11.0",
+        "react": "16.12.0",
+        "react-dom": "16.12.0",
+        "react-redux": "7.1.3",
+        "react-scripts": "3.3.0",
+        "react-test-renderer": "16.12.0",
         "react-transition-group": "4.3.0",
         "redux": "4.0.4",
         "redux-thunk": "2.3.0",
-        "typescript": "3.6.4",
+        "typescript": "3.7.3",
         "uuid": "3.3.3"
     },
     "scripts": {
@@ -71,7 +71,7 @@
     "devDependencies": {
         "http-proxy-middleware": "0.20.0",
         "morgan": "1.9.1",
-        "nodemon": "1.19.4",
-        "typedoc": "0.15.0"
+        "nodemon": "2.0.1",
+        "typedoc": "0.15.4"
     }
 }
