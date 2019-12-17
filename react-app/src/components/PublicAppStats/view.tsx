@@ -4,6 +4,7 @@ import { Table, Form, Progress, Input, Button, Tooltip } from 'antd';
 import { NiceTimeDuration } from '@kbase/ui-components';
 import { PaginationConfig, SorterResult } from 'antd/lib/table';
 import './style.css';
+import UILink from '../UILink';
 
 export interface PublicAppStatsProps {
     searchState: SearchState;
@@ -76,7 +77,10 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     render={(moduleId: string, stat: AppStat) => {
                         return (
                             <Tooltip title={stat.moduleTitle}>
-                                <a href={`#catalog/module/${moduleId}`}>{stat.moduleTitle}</a>
+                                <UILink path={`catalog/modules/${moduleId}`}
+                                    openIn='new-tab'>
+                                    {stat.moduleTitle}
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -93,9 +97,10 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     render={(functionId: string, stat: AppStat) => {
                         return (
                             <Tooltip title={stat.functionTitle}>
-                                <a href={`#catalog/apps/${stat.moduleId}/${stat.functionId}`}>
+                                <UILink path={`catalog/apps/${stat.moduleId}/${stat.functionId}`}
+                                    openIn='new-tab'>
                                     {stat.functionTitle}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}

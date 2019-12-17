@@ -3,9 +3,11 @@ import { Job, JobStatus } from '../redux/store';
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
 import JobStatusBadge, { jobColor } from './JobStatus';
 import { Spin } from 'antd';
+import UILink from './UILink';
+import NarrativeLink from './NarrativeLink';
 
 export interface Props {
-    job: Job
+    job: Job;
 }
 
 interface State {
@@ -14,7 +16,7 @@ interface State {
 
 export default class JobInfo extends React.Component<Props, State> {
     renderSubmitted() {
-        const date = this.props.job.queuedAt
+        const date = this.props.job.queuedAt;
         if (!date) {
             return <span>** empty **</span>;
         }
@@ -68,8 +70,18 @@ export default class JobInfo extends React.Component<Props, State> {
             return <span>
                 {' '}
                 <Spin size="small" style={{ color: jobColor(jobStatus) }} />
-            </span>
+            </span>;
         }
+    }
+
+    renderNarrativeLink() {
+        const id = this.props.job.narrativeID;
+        if (id === null) {
+            return;
+        }
+        return <NarrativeLink narrativeID={id}>
+            {this.props.job.narrativeTitle}
+        </NarrativeLink>;
     }
 
     render() {
@@ -96,13 +108,7 @@ export default class JobInfo extends React.Component<Props, State> {
                         Narrative
                     </div>
                     <div className="InfoTable-dataCol">
-                        <a
-                            href={`/narrative/${this.props.job.narrativeID}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            {this.props.job.narrativeTitle}
-                        </a>
+                        {this.renderNarrativeLink()}
                     </div>
                 </div>
                 <div className="InfoTable-row">
@@ -110,7 +116,10 @@ export default class JobInfo extends React.Component<Props, State> {
                         App
                     </div>
                     <div className="InfoTable-dataCol">
-                        <a href={`/#catalog/apps/${this.props.job.appID}`}>{this.props.job.appTitle}</a>
+                        <UILink path={`catalog/apps/${this.props.job.appID}`}
+                            openIn='new-tab'>
+                            {this.props.job.appTitle}
+                        </UILink>
                     </div>
                 </div>
                 <div className="InfoTable-row">
@@ -140,6 +149,6 @@ export default class JobInfo extends React.Component<Props, State> {
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 }

@@ -12,7 +12,7 @@ import {
     Popconfirm, Tooltip, Modal, Switch
 } from 'antd';
 import moment, { Moment } from 'moment';
-import JobStatusBadge from '../JobStatus'
+import JobStatusBadge from '../JobStatus';
 
 // project imports (should be shared lib)
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
@@ -28,6 +28,8 @@ import JobDetail from '../JobDetail';
 import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
+import UILink from '../UILink';
+import NarrativeLink from '../NarrativeLink';
 
 /*
     Props and State
@@ -134,9 +136,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
 
     componentDidUpdate() {
         if (this.props.searchState === SearchState.SEARCHING) {
-            this.pubsub.send('searching', { is: true })
+            this.pubsub.send('searching', { is: true });
         } else {
-            this.pubsub.send('searching', { is: false })
+            this.pubsub.send('searching', { is: false });
         }
     }
 
@@ -324,7 +326,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     onChange={this.onRangeToChange.bind(this)}
                 />
             </Form.Item>
-        </React.Fragment>
+        </React.Fragment>;
     }
 
     renderSearchInput() {
@@ -472,7 +474,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         if (this.state.isFilterOpen) {
             filterRow = <div className="Row" style={filterRowStyle}>
                 {this.renderFilterInput()}
-            </div>
+            </div>;
         }
         return (
             <div className="Col">
@@ -502,19 +504,19 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
             <Button key="cancel" onClick={this.onCloseModal.bind(this)}>
                 Close
             </Button>
-        )
+        );
         const title = (
             <span>
                 Detail for Job <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{this.state.selectedJob.id}</span>
             </span>
-        )
+        );
         return (
             <Modal className="FullScreenModal" title={title}
                 onCancel={this.onCloseModal.bind(this)} visible={true}
                 footer={footer}>
                 <JobDetail jobID={this.state.selectedJob.id} />
             </Modal>
-        )
+        );
     }
 
     renderJobsTable() {
@@ -545,10 +547,10 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             <Tooltip title={title}>
                                 <a href="https://example.com" onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
                                     e.preventDefault();
-                                    this.onClickDetail(job)
+                                    this.onClickDetail(job);
                                 }}>{jobID}</a>
                             </Tooltip>
-                        )
+                        );
                     }}
                 />
                 <Table.Column
@@ -558,9 +560,10 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     width="10%"
                     render={(username: string) => {
                         return (
-                            <a href={`#people/${username}`} target="_parent">
+                            <UILink path={`people/${username}`}
+                                openIn='new-tab'>
                                 {username}
-                            </a>
+                            </UILink>
                         );
                     }}
                 />
@@ -573,12 +576,11 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         if (!title || !job.narrativeID) {
                             return 'n/a';
                         }
-                        const href = ['/narrative', job.narrativeID].join('/');
                         return (
                             <Tooltip title={title}>
-                                <a href={href} target="_blank" rel="noopener noreferrer">
+                                <NarrativeLink narrativeID={job.narrativeID}>
                                     {title}
-                                </a>
+                                </NarrativeLink>
                             </Tooltip>
                         );
                     }}
@@ -593,12 +595,12 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         if (!title) {
                             return 'n/a';
                         }
-                        const href = '/#catalog/apps/' + job.appID;
                         return (
                             <Tooltip title={title}>
-                                <a href={href} target="_parent">
+                                <UILink path={`catalog/apps/${job.appID}`}
+                                    openIn='same-window'>
                                     {title}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -671,7 +673,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     key="status"
                     width="8%"
                     render={(status: JobStatus, job: Job) => {
-                        return <JobStatusBadge job={job} />
+                        return <JobStatusBadge job={job} />;
                     }}
                 />
                 <Table.Column
