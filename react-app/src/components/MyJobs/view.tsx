@@ -22,7 +22,7 @@ import {
 
 // kbase imports (or should be kbase imports)
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
-import JobStatusBadge from '../JobStatus'
+import JobStatusBadge from '../JobStatus';
 
 // project imoprts
 import JobDetail from '../JobDetail';
@@ -32,6 +32,8 @@ import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
 import { SortOrder } from 'antd/lib/table';
+import UILink from '../UILink';
+import NarrativeLink from '../NarrativeLink';
 
 /**
  * This version of the job status defines the set of strings that may be used
@@ -134,7 +136,7 @@ export interface MyJobsProps {
     jobs: Array<Job>;
     /** The current search state, used to control the primary display (none, searching, searched, error) */
     searchState: SearchState;
-    showMonitoringControls: boolean
+    showMonitoringControls: boolean;
     /** Triggers a redux action to search of the user's jobs according to the given search expression
      * @remarks Since at present the service used to fetch the jobs can suffer performance issues, the
      * default search action does not fetch search results each time (rather ??).
@@ -200,9 +202,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     componentDidUpdate() {
         if (this.props.searchState === SearchState.SEARCHING) {
-            this.pubsub.send('searching', { is: true })
+            this.pubsub.send('searching', { is: true });
         } else {
-            this.pubsub.send('searching', { is: false })
+            this.pubsub.send('searching', { is: false });
         }
     }
 
@@ -419,7 +421,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
     onToggleFilterArea(isFilterOpen: boolean) {
-        this.setState({ isFilterOpen })
+        this.setState({ isFilterOpen });
         // this.setState({ isFilterOpen: !this.state.isFilterOpen });
     }
 
@@ -518,7 +520,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         if (this.state.isFilterOpen) {
             filterRow = <div className="Row" style={filterRowStyle}>
                 {this.renderFilterInput()}
-            </div>
+            </div>;
         }
         return (
             <div className="Col">
@@ -570,6 +572,16 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         });
     }
 
+    renderNarrativeLink(job: Job) {
+        const id = job.narrativeID;
+        if (id === null) {
+            return;
+        }
+        return <NarrativeLink narrativeID={id}>
+            {job.narrativeTitle}
+        </NarrativeLink>;
+    }
+
     renderJobsTable() {
         const loading = this.props.searchState === SearchState.SEARCHING;
         return (
@@ -595,12 +607,13 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         const title = jobID;
                         return (
                             <Tooltip title={title}>
-                                <a href="https://example.com" onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-                                    e.preventDefault();
-                                    this.onClickDetail(job)
-                                }}>{jobID}</a>
+                                <a href="https://example.com"
+                                    onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+                                        e.preventDefault();
+                                        this.onClickDetail(job);
+                                    }}>{jobID}</a>
                             </Tooltip>
-                        )
+                        );
                     }}
                 />
                 <Table.Column
@@ -614,13 +627,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         }
                         return (
                             <Tooltip title={title}>
-                                <a
-                                    href={`/narrative/${job.narrativeID}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {title}
-                                </a>
+                                {this.renderNarrativeLink(job)}
                             </Tooltip>
                         );
                     }}
@@ -634,10 +641,12 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         if (!title) {
                             return 'n/a';
                         }
-                        const href = '/#catalog/apps/' + job.appID;
                         return (
                             <Tooltip title={title}>
-                                <a href={href}>{title}</a>
+                                <UILink path={`catalog/apps/${job.appID}`}
+                                    openIn='new-tab'>
+                                    {title}
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -738,7 +747,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     }}
                 />
             </Table>
-        )
+        );
     }
 
     renderJobDetail() {
@@ -749,19 +758,19 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             <Button key="cancel" onClick={this.onCloseModal.bind(this)}>
                 Close
             </Button>
-        )
+        );
         const title = (
             <span>
                 Detail for Job <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{this.state.selectedJob.id}</span>
             </span>
-        )
+        );
         return (
             <Modal className="FullScreenModal" title={title}
                 onCancel={this.onCloseModal.bind(this)} visible={true}
                 footer={footer}>
                 <JobDetail jobID={this.state.selectedJob.id} />
             </Modal>
-        )
+        );
     }
 
     render() {

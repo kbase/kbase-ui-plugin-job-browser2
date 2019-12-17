@@ -2,6 +2,7 @@ import React from 'react';
 import { UserRunSummaryStat, SearchState, UserRunSummaryQuery } from '../../redux/store';
 import { Table, Form, Input, Button, Tooltip } from 'antd';
 import './style.css';
+import UILink from '../UILink';
 
 export interface UserRunSummaryProps {
     searchState: SearchState;
@@ -73,9 +74,10 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                     render={(username: string, stat: UserRunSummaryStat) => {
                         return (
                             <Tooltip title={username}>
-                                <a href={`#people/${username}`} target="_parent">
+                                <UILink path={`people/${username}`}
+                                    openIn='same-window'>
                                     {username}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -91,9 +93,10 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                     render={(moduleName: string) => {
                         return (
                             <Tooltip title={moduleName}>
-                                <a href={`#catalog/module/${moduleName}`} target="_parent">
+                                <UILink path={`catalog/modules/${moduleName}`}
+                                    openIn='same-window'>
                                     {moduleName}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -109,9 +112,10 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                     render={(functionName: string, stat: UserRunSummaryStat) => {
                         return (
                             <Tooltip title={functionName}>
-                                <a href={`#catalog/apps/${stat.appId}`} target="_parent">
+                                <UILink path={`catalog/apps/${stat.appId}`}
+                                    openIn='same-window'>
                                     {functionName}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
