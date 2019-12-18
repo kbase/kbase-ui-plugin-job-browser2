@@ -16,7 +16,7 @@ function getJobStatus(job: JobState): JobStatus {
         case 'ERRORED_RUNNING':
             return JobStatus.ERRORED_RUNNING;
         default:
-            throw new Error('Unknown job state: ' + job.state)
+            throw new Error('Unknown job state: ' + job.state);
     }
     // Use most reliable fields first.
     // if (job.complete) {
@@ -119,10 +119,10 @@ function makeJobFinished(job: JobState, username: string): JobFinished {
         narrativeID = null;
     }
     if (!job.exec_start_time) {
-        throw new Error('Running job without exec_start_time!')
+        throw new Error('Running job without exec_start_time!');
     }
     if (!job.finish_time) {
-        throw new Error('Running job without finish_time!')
+        throw new Error('Running job without finish_time!');
     }
     return {
         key: job.job_id,
@@ -153,7 +153,7 @@ function makeJobCanceledQueued(job: JobState, username: string): JobCanceledWhil
     }
 
     if (!job.finish_time) {
-        throw new Error('Canceled job without finish_time!')
+        throw new Error('Canceled job without finish_time!');
     }
     return {
         key: job.job_id,
@@ -181,10 +181,10 @@ function makeJobCanceledRunning(job: JobState, username: string): JobCanceledWhi
         narrativeID = null;
     }
     if (!job.exec_start_time) {
-        throw new Error('Canceled job without exec_start_time!')
+        throw new Error('Canceled job without exec_start_time!');
     }
     if (!job.finish_time) {
-        throw new Error('Canceled job without finish_time!')
+        throw new Error('Canceled job without finish_time!');
     }
     return {
         key: job.job_id,
@@ -214,7 +214,7 @@ function makeJobErroredQueued(job: JobState, username: string): JobErroredWhileQ
         narrativeID = null;
     }
     if (!job.finish_time) {
-        throw new Error('Errored job without finish_time!')
+        throw new Error('Errored job without finish_time!');
     }
     return {
         key: job.job_id,
@@ -226,7 +226,7 @@ function makeJobErroredQueued(job: JobState, username: string): JobErroredWhileQ
         narrativeTitle: job.narrative_name,
         queuedAt: job.creation_time,
         finishAt: job.finish_time,
-        queuedElapsed: Date.now() - job.creation_time,
+        queuedElapsed: job.finish_time - job.creation_time,
         clientGroups: job.client_groups,
         message: job.status,
         // TODO: a more affirmative method of providing current username
@@ -244,10 +244,10 @@ function makeJobErroredRunning(job: JobState, username: string): JobErroredWhile
     }
     if (!job.exec_start_time) {
         console.error('ERROR: Errored job without exec_start_time!', job);
-        throw new Error('Errored job without exec_start_time!')
+        throw new Error('Errored job without exec_start_time!');
     }
     if (!job.finish_time) {
-        throw new Error('Errored job without finish_time!')
+        throw new Error('Errored job without finish_time!');
     }
     return {
         key: job.job_id,
@@ -261,7 +261,7 @@ function makeJobErroredRunning(job: JobState, username: string): JobErroredWhile
         runAt: job.exec_start_time,
         runElapsed: job.finish_time - job.exec_start_time,
         finishAt: job.finish_time,
-        queuedElapsed: Date.now() - job.creation_time,
+        queuedElapsed: job.exec_start_time - job.creation_time,
         clientGroups: job.client_groups,
         message: job.status,
         // TODO: a more affirmative method of providing current username

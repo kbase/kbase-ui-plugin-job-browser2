@@ -65,7 +65,7 @@ interface MyJobsParam {
     username: string,
     serviceWizardURL: string,
     from: number,
-    to: number
+    to: number;
 }
 
 type MyJobsResult = Array<Job>;
@@ -90,13 +90,13 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
                 });
 
                 return converted;
-            })
+            });
 
         const task: Task<MyJobsResult> = {
             id: this.newID(),
             promise,
             isCanceled: false
-        }
+        };
         this.pendingTasks.set(task.id, task);
         return task;
     }
