@@ -94,13 +94,6 @@ export default class Monitor extends React.Component<MonitorProps, MonitorState>
                 // this.poller.startPolling();
             }
         })
-        // this.searchListenerID = this.props.pubsub.on(
-        //     'search',
-        //     () => {
-        //         //this.resetMonitoring();
-        //         console.log('skipping the search reset...');
-        //     }
-        // )
     }
 
     componentWillUnmount() {

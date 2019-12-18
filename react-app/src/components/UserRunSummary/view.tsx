@@ -2,11 +2,15 @@ import React from 'react';
 import { } from '../../redux/store';
 import { Table, Form, Input, Button, Tooltip, Spin, Alert } from 'antd';
 import './style.css';
+
 import { SearchState } from '../../redux/store/base';
 import { UserRunSummaryStat, UserRunSummaryQuery, UserRunSummaryViewData, UserRunSummaryViewDataError, UserRunSummaryViewDataSearched, UserRunSummaryViewDataSearching } from '../../redux/store/UserRunSummary';
 
+import UILink from '../UILink';
+
+
 export interface UserRunSummaryProps {
-    view: UserRunSummaryViewData
+    view: UserRunSummaryViewData;
     // searchState: SearchState;
     // userRunSummary: Array<UserRunSummaryStat>;
     search: (query: UserRunSummaryQuery) => void;
@@ -76,9 +80,10 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                     render={(username: string, stat: UserRunSummaryStat) => {
                         return (
                             <Tooltip title={username}>
-                                <a href={`#people/${username}`} target="_parent">
+                                <UILink path={`people/${username}`}
+                                    openIn='same-window'>
                                     {username}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -94,9 +99,10 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                     render={(moduleName: string) => {
                         return (
                             <Tooltip title={moduleName}>
-                                <a href={`#catalog/module/${moduleName}`} target="_parent">
+                                <UILink path={`catalog/modules/${moduleName}`}
+                                    openIn='same-window'>
                                     {moduleName}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -112,9 +118,10 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                     render={(functionName: string, stat: UserRunSummaryStat) => {
                         return (
                             <Tooltip title={functionName}>
-                                <a href={`#catalog/apps/${stat.appId}`} target="_parent">
+                                <UILink path={`catalog/apps/${stat.appId}`}
+                                    openIn='same-window'>
                                     {functionName}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -147,11 +154,11 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
     }
 
     renderLoading() {
-        return <Spin />
+        return <Spin />;
     }
 
     renderError(view: UserRunSummaryViewDataError) {
-        return <Alert type="error" message={view.error.message} />
+        return <Alert type="error" message={view.error.message} />;
     }
 
     renderViewState() {
@@ -163,7 +170,7 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                 return this.renderLoading();
             case SearchState.SEARCHING:
             case SearchState.SEARCHED:
-                return this.renderTable(view)
+                return this.renderTable(view);
             case SearchState.ERROR:
                 return this.renderError(view);
         }

@@ -4,8 +4,12 @@ import { Table, Form, Progress, Input, Button, Tooltip, Spin, Alert } from 'antd
 import { NiceTimeDuration } from '@kbase/ui-components';
 import { PaginationConfig, SorterResult } from 'antd/lib/table';
 import './style.css';
+
 import { PublicAppStatsViewData, PublicAppStatsQuery, PublicAppStatsViewDataSearched, PublicAppStatsViewDataSearching, PublicAppStatsViewDataError } from '../../redux/store/PublicAppStats';
 import { AppStat, SearchState } from '../../redux/store/base';
+
+import UILink from '../UILink';
+
 
 export interface PublicAppStatsProps {
     view: PublicAppStatsViewData;
@@ -83,7 +87,10 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     render={(moduleId: string, stat: AppStat) => {
                         return (
                             <Tooltip title={stat.moduleTitle}>
-                                <a href={`#catalog/module/${moduleId}`}>{stat.moduleTitle}</a>
+                                <UILink path={`catalog/modules/${moduleId}`}
+                                    openIn='new-tab'>
+                                    {stat.moduleTitle}
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -100,9 +107,10 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     render={(functionId: string, stat: AppStat) => {
                         return (
                             <Tooltip title={stat.functionTitle}>
-                                <a href={`#catalog/apps/${stat.moduleId}/${stat.functionId}`}>
+                                <UILink path={`catalog/apps/${stat.moduleId}/${stat.functionId}`}
+                                    openIn='new-tab'>
                                     {stat.functionTitle}
-                                </a>
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -210,11 +218,11 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
     }
 
     renderLoading() {
-        return <Spin />
+        return <Spin />;
     }
 
     renderError(view: PublicAppStatsViewDataError) {
-        return <Alert type="error" message={view.error.message} />
+        return <Alert type="error" message={view.error.message} />;
     }
 
     renderViewState() {
@@ -226,7 +234,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                 return this.renderLoading();
             case SearchState.SEARCHING:
             case SearchState.SEARCHED:
-                return this.renderAppStatsTable(view)
+                return this.renderAppStatsTable(view);
             case SearchState.ERROR:
                 return this.renderError(view);
         }

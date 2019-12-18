@@ -19,7 +19,7 @@ export interface MainProps {
 }
 
 interface MainState {
-    tabs: Array<Tab>
+    tabs: Array<Tab>;
 }
 
 export default class Main extends React.Component<MainProps, MainState> {
@@ -45,7 +45,7 @@ export default class Main extends React.Component<MainProps, MainState> {
             tab: 'myjobs',
             title: 'My Jobs',
             renderBody: () => {
-                return this.renderMyJobsTab()
+                return this.renderMyJobsTab();
             }
         });
 
@@ -59,9 +59,9 @@ export default class Main extends React.Component<MainProps, MainState> {
                 tab: 'userjobs',
                 title: userJobsTabLabel,
                 renderBody: () => {
-                    return <UserJobs />
+                    return <UserJobs />;
                 }
-            })
+            });
         }
 
         tabs.push({
@@ -84,7 +84,7 @@ export default class Main extends React.Component<MainProps, MainState> {
                 renderBody: () => {
                     return <UserRunSummary />;
                 }
-            })
+            });
         }
 
         this.state = {
@@ -114,19 +114,19 @@ export default class Main extends React.Component<MainProps, MainState> {
     renderAdminJobsTab() { }
 
     renderMyJobsTab() {
-        return <MyJobs />
+        return <MyJobs />;
     }
 
     renderUserJobsTab() {
-        return <UserJobs />
+        return <UserJobs />;
     }
 
     renderPublicAppStatsTab() {
-        return <PublicAppStats />
+        return <PublicAppStats />;
     }
 
     renderUserRunSummaryTab() {
-        return <UserRunSummary />
+        return <UserRunSummary />;
     }
 
     renderTabs() {

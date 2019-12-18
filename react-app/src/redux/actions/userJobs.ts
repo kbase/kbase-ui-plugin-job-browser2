@@ -24,27 +24,27 @@ export interface UserJobsLoadError extends Action<ActionType.USER_JOBS_LOAD_ERRO
 
 export interface UserJobsLoadSuccess extends Action<ActionType.USER_JOBS_LOAD_SUCCESS> {
     type: ActionType.USER_JOBS_LOAD_SUCCESS;
-    data: UserJobsViewData
+    data: UserJobsViewData;
 }
 
 export function userJobsLoadLoading(): UserJobsLoadLoading {
     return {
         type: ActionType.USER_JOBS_LOAD_LOADING
-    }
+    };
 }
 
 export function userJobsLoadError(error: UIError): UserJobsLoadError {
     return {
         type: ActionType.USER_JOBS_LOAD_ERROR,
         error
-    }
+    };
 }
 
 export function userJobsLoadSuccess(data: UserJobsViewData): UserJobsLoadSuccess {
     return {
         type: ActionType.USER_JOBS_LOAD_SUCCESS,
         data
-    }
+    };
 }
 
 // Search
@@ -104,15 +104,15 @@ export function userJobsSearchError(error: AppError): UserJobsSearchError {
 
 interface UserJobsParam {
     token: string,
-    searchExpression: JobsSearchExpression
+    searchExpression: JobsSearchExpression;
     serviceWizardURL: string,
 }
 
 type UserJobsResult = {
     jobs: Array<Job>,
     foundCount: number,
-    totalCount: number
-}
+    totalCount: number;
+};
 
 class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
     request({ token, searchExpression, serviceWizardURL }: UserJobsParam): Task<UserJobsResult> {
@@ -133,7 +133,7 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
             limit: searchExpression.limit,
             timeout: 10000,
             admin: 1
-        }
+        };
 
         if (searchExpression.sort) {
             switch (searchExpression.sort.field) {
@@ -161,7 +161,7 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
             id: this.newID(),
             promise,
             isCanceled: false
-        }
+        };
         this.pendingTasks.set(task.id, task);
         return task;
     }
@@ -208,7 +208,7 @@ export function userJobsLoad() {
                 kind: 'preset',
                 preset: 'lastMonth'
             }
-        }
+        };
         const initialData: UserJobsViewData = {
             searchState: JobSearchState.INITIAL_SEARCHING,
             searchExpression
@@ -240,7 +240,7 @@ export function userJobsLoad() {
         console.log('GOT JOBS', jobs, foundCount, totalCount);
 
         dispatch(userJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
-    }
+    };
 }
 
 export function userJobsSearch(searchExpression: JobsSearchExpression) {

@@ -10,7 +10,7 @@ import { myJobsLoad } from '../../redux/actions/myJobs';
 import { ComponentLoadingState } from '../../redux/store/base';
 
 export interface GateProps {
-    loadingState: ComponentLoadingState
+    loadingState: ComponentLoadingState;
     onLoad: () => void;
 }
 
@@ -24,7 +24,7 @@ export class Gate extends React.Component<GateProps, GateState> {
     }
 
     renderLoading() {
-        return <Spin />
+        return <Spin />;
     }
 
     renderSuccess() {
@@ -32,7 +32,7 @@ export class Gate extends React.Component<GateProps, GateState> {
     }
 
     renderError() {
-        return <Alert type="error" message="Error!" />
+        return <Alert type="error" message="Error!" />;
     }
 
     render() {
@@ -41,7 +41,7 @@ export class Gate extends React.Component<GateProps, GateState> {
             case ComponentLoadingState.LOADING:
                 return this.renderLoading();
             case ComponentLoadingState.SUCCESS:
-                return this.renderSuccess()
+                return this.renderSuccess();
             case ComponentLoadingState.ERROR:
                 return this.renderError();
         }
@@ -54,7 +54,7 @@ interface OwnProps {
 }
 
 interface StateProps {
-    loadingState: ComponentLoadingState
+    loadingState: ComponentLoadingState;
 }
 
 interface DispatchProps {
@@ -73,7 +73,7 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {
     return {
         onLoad: () => {
-            dispatch(myJobsLoad() as any)
+            dispatch(myJobsLoad() as any);
         }
     };
 }

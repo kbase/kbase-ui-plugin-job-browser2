@@ -20,7 +20,7 @@ function makeJobContext(job: JobInfo): JobContext {
                     name: job.context.workspace.name,
                     isDeleted: job.context.workspace.is_deleted
                 }
-            }
+            };
         case 'workspace':
             return {
                 type: JobContextType.WORKSPACE,
@@ -30,17 +30,16 @@ function makeJobContext(job: JobInfo): JobContext {
                     name: job.context.workspace.name,
                     isDeleted: job.context.workspace.is_deleted
                 }
-            }
+            };
         case 'export':
             return {
                 type: JobContextType.EXPORT,
-            }
+            };
         case 'unknown':
             return {
                 type: JobContextType.UNKNOWN,
-            }
+            };
     }
-
 }
 
 export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
@@ -49,7 +48,7 @@ export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
             return [{
                 type: JobStateType.CREATE,
                 at: job.state.create_at
-            }]
+            }];
         case 'queue':
             return [{
                 type: JobStateType.CREATE,
@@ -101,7 +100,7 @@ export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
                         code: job.state.error.code,
                         message: job.state.error.message
                     }
-                ]
+                ];
             }
             if (job.state.queue_at) {
                 return [
@@ -117,7 +116,7 @@ export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
                         code: job.state.error.code,
                         message: job.state.error.message
                     }
-                ]
+                ];
             }
 
             return [
@@ -151,7 +150,7 @@ export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
                         at: job.state.finish_at,
                         code: job.state.reason.code
                     }
-                ]
+                ];
             }
             if (job.state.queue_at) {
                 return [
@@ -166,7 +165,7 @@ export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
                         at: job.state.finish_at,
                         code: job.state.reason.code
                     }
-                ]
+                ];
             }
 
             return [
@@ -181,7 +180,7 @@ export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
                     at: job.state.finish_at,
                     code: job.state.reason.code
                 }
-            ]
+            ];
     }
 }
 
@@ -195,7 +194,7 @@ export function serviceJobToUIJob(job: JobInfo, username: string): Job {
             functionName: job.app.function_name,
             title: job.app.title,
             clientGroups: job.app.client_groups
-        }
+        };
     } else {
         app = null;
     }
@@ -210,7 +209,7 @@ export function serviceJobToUIJob(job: JobInfo, username: string): Job {
             app
         },
         eventHistory: serviceJobToEventHistory(job)
-    }
+    };
     // Note that the usage of "as" below to force the type is because I 
     // can't figure out why type narrowing isn't happening through job.state.status.
     // Logically it should, and it does if state is considered separately, but I 

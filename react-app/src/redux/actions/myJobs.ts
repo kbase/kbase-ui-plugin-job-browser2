@@ -27,27 +27,27 @@ export interface MyJobsLoadError extends Action<ActionType.MY_JOBS_LOAD_ERROR> {
 
 export interface MyJobsLoadSuccess extends Action<ActionType.MY_JOBS_LOAD_SUCCESS> {
     type: ActionType.MY_JOBS_LOAD_SUCCESS;
-    data: MyJobsViewData
+    data: MyJobsViewData;
 }
 
 export function myJobsLoadLoading(): MyJobsLoadLoading {
     return {
         type: ActionType.MY_JOBS_LOAD_LOADING
-    }
+    };
 }
 
 export function myJobsLoadError(error: UIError): MyJobsLoadError {
     return {
         type: ActionType.MY_JOBS_LOAD_ERROR,
         error
-    }
+    };
 }
 
 export function myJobsLoadSuccess(data: MyJobsViewData): MyJobsLoadSuccess {
     return {
         type: ActionType.MY_JOBS_LOAD_SUCCESS,
         data
-    }
+    };
 }
 
 // Search
@@ -107,7 +107,7 @@ export function myJobsSearchError(error: AppError) {
 
 interface MyJobsParam {
     token: string,
-    searchExpression: JobsSearchExpression
+    searchExpression: JobsSearchExpression;
     username: string,
     serviceWizardURL: string,
     // from: number,
@@ -119,8 +119,8 @@ interface MyJobsParam {
 type MyJobsResult = {
     jobs: Array<Job>,
     foundCount: number,
-    totalCount: number
-}
+    totalCount: number;
+};
 
 class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
     request({ token, searchExpression, username, serviceWizardURL }: MyJobsParam): Task<MyJobsResult> {
@@ -145,7 +145,7 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
             filter: {
                 status: searchExpression.jobStatus
             }
-        }
+        };
 
         if (searchExpression.sort) {
             switch (searchExpression.sort.field) {
@@ -174,7 +174,7 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
             id: this.newID(),
             promise,
             isCanceled: false
-        }
+        };
         this.pendingTasks.set(task.id, task);
         return task;
     }
@@ -219,7 +219,7 @@ export function myJobsLoad() {
                 kind: 'preset',
                 preset: 'lastMonth'
             }
-        }
+        };
         const initialData: MyJobsViewData = {
             searchState: JobSearchState.INITIAL_SEARCHING,
             searchExpression
@@ -243,7 +243,7 @@ export function myJobsLoad() {
         myJobsSearchRequests.done(task);
 
         dispatch(myJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
-    }
+    };
 }
 
 const myJobsSearchRequests = new MyJobsRequests();
@@ -285,7 +285,7 @@ export function myJobsSearch(searchExpression: JobsSearchExpression) {
                 code: 'search-error',
                 message: 'My Jobs Component not in correct state (SUCCESS)'
             });
-            return
+            return;
         }
 
         // const searchTerms = searchExpression.query.split(/\s+/).map((term) => {
@@ -363,7 +363,7 @@ export function myJobsRefreshSearch() {
                 code: 'search-error',
                 message: 'My Jobs Component not in correct state (SUCCESS)'
             });
-            return
+            return;
         }
 
 

@@ -4,9 +4,11 @@ import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
 import JobStatusBadge, { jobColor } from './JobStatusBadge';
 import { Spin } from 'antd';
 import { JobEvent, JobStateType } from '../redux/types/jobState';
+import NarrativeLink from './NarrativeLink';
+import UILink from './UILink';
 
 export interface Props {
-    job: Job
+    job: Job;
 }
 
 interface State {
@@ -38,7 +40,7 @@ export default class JobInfo extends React.Component<Props, State> {
         const currentState = this.currentJobState(job);
         switch (currentState.type) {  // left off here
             case JobStateType.CREATE:
-                return <span>-</span>
+                return <span>-</span>;
             case JobStateType.QUEUE:
                 return <NiceElapsedTime
                     from={currentState.at}
@@ -82,7 +84,7 @@ export default class JobInfo extends React.Component<Props, State> {
             return <span>
                 {' '}
                 <Spin size="small" style={{ color: jobColor(this.props.job) }} />
-            </span>
+            </span>;
         }
     }
 
@@ -90,13 +92,9 @@ export default class JobInfo extends React.Component<Props, State> {
         const job = this.props.job;
         switch (job.request.context.type) {
             case JobContextType.NARRATIVE:
-                return <a
-                    href={`/narrative/${job.request.context.workspace.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
+                return <NarrativeLink narrativeID={job.request.context.workspace.id}>
                     {job.request.context.title}
-                </a>
+                </NarrativeLink>;
             default:
                 return 'n/a';
         }
@@ -106,7 +104,10 @@ export default class JobInfo extends React.Component<Props, State> {
         if (this.props.job.request.app === null) {
             return 'n/a';
         }
-        return <a href={`/#catalog/apps/${this.props.job.request.app.id}`}>{this.props.job.request.app.id}</a>
+        return <UILink path={`catalog/apps/${this.props.job.request.app.id}`}
+            openIn='new-tab'>
+            {this.props.job.request.app.title}
+        </UILink>;
     }
 
     render() {
@@ -171,6 +172,6 @@ export default class JobInfo extends React.Component<Props, State> {
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 }

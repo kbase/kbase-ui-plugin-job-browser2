@@ -62,7 +62,6 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         if (this.bodyRef.current === null) {
             return;
         }
-        // console.log('scroll to bottom!', this.bodyRef.current.scrollTop, this.bodyRef.current.scrollHeight, this.bodyRef.current.clientHeight);
         this.bodyRef.current.scrollTop = this.bodyRef.current.scrollHeight;
     }
 

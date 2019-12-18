@@ -66,7 +66,6 @@ class Loader extends React.Component<LoaderProps, LoaderState> {
     }
 
     componentDidMount() {
-        // console.log('did mount?', this.props.view.loadingState);
         // this.props.onLoad();
         switch (this.props.view.loadingState) {
             case ComponentLoadingState.NONE:

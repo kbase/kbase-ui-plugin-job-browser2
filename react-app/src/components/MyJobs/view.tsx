@@ -25,7 +25,7 @@ import JobDetail from '../JobDetail';
 
 // kbase imports (or should be kbase imports)
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
-import JobStatusBadge from '../JobStatusBadge'
+import JobStatusBadge from '../JobStatusBadge';
 
 // file imports
 import './style.css';
@@ -33,6 +33,9 @@ import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
 import { JobEvent, JobStateType } from '../../redux/types/jobState';
 import { PaginationConfig, SorterResult } from 'antd/lib/table';
+import NarrativeLink from '../NarrativeLink';
+import { JobContextNarrative } from '../../lib/JobBrowserBFFClient';
+import UILink from '../UILink';
 
 /**
  * This version of the job status defines the set of strings that may be used
@@ -163,7 +166,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.sorting = {
             field: 'created',
             direction: 'descending'
-        }
+        };
 
         this.state = {
             showDates: false,
@@ -177,9 +180,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     componentDidUpdate() {
         if (this.props.view.searchState === JobSearchState.SEARCHING) {
-            this.pubsub.send('searching', { is: true })
+            this.pubsub.send('searching', { is: true });
         } else {
-            this.pubsub.send('searching', { is: false })
+            this.pubsub.send('searching', { is: false });
         }
     }
 
@@ -269,7 +272,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
         console.log('TABLE CHANGED', pagination, this.offset, this.limit);
 
-        this.doSearch(false)
+        this.doSearch(false);
     }
 
     // doSearch(searchExpression: JobsSearchExpression) {
@@ -466,7 +469,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
     onToggleFilterArea(isFilterOpen: boolean) {
-        this.setState({ isFilterOpen })
+        this.setState({ isFilterOpen });
         // this.setState({ isFilterOpen: !this.state.isFilterOpen });
     }
 
@@ -565,7 +568,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         if (this.state.isFilterOpen) {
             filterRow = <div className="Row" style={filterRowStyle}>
                 {this.renderFilterInput()}
-            </div>
+            </div>;
         }
         return (
             <div className="Col">
@@ -665,6 +668,10 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return new Date(job.eventHistory[0].at);
     }
 
+    renderNarrativeLink(context: JobContextNarrative) {
+        return;
+    }
+
     renderJobsTable(view: MyJobsViewDataSearching | MyJobsViewDataReady) {
         const loading = view.searchState === JobSearchState.SEARCHING;
         return (
@@ -674,7 +681,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                 dataSource={view.searchResult.jobs}
                 loading={loading}
                 rowKey={(job: Job) => {
-                    return job.id
+                    return job.id;
                 }}
                 pagination={{
                     position: 'bottom',
@@ -685,7 +692,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     showTotal: (total: number, [from, to]: [number, number]) => {
                         return <span>
                             {from} to {to} of {total}
-                        </span>
+                        </span>;
                     }
                 }}
                 onChange={this.onTableChanged.bind(this)}
@@ -703,10 +710,10 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                                 <a href="https://example.com"
                                     onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
                                         e.preventDefault();
-                                        this.onClickDetail(job)
+                                        this.onClickDetail(job);
                                     }}>{job.id}</a>
                             </Tooltip>
-                        )
+                        );
                     }}
                 />
                 <Table.Column
@@ -716,21 +723,17 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     render={(_: any, job: Job): any => {
                         switch (job.request.context.type) {
                             case JobContextType.NARRATIVE:
-                                const title = job.request.context.title
+                                const title = job.request.context.title;
                                 return (
                                     <Tooltip title={title}>
-                                        <a
-                                            href={`/narrative/${job.request.context.workspace.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
+                                        <NarrativeLink narrativeID={job.request.context.workspace.id}>
                                             {title}
-                                        </a>
+                                        </NarrativeLink>
                                     </Tooltip>
                                 );
                             case JobContextType.WORKSPACE:
                                 if (job.request.context.workspace.isAccessible) {
-                                    return job.request.context.workspace.name
+                                    return job.request.context.workspace.name;
                                 } else {
                                     return 'inaccessible workspace';
                                 }
@@ -749,14 +752,16 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         if (job.request.app === null) {
                             return 'n/a';
                         }
-                        const appTitle = job.request.app.title
+                        const appTitle = job.request.app.title;
                         if (!appTitle) {
                             return 'n/a';
                         }
-                        const href = '/#catalog/apps/' + job.request.app.id;
                         return (
                             <Tooltip title={appTitle}>
-                                <a href={href}>{appTitle}</a>
+                                <UILink path={`catalog/apps/${job.request.app.id}`}
+                                    openIn='new-tab'>
+                                    {appTitle}
+                                </UILink>
                             </Tooltip>
                         );
                     }}
@@ -849,7 +854,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     }}
                 />
             </Table>
-        )
+        );
     }
 
     renderJobDetail() {
@@ -860,25 +865,25 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             <Button key="cancel" onClick={this.onCloseModal.bind(this)}>
                 Close
             </Button>
-        )
+        );
         const title = (
             <span>
                 Detail for Job <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{this.state.selectedJob.id}</span>
             </span>
-        )
+        );
         return (
             <Modal className="FullScreenModal" title={title}
                 onCancel={this.onCloseModal.bind(this)} visible={true}
                 footer={footer}>
                 <JobDetail jobID={this.state.selectedJob.id} admin={false} />
             </Modal>
-        )
+        );
     }
 
     renderError(view: MyJobsViewDataError) {
         return (
             <Alert type="error" message={view.error.message} />
-        )
+        );
     }
 
     renderSearching(view: MyJobsViewDataSearching) {
@@ -886,7 +891,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             <div>{this.renderControlBar()}</div>
             {this.renderJobsTable(view)}
             {this.renderJobDetail()}
-        </React.Fragment>
+        </React.Fragment>;
     }
 
     renderReady(view: MyJobsViewDataReady) {
@@ -894,7 +899,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             <div>{this.renderControlBar()}</div>
             {this.renderJobsTable(view)}
             {this.renderJobDetail()}
-        </React.Fragment>
+        </React.Fragment>;
     }
 
     renderInitialSearch(view: MyJobsViewDataInitialSearching) {
@@ -903,7 +908,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             <div><Spin tip="Loading...">
                 <Alert type="info" message="Loading Initial Data"
                     description="Loading initial jobs..."></Alert></Spin> </div>
-        </React.Fragment>
+        </React.Fragment>;
     }
 
     renderView() {
@@ -917,7 +922,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             case JobSearchState.INITIAL_SEARCHING:
                 return this.renderInitialSearch(this.props.view);
             default:
-                return ''
+                return '';
         }
     }
 
