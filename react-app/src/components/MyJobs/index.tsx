@@ -1,56 +1,79 @@
-import { Dispatch, Action } from 'redux';
+import React from 'react';
 import { connect } from 'react-redux';
-import MyJobs from './view';
+import { Spin, Alert } from 'antd';
 
-import { StoreState, Job, JobsSearchExpression, SearchState } from '../../redux/store';
-import { myJobsSearch, myJobsRefreshSearch, myJobsCancelJob } from '../../redux/actions/myJobs';
+import { Action, Dispatch } from '@kbase/ui-components/node_modules/redux';
 
-export interface OwnProps { }
+import { StoreState } from '../../redux/store';
+import ReduxInterface from './redux';
+import { myJobsLoad } from '../../redux/actions/myJobs';
+import { ComponentLoadingState } from '../../redux/store/base';
+
+export interface GateProps {
+    loadingState: ComponentLoadingState
+    onLoad: () => void;
+}
+
+export interface GateState {
+}
+
+export class Gate extends React.Component<GateProps, GateState> {
+
+    componentDidMount() {
+        this.props.onLoad();
+    }
+
+    renderLoading() {
+        return <Spin />
+    }
+
+    renderSuccess() {
+        return <ReduxInterface />;
+    }
+
+    renderError() {
+        return <Alert type="error" message="Error!" />
+    }
+
+    render() {
+        switch (this.props.loadingState) {
+            case ComponentLoadingState.NONE:
+            case ComponentLoadingState.LOADING:
+                return this.renderLoading();
+            case ComponentLoadingState.SUCCESS:
+                return this.renderSuccess()
+            case ComponentLoadingState.ERROR:
+                return this.renderError();
+        }
+    }
+}
+
+// Store interface
+
+interface OwnProps {
+}
 
 interface StateProps {
-    jobs: Array<Job>;
-    searchState: SearchState;
-    showMonitoringControls: boolean;
+    loadingState: ComponentLoadingState
 }
 
 interface DispatchProps {
-    search: (searchExpression: JobsSearchExpression) => void;
-    cancelJob: (jobID: string) => void;
-    refreshSearch: () => void;
+    onLoad: () => void;
 }
 
 function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
-    const {
-        auth: { userAuthorization },
-        views: {
-            myJobsView: { searchState, jobs }
+    const { views: {
+        myJobsView: {
+            loadingState
         }
-    } = state;
-
-    if (!userAuthorization) {
-        throw new Error('Not authorized!');
-    }
-
-    // const { roles } = userAuthorization
-    // console.log('roles?', roles);
-    // const showMonitoringControls = roles.some((role) => {
-    //     return role === 'DevToken';
-    // })
-    const showMonitoringControls = true;
-
-    return { jobs, searchState, showMonitoringControls };
+    } } = state;
+    return { loadingState };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {
     return {
-        search: (searchExpression: JobsSearchExpression) => {
-            dispatch(myJobsSearch(searchExpression) as any);
-        },
-        cancelJob: (jobID: string) => {
-            dispatch(myJobsCancelJob(jobID) as any);
-        },
-        refreshSearch: () => {
-            dispatch(myJobsRefreshSearch() as any);
+        onLoad: () => {
+            dispatch(myJobsLoad() as any)
         }
     };
 }
@@ -58,4 +81,4 @@ function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): Dis
 export default connect<StateProps, DispatchProps, OwnProps, StoreState>(
     mapStateToProps,
     mapDispatchToProps
-)(MyJobs);
+)(Gate);

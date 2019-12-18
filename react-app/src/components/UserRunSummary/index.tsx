@@ -1,33 +1,83 @@
-import { StoreState, SearchState, UserRunSummaryStat, UserRunSummaryQuery } from '../../redux/store';
-import { Action, Dispatch } from 'redux';
+import React from 'react';
 import { connect } from 'react-redux';
-import Component from './view';
-import { search } from '../../redux/actions/userRunSummary';
+import { Spin, Alert } from 'antd';
 
-export interface OwnProps {}
+import { Action, Dispatch } from '@kbase/ui-components/node_modules/redux';
+
+import {
+    StoreState
+} from '../../redux/store';
+import ReduxInterface from './redux';
+import { load } from '../../redux/actions/userRunSummary';
+import { ComponentLoadingState } from '../../redux/store/base';
+import { UserRunSummaryView, UserRunSummaryViewData } from '../../redux/store/UserRunSummary';
+
+export interface GateProps {
+    view: UserRunSummaryView
+    onLoad: () => void;
+}
+
+export interface GateState {
+}
+
+export class Gate extends React.Component<GateProps, GateState> {
+
+    componentDidMount() {
+        this.props.onLoad();
+    }
+
+    renderLoading() {
+        return <Spin />
+    }
+
+    renderSuccess(view: UserRunSummaryViewData) {
+        return <ReduxInterface />;
+    }
+
+    renderError() {
+        return <Alert type="error" message="Error!" />
+    }
+
+    render() {
+        const view = this.props.view;
+        switch (view.loadingState) {
+            case ComponentLoadingState.NONE:
+            case ComponentLoadingState.LOADING:
+                return this.renderLoading();
+            case ComponentLoadingState.SUCCESS:
+                return this.renderSuccess(view.view)
+            case ComponentLoadingState.ERROR:
+                return this.renderError();
+        }
+    }
+}
+
+// Store interface
+
+interface OwnProps {
+}
 
 interface StateProps {
-    searchState: SearchState;
-    userRunSummary: Array<UserRunSummaryStat>;
+    view: UserRunSummaryView
 }
 
 interface DispatchProps {
-    search: (query: UserRunSummaryQuery) => void;
+    onLoad: () => void;
 }
 
 function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
     const {
         views: {
-            userRunSummaryView: { searchState, userRunSummary }
+            userRunSummaryView
         }
     } = state;
-    return { searchState, userRunSummary };
+    return { view: userRunSummaryView };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {
     return {
-        search: (query: UserRunSummaryQuery) => {
-            dispatch(search(query) as any);
+        onLoad: () => {
+            dispatch(load() as any)
         }
     };
 }
@@ -35,4 +85,4 @@ function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): Dis
 export default connect<StateProps, DispatchProps, OwnProps, StoreState>(
     mapStateToProps,
     mapDispatchToProps
-)(Component);
+)(Gate);

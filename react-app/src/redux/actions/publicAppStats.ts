@@ -1,10 +1,13 @@
 import { Action } from 'redux';
-import { ActionType } from '.';
-import { StoreState, AppStat, PublicAppStatsQuery } from '../store';
+import { ThunkDispatch } from 'redux-thunk';
+
 import { CatalogClient } from '@kbase/ui-lib';
 import { AppError } from '@kbase/ui-components';
 
-import { ThunkDispatch } from 'redux-thunk';
+import { ActionType } from '.';
+import { StoreState } from '../store';
+import { PublicAppStatsViewData, PublicAppStatsViewDataInitialSearching, PublicAppStatsQuery } from '../store/PublicAppStats';
+import { UIError, SearchState, AppStat } from '../store/base';
 
 function calcAverage(total: number, count: number) {
     if (total) {
@@ -35,6 +38,59 @@ function calcRate(part: number, whole: number) {
         } else {
             return null;
         }
+    }
+}
+
+// Loading
+
+export interface LoadLoading extends Action<ActionType.PUBLIC_APP_STATS_LOAD_LOADING> {
+    type: ActionType.PUBLIC_APP_STATS_LOAD_LOADING
+}
+
+export interface LoadSuccess extends Action<ActionType.PUBLIC_APP_STATS_LOAD_SUCCESS> {
+    type: ActionType.PUBLIC_APP_STATS_LOAD_SUCCESS;
+    view: PublicAppStatsViewData
+}
+
+export interface LoadError extends Action<ActionType.PUBLIC_APP_STATS_LOAD_ERROR> {
+    type: ActionType.PUBLIC_APP_STATS_LOAD_ERROR;
+    error: UIError;
+}
+
+export function loadLoading(): LoadLoading {
+    return {
+        type: ActionType.PUBLIC_APP_STATS_LOAD_LOADING
+    }
+}
+
+export function loadSuccess(view: PublicAppStatsViewDataInitialSearching): LoadSuccess {
+    return {
+        type: ActionType.PUBLIC_APP_STATS_LOAD_SUCCESS,
+        view
+    }
+}
+
+export function loadError(error: UIError) {
+    return {
+        type: ActionType.PUBLIC_APP_STATS_LOAD_ERROR,
+        error
+    }
+}
+
+export function load() {
+    return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
+        dispatch(loadLoading());
+
+        dispatch(loadSuccess({
+            searchState: SearchState.INITIAL_SEARCHING,
+            query: {
+                query: ''
+            }
+        }));
+
+        dispatch(search({
+            query: ''
+        }));
     }
 }
 
@@ -143,7 +199,14 @@ export function search(query: PublicAppStatsQuery) {
             } as AppStat;
         });
 
-        const expression = query.query.split(/\s+/).map((term) => {
+        const terms = query.query.match(/\S+/);
+
+        if (terms === null) {
+            dispatch(searchSuccess(stats));
+            return;
+        }
+
+        const expression = terms.map((term) => {
             return new RegExp(term, 'i');
         });
         const filtered = stats.filter((stat) => {

@@ -18,3 +18,4 @@ _site
 # Put stuff in _trash to move it out of the way, and omit it from the repo 
 # (but keep it locally to support procrastination.)
 _trash
+_attic

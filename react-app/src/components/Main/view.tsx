@@ -5,8 +5,9 @@ import MyJobs from '../MyJobs';
 import PublicAppStats from '../PublicAppStats';
 import UserRunSummary from '../UserRunSummary';
 import { MainParams } from './state';
-import FlexTabs, { Tab } from '../FlexTabs';
+import { Tab } from '../FlexTabs';
 import { Icon } from 'antd';
+import Tabs from '../AutoFlexTabs';
 
 export interface MainProps {
     isAdmin: boolean;
@@ -18,8 +19,7 @@ export interface MainProps {
 }
 
 interface MainState {
-    activeTabKey: string | null;
-    defaultActiveTabKey: string | null;
+    tabs: Array<Tab>
 }
 
 export default class Main extends React.Component<MainProps, MainState> {
@@ -27,30 +27,85 @@ export default class Main extends React.Component<MainProps, MainState> {
     constructor(props: MainProps) {
         super(props);
         this.defaultTabKey = 'myJobs';
+
+
+        // const tabs: Map<string, Tab> = new Map();
+        // let tabOrder: Array<string>;
+        // const selectedTab = 'myjobs';
+
+        const tabs: Array<Tab> = [];
+
+        // if (this.props.isAdmin) {
+        //     tabOrder = ['myjobs', 'userjobs', 'appstats', 'userrunsummary']
+        // } else {
+        //     tabOrder = ['myjobs', 'appstats',]
+        // }
+
+        tabs.push({
+            tab: 'myjobs',
+            title: 'My Jobs',
+            renderBody: () => {
+                return this.renderMyJobsTab()
+            }
+        });
+
+        if (this.props.isAdmin) {
+            const userJobsTabLabel = (
+                <span>
+                    User Jobs <Icon type="unlock" />
+                </span>
+            );
+            tabs.push({
+                tab: 'userjobs',
+                title: userJobsTabLabel,
+                renderBody: () => {
+                    return <UserJobs />
+                }
+            })
+        }
+
+        tabs.push({
+            tab: 'appstats',
+            title: 'Public AppStats',
+            renderBody: () => {
+                return this.renderPublicAppStatsTab();
+            }
+        });
+
+        if (this.props.isAdmin) {
+            const tabLabel = (
+                <span>
+                    User Run Summary <Icon type="unlock" />
+                </span>
+            );
+            tabs.push({
+                tab: 'userrunsummary',
+                title: tabLabel,
+                renderBody: () => {
+                    return <UserRunSummary />;
+                }
+            })
+        }
+
         this.state = {
-            activeTabKey: this.defaultTabKey,
-            defaultActiveTabKey: this.defaultTabKey
+            tabs
         };
     }
 
     componentDidMount() {
         this.props.setTitle('Job Browser');
-
-        // window.setTimeout(() => {
-        //     this.props.setParams({ tab: 'userJobs' });
-        // }, 1000);
     }
 
     componentWillUnmount() {
-        this.setState({
-            activeTabKey: null
-            // defaultActiveTabKey: null
-        });
+        // this.setState({
+        //     activeTabKey: null
+        //     // defaultActiveTabKey: null
+        // });
     }
 
     onTabsChange(activeKey: string) {
         // console.log('tabs changed', activeKey, this.activeTabKey);
-        this.setState({ activeTabKey: activeKey });
+        // this.setState({ activeTabKey: activeKey });
         // this.state.activeTabKey = activeKey;
     }
 
@@ -126,49 +181,11 @@ export default class Main extends React.Component<MainProps, MainState> {
         //         {userRunTab}
         //     </Tabs>
         // );
-        const tabs: Array<Tab> = [];
 
-        tabs.push({
-            tab: 'myjobs',
-            title: 'My Jobs',
-            component: this.renderMyJobsTab()
-        });
-
-        if (this.props.isAdmin) {
-            const userJobsTabLabel = (
-                <span>
-                    User Jobs <Icon type="unlock" />
-                </span>
-            );
-            tabs.push({
-                tab: 'userjobs',
-                title: userJobsTabLabel,
-                component: <UserJobs />
-            })
-        }
-
-        tabs.push({
-            tab: 'appstats',
-            title: 'Public AppStats',
-            component: this.renderPublicAppStatsTab()
-        });
-
-        if (this.props.isAdmin) {
-            const tabLabel = (
-                <span>
-                    User Run Summary <Icon type="unlock" />
-                </span>
-            );
-            tabs.push({
-                tab: 'userrunsummary',
-                title: tabLabel,
-                component: <UserRunSummary />
-            })
-        }
 
         return (
-            <FlexTabs
-                tabs={tabs}
+            <Tabs
+                tabs={this.state.tabs}
             />
         );
     }

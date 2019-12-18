@@ -1,11 +1,14 @@
 import React from 'react';
-import { UserRunSummaryStat, SearchState, UserRunSummaryQuery } from '../../redux/store';
-import { Table, Form, Input, Button, Tooltip } from 'antd';
+import { } from '../../redux/store';
+import { Table, Form, Input, Button, Tooltip, Spin, Alert } from 'antd';
 import './style.css';
+import { SearchState } from '../../redux/store/base';
+import { UserRunSummaryStat, UserRunSummaryQuery, UserRunSummaryViewData, UserRunSummaryViewDataError, UserRunSummaryViewDataSearched, UserRunSummaryViewDataSearching } from '../../redux/store/UserRunSummary';
 
 export interface UserRunSummaryProps {
-    searchState: SearchState;
-    userRunSummary: Array<UserRunSummaryStat>;
+    view: UserRunSummaryViewData
+    // searchState: SearchState;
+    // userRunSummary: Array<UserRunSummaryStat>;
     search: (query: UserRunSummaryQuery) => void;
 }
 
@@ -46,11 +49,11 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
             </Form>
         );
     }
-    renderTable() {
+    renderTable(view: UserRunSummaryViewDataSearched | UserRunSummaryViewDataSearching) {
         return (
             <Table<UserRunSummaryStat>
-                dataSource={this.props.userRunSummary}
-                loading={this.props.searchState === SearchState.SEARCHING}
+                dataSource={view.userRunSummary}
+                loading={view.searchState === SearchState.SEARCHING}
                 rowKey={(stat: UserRunSummaryStat) => {
                     return [
                         stat.username,
@@ -142,11 +145,35 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
             </Table>
         );
     }
+
+    renderLoading() {
+        return <Spin />
+    }
+
+    renderError(view: UserRunSummaryViewDataError) {
+        return <Alert type="error" message={view.error.message} />
+    }
+
+    renderViewState() {
+        const view = this.props.view;
+        console.log('rendering?', view);
+        switch (view.searchState) {
+            case SearchState.NONE:
+            case SearchState.INITIAL_SEARCHING:
+                return this.renderLoading();
+            case SearchState.SEARCHING:
+            case SearchState.SEARCHED:
+                return this.renderTable(view)
+            case SearchState.ERROR:
+                return this.renderError(view);
+        }
+    }
+
     render() {
         return (
             <div className="UserRunSummary">
                 {this.renderControlBar()}
-                {this.renderTable()}
+                {this.renderViewState()}
             </div>
         );
     }

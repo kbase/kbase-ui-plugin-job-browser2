@@ -1,11 +1,12 @@
 import React from 'react';
 import './style.css';
-import { Job, JobStatus } from '../../redux/store';
-import { JobLogLine, JobLog } from './state';
+import { Job } from '../../redux/store';
+import { JobLogEntry } from './state';
 import { Table, Tooltip, Empty, Button, Dropdown, Menu, Spin } from 'antd';
 import { ClickParam } from 'antd/lib/menu';
 import Papa from 'papaparse';
 import ButtonGroup from 'antd/lib/button/button-group';
+import { JobStateType } from '../../redux/types/jobState';
 
 enum PlayState {
     NONE,
@@ -16,7 +17,7 @@ enum PlayState {
 
 export interface JobLogProps {
     job: Job;
-    log: JobLog;
+    log: Array<JobLogEntry>;
 }
 
 interface JobLogState {
@@ -28,20 +29,23 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
     playLogTimer: number;
     bodyRef: React.RefObject<HTMLDivElement>
     // a hack to detect state change... 
-    currentJobStatus: JobStatus | null;
+    currentJobEventType: JobStateType | null;
 
     constructor(params: JobLogProps) {
         super(params);
         this.playLogTimer = 0;
         this.bodyRef = React.createRef();
-        this.currentJobStatus = null;
+        this.currentJobEventType = null;
         this.state = {
             playState: PlayState.NONE,
             isPaused: false
         }
     }
+    currentEvent(job: Job) {
+        return job.eventHistory[job.eventHistory.length - 1];
+    }
     componentDidMount() {
-        this.currentJobStatus = this.props.job.status;
+        this.currentJobEventType = this.currentEvent(this.props.job).type;
 
         // if (this.state.playState !== PlayState.PLAYING) {
         //     return;
@@ -61,9 +65,10 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         // console.log('scroll to bottom!', this.bodyRef.current.scrollTop, this.bodyRef.current.scrollHeight, this.bodyRef.current.clientHeight);
         this.bodyRef.current.scrollTop = this.bodyRef.current.scrollHeight;
     }
+
     componentDidUpdate() {
-        const lastJobStatus = this.currentJobStatus;
-        this.currentJobStatus = this.props.job.status;
+        const lastJobEvent = this.currentEvent(this.props.job);
+        this.currentJobEventType = lastJobEvent.type;
         // if (this.state.playState !== PlayState.PLAYING) {
         //     return;
         // }
@@ -71,16 +76,17 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             return;
         }
         if (!this.isActive()) {
-            if (lastJobStatus === JobStatus.RUNNING &&
-                this.props.job.status === JobStatus.RUNNING) {
+            if (lastJobEvent.type === JobStateType.RUN &&
+                this.currentJobEventType === JobStateType.RUN) {
                 return;
             }
         }
         this.scrollToBottom();
     }
     isActive() {
-        return this.props.job.status === JobStatus.QUEUED ||
-            this.props.job.status === JobStatus.RUNNING;
+        const currentJobEvent = this.currentEvent(this.props.job);
+        return currentJobEvent.type === JobStateType.QUEUE ||
+            currentJobEvent.type === JobStateType.RUN;
     }
     renderLastLine() {
         let message;
@@ -101,23 +107,23 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         )
     }
     renderJobLog() {
-        const lines = this.props.log;
-        if (lines.length === 0) {
+        const log = this.props.log;
+        if (log.length === 0) {
             return (
                 <Empty />
             )
         }
-        const rows = lines.map((line) => {
+        const rows = log.map((entry) => {
             const rowStyle: React.CSSProperties = {};
-            if (line.isError) {
+            if (entry.isError) {
                 rowStyle.color = 'red';
             }
-            return <div className="FlexTable-row" style={rowStyle} key={line.lineNumber}>
+            return <div className="FlexTable-row" style={rowStyle} key={entry.lineNumber}>
                 <div className="FlexTable-col">
-                    {line.lineNumber}
+                    {entry.lineNumber}
                 </div>
                 <div className="FlexTable-col">
-                    {line.line}
+                    {entry.message}
                 </div>
             </div>
         })
@@ -148,13 +154,13 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 dataSource={this.props.log}
                 size="small"
                 // scroll={{ y: 400 }}
-                rowKey={(logLine: JobLogLine) => {
+                rowKey={(logLine: JobLogEntry) => {
                     return String(logLine.lineNumber);
                 }}
                 // pagination={{ position: 'top', showSizeChanger: true }}
                 pagination={false}
                 scroll={{ y: '100%' }}
-                rowClassName={(line: JobLogLine) => {
+                rowClassName={(line: JobLogEntry) => {
                     if (line.isError) {
                         return 'JobLog-errorRow';
                     } else {
@@ -167,14 +173,14 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                     dataIndex="lineNumber"
                     key="lineNumber"
                     width="8%"
-                    render={(lineNumber: number, logLine: JobLogLine) => {
+                    render={(lineNumber: number, logLine: JobLogEntry) => {
                         const numberDisplay = new Intl.NumberFormat('en-US', { useGrouping: true }).format(lineNumber);
                         if (logLine.isError) {
                             return <span className="JobLog-errorText">{numberDisplay}</span>;
                         }
                         return numberDisplay;
                     }}
-                    sorter={(a: JobLogLine, b: JobLogLine) => {
+                    sorter={(a: JobLogEntry, b: JobLogEntry) => {
                         return a.lineNumber - b.lineNumber;
                     }}
                 />
@@ -183,7 +189,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                     dataIndex="line"
                     key="line"
                     width="92%"
-                    render={(line: string, logLine: JobLogLine) => {
+                    render={(line: string, logLine: JobLogEntry) => {
                         let row;
                         if (logLine.isError) {
                             row = <span className="JobLog-errorText">{line}</span>;
@@ -196,7 +202,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             </Table>
         );
     }
-    downloadLog(type: string, log: JobLog) {
+    downloadLog(type: string, log: Array<JobLogEntry>) {
         function download(filename: string, contentType: string, content: string) {
             const downloadLink = document.createElement('a');
             const downloadContent = new Blob([content]);
@@ -209,20 +215,20 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             document.body.removeChild(downloadLink);
             URL.revokeObjectURL(downloadLink.href);
         }
-        function logToCSV(log: JobLog): string {
+        function logToCSV(log: Array<JobLogEntry>): string {
             return Papa.unparse(log);
         }
-        function logToTSV(log: JobLog): string {
+        function logToTSV(log: Array<JobLogEntry>): string {
             return Papa.unparse(log, {
                 delimiter: '\t'
             });
         }
-        function logToJSON(log: JobLog): string {
+        function logToJSON(log: Array<JobLogEntry>): string {
             return JSON.stringify(log);
         }
-        function logToText(log: JobLog): string {
-            return log.map((line) => {
-                return line.line;
+        function logToText(log: Array<JobLogEntry>): string {
+            return log.map((entry) => {
+                return entry.message;
             }).join('\n');
         }
 
@@ -279,8 +285,8 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         let pauseTooltip: string;
         const isPaused = this.state.isPaused;
 
-        switch (this.props.job.status) {
-            case JobStatus.RUNNING:
+        switch (this.currentEvent(this.props.job).type) {
+            case JobStateType.RUN:
                 if (isPaused) {
                     playTooltip = 'Click to automatically scroll to the bottom of the logs when new entries arrive';
                     pauseTooltip = 'Automatic scrolling is already paused';
@@ -289,12 +295,6 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                     pauseTooltip = 'Click to pause automatic scrolling to the bottom of the logs when new entries arrive';
                 }
                 break;
-            case JobStatus.QUEUED:
-            case JobStatus.FINISHED:
-            case JobStatus.ERRORED_QUEUED:
-            case JobStatus.ERRORED_RUNNING:
-            case JobStatus.CANCELED_QUEUED:
-            case JobStatus.CANCELED_RUNNING:
             default:
                 playTooltip = 'Log playing only available when the job is running';
                 pauseTooltip = 'Log playing only available when the job is running';
@@ -308,20 +308,13 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         let irrelevant: boolean;
 
         // Does the job status make log playing irrelevant.
-        switch (this.props.job.status) {
-            case JobStatus.QUEUED:
-                irrelevant = true;
-                break;
-            case JobStatus.RUNNING:
+        switch (this.currentEvent(this.props.job).type) {
+            case JobStateType.RUN:
                 irrelevant = false;
                 break;
-            case JobStatus.FINISHED:
-            case JobStatus.ERRORED_QUEUED:
-            case JobStatus.ERRORED_RUNNING:
-            case JobStatus.CANCELED_QUEUED:
-            case JobStatus.CANCELED_RUNNING:
             default:
                 irrelevant = true;
+                break;
         }
 
         const [playTooltip, pauseTooltip] = this.renderPlayPauseTooltips();

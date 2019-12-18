@@ -1,25 +1,33 @@
 import React from 'react';
 
 import { Spin, Alert } from 'antd';
-import FlexTabs from '../FlexTabs';
+import AutoFlexTabs from '../AutoFlexTabs';
 import JobLog from '../JobLog/view';
 import JobInfo from '../JobInfo';
 import './style.css'
 import { JobLogView, JobLogState, JobLogViewError } from './state';
-import JobStatusBadge from '../JobStatus';
+import JobStatusBadge from '../JobStatusBadge';
 
-export interface JobDetailProps {
+interface JobLogGateProps {
     view: JobLogView
 }
 
-interface JobDetailState {
+interface JobLogGateState {
 }
 
-export default class JobDetail extends React.Component<JobDetailProps, JobDetailState> {
+class JobLogGate extends React.Component<JobLogGateProps, JobLogGateState> {
     renderLoading() {
         return (
             <div className="FullyCenteredBox">
                 <span>Loading ... <Spin /></span>
+            </div>
+        );
+    }
+
+    renderNone() {
+        return (
+            <div className="FullyCenteredBox">
+                <span>None ... <Spin /></span>
             </div>
         );
     }
@@ -39,10 +47,11 @@ export default class JobDetail extends React.Component<JobDetailProps, JobDetail
             <Alert type="error" message={view.error} />
         )
     }
-
-    renderJobLog() {
+    render() {
+        console.log('should be RENDERING', this.props);
         switch (this.props.view.status) {
             case JobLogState.NONE:
+                return this.renderNone();
             case JobLogState.JOB_QUEUED:
                 return this.renderQueued();
             case JobLogState.INITIAL_LOADING:
@@ -56,7 +65,30 @@ export default class JobDetail extends React.Component<JobDetailProps, JobDetail
                 return <JobLog job={this.props.view.job} log={this.props.view.log} />;
         }
     }
-    renderJobInfo() {
+}
+
+interface JobInfoGateProps {
+    view: JobLogView
+}
+
+interface JobInfoGateState {
+}
+
+class JobInfoGate extends React.Component<JobInfoGateProps, JobInfoGateState> {
+    renderLoading() {
+        return (
+            <div className="FullyCenteredBox">
+                <span>Loading Job Info... <Spin /></span>
+            </div>
+        );
+    }
+
+    renderError(view: JobLogViewError) {
+        return (
+            <Alert type="error" message={view.error} />
+        )
+    }
+    render() {
         switch (this.props.view.status) {
             case JobLogState.NONE:
                 return this.renderLoading();
@@ -73,44 +105,16 @@ export default class JobDetail extends React.Component<JobDetailProps, JobDetail
                 return <JobInfo job={this.props.view.job} />;
         }
     }
-    renderTest() {
-        const content = Array.from(Array(100).keys()).map((i) => {
-            return <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'row', borderBottom: '1px silver solid' }} key={String(i)}>
-                <div style={{ flex: '0 0 auto', padding: '4px', overflowWrap: 'break-word', wordWrap: 'break-word' }}>
-                    {i}
-                </div>
-            </div>
-        });
-        return (
-            <div style={{ flex: '1 1 0px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                <div>Header Here</div>
-                <div style={{ flex: '1 1 0px', display: 'flex', flexDirection: 'column', minHeight: 0, overflowY: 'auto' }}>
-                    {content}
-                </div>
-            </div>
-        )
-    }
-    renderTest2() {
-        const content = Array.from(Array(100).keys()).map((i) => {
-            return <div className="FlexTable-row" key={String(i)}>
-                <div className="FlexTable-col">{i}</div>
-                <div className="FlexTable-col">This is row {i}</div>
-            </div>
-        });
-        return (
-            <div className="FlexTable">
-                <div className="FlexTable-header">
-                    <div className="FlexTable-row">
-                        <div className="FlexTable-col">#</div>
-                        <div className="FlexTable-col">Data</div>
-                    </div>
-                </div>
-                <div className="FlexTable-body">
-                    {content}
-                </div>
-            </div>
-        )
-    }
+}
+
+export interface JobDetailProps {
+    view: JobLogView
+}
+
+interface JobDetailState {
+}
+
+export default class JobDetail extends React.Component<JobDetailProps, JobDetailState> {
     renderStatus() {
         switch (this.props.view.status) {
             case JobLogState.NONE:
@@ -128,23 +132,30 @@ export default class JobDetail extends React.Component<JobDetailProps, JobDetail
         </div>
 
     }
+    selectTab(selectedTab: string) {
+        this.setState({
+            selectedTab
+        })
+    }
     render() {
-        const tabs = [
-            {
-                tab: 'log',
-                title: 'Log',
-                component: this.renderJobLog()
-            },
-            {
-                tab: 'detail',
-                title: 'Detail',
-                component: this.renderJobInfo()
-            },
-        ]
+        const tabs = [{
+            tab: 'log',
+            title: 'Log',
+            renderBody: () => {
+                return <JobLogGate view={this.props.view} />
+            }
+        },
+        {
+            tab: 'detail',
+            title: 'Detail',
+            renderBody: () => {
+                return <JobInfoGate view={this.props.view} />
+            }
+        }];
         return (
             <React.Fragment>
                 {this.renderMiniDetails()}
-                <FlexTabs tabs={tabs} />
+                <AutoFlexTabs tabs={tabs} />
             </React.Fragment>
         )
     }
