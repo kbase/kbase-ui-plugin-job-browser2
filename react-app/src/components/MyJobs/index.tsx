@@ -1,14 +1,16 @@
-import { Dispatch, Action } from 'redux';
-import { connect } from 'react-redux';
-import MyJobs from './view';
+import { Dispatch, Action } from "redux";
+import { connect } from "react-redux";
+import MyJobs from "./view";
 
-import { StoreState, Job, JobsSearchExpression, SearchState } from '../../redux/store';
-import { myJobsSearch, myJobsRefreshSearch, myJobsCancelJob } from '../../redux/actions/myJobs';
+import { StoreState, Job, JobsSearchExpression, SearchState } from "../../redux/store";
+import { myJobsSearch, myJobsRefreshSearch, myJobsCancelJob } from "../../redux/actions/myJobs";
+import { AppError } from "@kbase/ui-components";
 
 export interface OwnProps { }
 
 interface StateProps {
     jobs: Array<Job>;
+    error: AppError | null;
     searchState: SearchState;
     showMonitoringControls: boolean;
 }
@@ -23,17 +25,17 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
     const {
         auth: { userAuthorization },
         views: {
-            myJobsView: { searchState, jobs }
+            myJobsView: { searchState, jobs, error }
         }
     } = state;
 
     if (!userAuthorization) {
-        throw new Error('Not authorized!');
+        throw new Error("Not authorized!");
     }
 
     const showMonitoringControls = true;
 
-    return { jobs, searchState, showMonitoringControls };
+    return { jobs, error, searchState, showMonitoringControls };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {
@@ -50,7 +52,4 @@ function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): Dis
     };
 }
 
-export default connect<StateProps, DispatchProps, OwnProps, StoreState>(
-    mapStateToProps,
-    mapDispatchToProps
-)(MyJobs);
+export default connect<StateProps, DispatchProps, OwnProps, StoreState>(mapStateToProps, mapDispatchToProps)(MyJobs);

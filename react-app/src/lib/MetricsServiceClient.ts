@@ -1,4 +1,4 @@
-import { DynamicServiceClient, DynamicServiceClientParams } from '@kbase/ui-lib';
+import { DynamicServiceClient, DynamicServiceClientParams } from '../lib/comm/DynamicServiceClient';
 
 // Metrics client --
 // TODO: move
@@ -58,34 +58,30 @@ interface GetJobResult {
 }
 
 export default class MetricsServiceClient extends DynamicServiceClient {
-    static module: string = 'kb_Metrics';
+    module: string = 'kb_Metrics';
+    constructor(params: DynamicServiceClientParams) {
+        super(params);
+    }
 
     async getJobs({ epoch_range, user_ids }: GetJobsParam): Promise<GetJobsResult> {
-        const result = await this.callFunc<[GetJobsParam], [GetJobsResult]>('get_jobs', [
-            {
-                epoch_range,
-                user_ids
-            }
-        ]);
-        return result[0];
+        return this.callFunc<GetJobsParam, GetJobsResult>('get_jobs', {
+            epoch_range,
+            user_ids
+        });
     }
 
     async getJob({ job_id }: GetJobParam): Promise<GetJobResult> {
-        const result = await this.callFunc<[GetJobParam], [GetJobResult]>('get_job', [
-            {
-                job_id
-            }
-        ]);
-        return result[0];
+        return this.callFunc<GetJobParam, GetJobResult>('get_job', {
+            job_id
+        }
+        );
     }
 
     async getAppMetrics({ epoch_range, user_ids }: GetAppMetricsParam): Promise<GetAppMetricsResult> {
-        const result = await this.callFunc<[GetAppMetricsParam], [GetAppMetricsResult]>('get_job', [
-            {
-                epoch_range,
-                user_ids
-            }
-        ]);
-        return result[0];
+        return await this.callFunc<GetAppMetricsParam, GetAppMetricsResult>('get_job', {
+            epoch_range,
+            user_ids
+        });
+
     }
 }

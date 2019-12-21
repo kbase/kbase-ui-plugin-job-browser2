@@ -1,8 +1,8 @@
-import { Reducer } from 'react';
-import { StoreState, SearchState } from '../store';
-import { Action } from 'redux';
-import { MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess } from '../actions/myJobs';
-import { ActionType } from '../actions';
+import { Reducer } from "react";
+import { StoreState, SearchState } from "../store";
+import { Action } from "redux";
+import { MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess, MyJobsSearchError } from "../actions/myJobs";
+import { ActionType } from "../actions";
 
 function myJobsSearchStart(state: StoreState, action: MyJobsSearchStart): StoreState {
     return {
@@ -35,6 +35,20 @@ function myJobsSearchSuccess(state: StoreState, action: MyJobsSearchSuccess): St
     return newState;
 }
 
+function myJobsSearchError(state: StoreState, action: MyJobsSearchError): StoreState {
+    return {
+        ...state,
+        views: {
+            ...state.views,
+            myJobsView: {
+                ...state.views.myJobsView,
+                searchState: SearchState.ERROR,
+                error: action.error
+            }
+        }
+    };
+}
+
 function myJobsCancelJobSuccess(state: StoreState, action: MyJobsCancelJobSuccess): StoreState {
     return {
         ...state,
@@ -59,6 +73,8 @@ const reducer: Reducer<StoreState | undefined, Action> = (state: StoreState | un
             return myJobsSearchStart(state, action as MyJobsSearchStart);
         case ActionType.MY_JOBS_CANCEL_SUCCESS:
             return myJobsCancelJobSuccess(state, action as MyJobsCancelJobSuccess);
+        case ActionType.MY_JOBS_SEARCH_ERROR:
+            return myJobsSearchError(state, action as MyJobsSearchError);
     }
 };
 
