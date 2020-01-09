@@ -3,13 +3,6 @@
     "version": "1.0.0",
     "description": "A kbase-ui plugin to allow a KBase user to view their existing jobs; and for job admins to manage all jobs.",
     "main": "index.js",
-    "devDependencies": {
-        "common-readme": "1.1.0",
-        "eslint": "5.16.0",
-        "@typescript-eslint/parser": "2.0.0",
-        "@typescript-eslint/eslint-plugin": "2.0.0",
-        "typescript": "3.5.3"
-    },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build-plugin": "bash scripts/build-plugin.bash"
