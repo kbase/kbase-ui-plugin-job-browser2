@@ -1,5 +1,5 @@
 import {
-    HTTPClient, GeneralError, TimeoutError, AbortError, Response,
+    HTTPClient, GeneralError,
     RequestOptions, HTTPHeader
 } from './HTTPClient';
 

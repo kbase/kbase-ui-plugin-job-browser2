@@ -16,7 +16,7 @@ export class HTTPQuery {
 
     constructor(map?: QueryMap) {
         if (typeof map === 'undefined') {
-            map = <QueryMap>{};
+            map = {} as QueryMap;
         }
         this.queryMap = map;
     }

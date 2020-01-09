@@ -2,6 +2,11 @@ import { ServiceWizardClient, GetServiceStatusResult, ServiceStatus } from './co
 import { ServiceClient, ServiceClientParams } from './ServiceClient';
 import Cache from './Cache';
 
+const ITEM_LIFETIME = 1800000;
+const MONITORING_FREQUENCY = 60000;
+const WAITER_TIMEOUT = 30000;
+const WAITER_FREQUENCY = 100;
+
 // now import the service wizard, and one auth generic client
 
 // type Promise<T> = Promise<T>
@@ -12,10 +17,10 @@ interface ModuleInfo {
 }
 
 var moduleCache = new Cache<ServiceStatus>({
-    itemLifetime: 1800000,
-    monitoringFrequency: 60000,
-    waiterTimeout: 30000,
-    waiterFrequency: 100
+    itemLifetime: ITEM_LIFETIME,
+    monitoringFrequency: MONITORING_FREQUENCY,
+    waiterTimeout: WAITER_TIMEOUT,
+    waiterFrequency: WAITER_FREQUENCY
 });
 
 /*
@@ -34,7 +39,6 @@ export interface DynamicServiceClientParams extends ServiceClientParams {
     // module: string;
 }
 
-const DEFAULT_TIMEOUT = 10000;
 
 export abstract class DynamicServiceClient extends ServiceClient {
     version: string | null;

@@ -59,9 +59,6 @@ interface GetJobResult {
 
 export default class MetricsServiceClient extends DynamicServiceClient {
     module: string = 'kb_Metrics';
-    constructor(params: DynamicServiceClientParams) {
-        super(params);
-    }
 
     async getJobs({ epoch_range, user_ids }: GetJobsParam): Promise<GetJobsResult> {
         return this.callFunc<GetJobsParam, GetJobsResult>('get_jobs', {

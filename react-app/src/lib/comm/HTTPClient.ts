@@ -119,7 +119,7 @@ export class TimeoutError extends Error {
         Object.setPrototypeOf(this, TimeoutError.prototype);
 
         this.name = 'TimeoutError';
-        this.stack = (<any>new Error()).stack;
+        this.stack = new Error().stack;
 
         this.timeout = timeout;
         this.elapsed = elapsed;
@@ -139,7 +139,7 @@ export class GeneralError extends Error {
         Object.setPrototypeOf(this, GeneralError.prototype);
 
         this.name = 'GeneralError';
-        this.stack = (<any>new Error()).stack;
+        this.stack = new Error().stack;
 
         this.xhr = xhr;
     }
@@ -155,7 +155,7 @@ export class AbortError extends Error {
         Object.setPrototypeOf(this, AbortError.prototype);
 
         this.name = 'AbortError';
-        this.stack = (<any>new Error()).stack;
+        this.stack = new Error().stack;
 
         this.xhr = xhr;
     }
@@ -184,16 +184,12 @@ export interface Response {
 }
 
 export class HTTPClient {
-    constructor() {
-    }
-
     async request(options: RequestOptions): Promise<Response> {
         let startTime = new Date().getTime();
-        let that = this;
-        return <Promise<Response>>new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const xhr: XMLHttpRequest = new XMLHttpRequest();
             xhr.onload = () => {
-                resolve(<Response>{
+                resolve({
                     status: xhr.status,
                     response: xhr.response,
                     responseType: xhr.responseType,
