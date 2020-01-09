@@ -6,28 +6,31 @@ const fs = bluebird.promisifyAll(require('fs-extra'));
 const path = require('path');
 const tar = require('tar');
 
+/*
+Copy the react-app build files into the iframe_root directory of the
+dist/plugin.
+*/
 async function copyBuildFiles(rootDir) {
     const root = rootDir.split('/');
     const source = root.concat(['react-app', 'build']).join('/');
     const dest = root.concat(['dist', 'plugin', 'iframe_root']).join('/');
-    try {
-        await fs.removeAsync(dest);
-    } catch (ex) {
-        console.warn('WARNING removing dest', ex.message);
-    }
     await fs.ensureDirAsync(dest);
     await fs.copyAsync(source, dest);
 }
 
+async function removeDist(rootDir) {
+    const root = rootDir.split('/');
+    const dist = root.concat(['dist']).join('/');
+    await fs.removeAsync(dist);
+}
+
+/*
+Create the dist directory, and copy the plugin directory into it.
+*/
 async function copyPluginTemplate(rootDir) {
     const root = rootDir.split('/');
     const source = root.concat(['plugin']).join('/');
-    const dest = root.concat(['dist']).join('/');
-    try {
-        await fs.removeAsync(dest);
-    } catch (ex) {
-        console.warn('WARNING removing dest', ex.message);
-    }
+    const dest = root.concat(['dist', 'plugin']).join('/');
     await fs.ensureDirAsync(dest);
     await fs.copyAsync(source, dest);
 }
@@ -51,6 +54,10 @@ async function main() {
     cwd.push('..');
     const projectPath = path.normalize(cwd.join('/'));
     console.log(`Project path: ${projectPath}`);
+
+    // Remove dist
+    console.log('Remove dist...');
+    await removeDist(projectPath);
 
     // Copy files to dist.
     console.log('Copying files to dist...');
