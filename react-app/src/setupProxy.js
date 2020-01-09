@@ -1,6 +1,6 @@
 const proxy = require("http-proxy-middleware");
 const morgan = require("morgan");
-const DEPLOY_ENV = "next";
+const DEPLOY_ENV = process.env.ENV || "ci";
 let HOST;
 
 if (DEPLOY_ENV === "prod") {
