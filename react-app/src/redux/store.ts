@@ -1,23 +1,21 @@
-import { makeBaseStoreState } from '@kbase/ui-components';
-import reducer from './reducers';
-import { createStore, compose, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
-import { AppError } from '@kbase/ui-components';
-import { BaseStoreState } from '@kbase/ui-components';
+import { makeBaseStoreState } from "@kbase/ui-components";
+import reducer from "./reducers";
+import { createStore, compose, applyMiddleware } from "redux";
+import thunk from "redux-thunk";
+import { AppError } from "@kbase/ui-components";
+import { BaseStoreState } from "@kbase/ui-components";
 
 export enum JobStatus {
-    QUEUED = 'QUEUED',
-    RUNNING = 'RUNNING',
-    FINISHED = 'FINISHED',
-    ERRORED_QUEUED = 'ERRORED_QUEUED',
-    ERRORED_RUNNING = 'ERRORED_RUNNING',
-    CANCELED_QUEUED = 'CANCELED_QUEUED',
-    CANCELED_RUNNING = 'CANCELED_RUNNING'
+  QUEUED = "QUEUED",
+  RUNNING = "RUNNING",
+  FINISHED = "FINISHED",
+  ERRORED_QUEUED = "ERRORED_QUEUED",
+  ERRORED_RUNNING = "ERRORED_RUNNING",
+  CANCELED_QUEUED = "CANCELED_QUEUED",
+  CANCELED_RUNNING = "CANCELED_RUNNING"
 }
 
 export type JobID = string;
-
-
 
 // export interface Job {
 //     id: JobID;
@@ -122,246 +120,252 @@ export type JobID = string;
 //     username: string;
 // }
 
-
 export interface JobQueued {
-    status: JobStatus.QUEUED;
-    id: JobID;
-    key: string;
-    narrativeID: number | null;
-    narrativeTitle: string;
-    appID: string;
-    appTitle: string;
-    queuedAt: EpochTime;
-    queuedElapsed: number;
-    clientGroups: Array<string>;
-    username: string;
+  status: JobStatus.QUEUED;
+  id: JobID;
+  key: string;
+  narrativeID: number | null;
+  narrativeTitle: string;
+  appID: string;
+  appTitle: string;
+  queuedAt: EpochTime;
+  queuedElapsed: number;
+  clientGroups: Array<string>;
+  username: string;
 }
 
 export interface JobRunning {
-    status: JobStatus.RUNNING;
-    id: JobID;
-    key: string;
-    narrativeID: number | null;
-    narrativeTitle: string;
-    appID: string;
-    appTitle: string;
-    queuedAt: EpochTime;
-    runAt: EpochTime;
-    queuedElapsed: number;
-    runElapsed: number;
-    clientGroups: Array<string>;
-    username: string;
+  status: JobStatus.RUNNING;
+  id: JobID;
+  key: string;
+  narrativeID: number | null;
+  narrativeTitle: string;
+  appID: string;
+  appTitle: string;
+  queuedAt: EpochTime;
+  runAt: EpochTime;
+  queuedElapsed: number;
+  runElapsed: number;
+  clientGroups: Array<string>;
+  username: string;
 }
 
 export interface JobFinished {
-    status: JobStatus.FINISHED;
-    id: JobID;
-    key: string;
-    narrativeID: number | null;
-    narrativeTitle: string;
-    appID: string;
-    appTitle: string;
-    queuedAt: EpochTime;
-    runAt: EpochTime;
-    finishAt: EpochTime;
-    queuedElapsed: number;
-    runElapsed: number;
-    clientGroups: Array<string>;
-    username: string;
+  status: JobStatus.FINISHED;
+  id: JobID;
+  key: string;
+  narrativeID: number | null;
+  narrativeTitle: string;
+  appID: string;
+  appTitle: string;
+  queuedAt: EpochTime;
+  runAt: EpochTime;
+  finishAt: EpochTime;
+  queuedElapsed: number;
+  runElapsed: number;
+  clientGroups: Array<string>;
+  username: string;
 }
 
 export interface JobCanceledWhileQueued {
-    status: JobStatus.CANCELED_QUEUED;
-    id: JobID;
-    key: string;
-    narrativeID: number | null;
-    narrativeTitle: string;
-    appID: string;
-    appTitle: string;
-    queuedAt: EpochTime;
-    finishAt: EpochTime;
-    queuedElapsed: number;
-    clientGroups: Array<string>;
-    username: string;
+  status: JobStatus.CANCELED_QUEUED;
+  id: JobID;
+  key: string;
+  narrativeID: number | null;
+  narrativeTitle: string;
+  appID: string;
+  appTitle: string;
+  queuedAt: EpochTime;
+  finishAt: EpochTime;
+  queuedElapsed: number;
+  clientGroups: Array<string>;
+  username: string;
 }
 
 export interface JobCanceledWhileRunning {
-    status: JobStatus.CANCELED_RUNNING;
-    id: JobID;
-    key: string;
-    narrativeID: number | null;
-    narrativeTitle: string;
-    appID: string;
-    appTitle: string;
-    queuedAt: EpochTime;
-    runAt: EpochTime;
-    finishAt: EpochTime;
-    queuedElapsed: number;
-    runElapsed: number;
-    clientGroups: Array<string>;
-    username: string;
+  status: JobStatus.CANCELED_RUNNING;
+  id: JobID;
+  key: string;
+  narrativeID: number | null;
+  narrativeTitle: string;
+  appID: string;
+  appTitle: string;
+  queuedAt: EpochTime;
+  runAt: EpochTime;
+  finishAt: EpochTime;
+  queuedElapsed: number;
+  runElapsed: number;
+  clientGroups: Array<string>;
+  username: string;
 }
 
 export interface JobErroredWhileQueued {
-    status: JobStatus.ERRORED_QUEUED;
-    id: JobID;
-    key: string;
-    narrativeID: number | null;
-    narrativeTitle: string;
-    appID: string;
-    appTitle: string;
-    queuedAt: EpochTime;
-    finishAt: EpochTime;
-    queuedElapsed: number;
-    message: string;
-    clientGroups: Array<string>;
-    username: string;
+  status: JobStatus.ERRORED_QUEUED;
+  id: JobID;
+  key: string;
+  narrativeID: number | null;
+  narrativeTitle: string;
+  appID: string;
+  appTitle: string;
+  queuedAt: EpochTime;
+  finishAt: EpochTime;
+  queuedElapsed: number;
+  message: string;
+  clientGroups: Array<string>;
+  username: string;
 }
 
 export interface JobErroredWhileRunning {
-    status: JobStatus.ERRORED_RUNNING;
-    id: JobID;
-    key: string;
-    narrativeID: number | null;
-    narrativeTitle: string;
-    appID: string;
-    appTitle: string;
-    queuedAt: EpochTime;
-    runAt: EpochTime;
-    finishAt: EpochTime;
-    queuedElapsed: number;
-    runElapsed: number;
-    message: string;
-    clientGroups: Array<string>;
-    username: string;
+  status: JobStatus.ERRORED_RUNNING;
+  id: JobID;
+  key: string;
+  narrativeID: number | null;
+  narrativeTitle: string;
+  appID: string;
+  appTitle: string;
+  queuedAt: EpochTime;
+  runAt: EpochTime;
+  finishAt: EpochTime;
+  queuedElapsed: number;
+  runElapsed: number;
+  message: string;
+  clientGroups: Array<string>;
+  username: string;
 }
 
-export type Job = JobQueued | JobRunning | JobFinished | JobCanceledWhileQueued | JobCanceledWhileRunning | JobErroredWhileQueued | JobErroredWhileRunning;
+export type Job =
+  | JobQueued
+  | JobRunning
+  | JobFinished
+  | JobCanceledWhileQueued
+  | JobCanceledWhileRunning
+  | JobErroredWhileQueued
+  | JobErroredWhileRunning;
 
 interface JobsState {
-    jobs: Array<Job>;
+  jobs: Array<Job>;
 }
 
 export type EpochTime = number;
 
-export type TimeRangePresets = 'lastHour' | 'last48Hours' | 'lastWeek' | 'lastMonth';
+export type TimeRangePresets = "lastHour" | "last48Hours" | "lastWeek" | "lastMonth";
 
 export interface TimeRangePreset {
-    kind: 'preset';
-    preset: TimeRangePresets;
+  kind: "preset";
+  preset: TimeRangePresets;
 }
 
 export interface TimeRangeLiteral {
-    kind: 'literal';
-    start: EpochTime;
-    end: EpochTime;
+  kind: "literal";
+  start: EpochTime;
+  end: EpochTime;
 }
 
 export type TimeRange = TimeRangePreset | TimeRangeLiteral;
 
 export interface TimeRange2 {
-    preset: TimeRangePresets;
-    start: EpochTime | null;
-    end: EpochTime | null;
+  preset: TimeRangePresets;
+  start: EpochTime | null;
+  end: EpochTime | null;
 }
 
 export interface SortSpec {
-    field: string;
-    direction: 'ascending' | 'descending';
+  field: string;
+  direction: "ascending" | "descending";
 }
 
 export interface JobsSearchExpression {
-    query: string;
-    timeRange: TimeRange;
-    sort: SortSpec | null;
-    // timeRangeStart: EpochTime;
-    // timeRangeEnd: EpochTime;
-    jobStatus: Array<JobStatus>;
-    forceSearch: boolean;
+  query: string;
+  timeRange: TimeRange;
+  sort: SortSpec | null;
+  // timeRangeStart: EpochTime;
+  // timeRangeEnd: EpochTime;
+  jobStatus: Array<JobStatus>;
+  forceSearch: boolean;
 }
 
 export enum SearchState {
-    NONE = 0,
-    SEARCHING,
-    SEARCHED,
-    ERROR
+  NONE = 0,
+  SEARCHING,
+  SEARCHED,
+  ERROR
 }
 
 export enum ComponentLoadingState {
-    NONE = 0,
-    LOADING,
-    SUCCESS,
-    ERROR
+  NONE = 0,
+  LOADING,
+  SUCCESS,
+  ERROR
 }
 
 // The Store!
 
 export interface MainView {
-    loadingState: ComponentLoadingState;
-    error: AppError | null;
-    isAdmin: boolean;
+  loadingState: ComponentLoadingState;
+  error: AppError | null;
+  isAdmin: boolean;
 }
 
 export interface MyJobsView {
-    searchState: SearchState;
-    searchExpression: JobsSearchExpression | null;
-    jobsFetchedAt: EpochTime | null;
-    rawJobs: Array<Job>;
-    jobs: Array<Job>;
+  searchState: SearchState;
+  error: AppError | null;
+  searchExpression: JobsSearchExpression | null;
+  jobsFetchedAt: EpochTime | null;
+  rawJobs: Array<Job>;
+  jobs: Array<Job>;
 }
 
 export interface UserJobsView {
-    searchState: SearchState;
-    searchExpression: JobsSearchExpression | null;
-    jobsFetchedAt: EpochTime | null;
-    rawJobs: Array<Job>;
-    jobs: Array<Job>;
+  searchState: SearchState;
+  searchExpression: JobsSearchExpression | null;
+  jobsFetchedAt: EpochTime | null;
+  rawJobs: Array<Job>;
+  jobs: Array<Job>;
 }
 
 export interface MyStoreState {
-    views: {
-        mainView: MainView;
-        myJobsView: MyJobsView;
-        userJobsView: UserJobsView;
-        publicAppStatsView: PublicAppStatsView;
-        userRunSummaryView: UserRunSummaryView;
-    };
+  views: {
+    mainView: MainView;
+    myJobsView: MyJobsView;
+    userJobsView: UserJobsView;
+    publicAppStatsView: PublicAppStatsView;
+    userRunSummaryView: UserRunSummaryView;
+  };
 }
 
 export interface StoreState extends BaseStoreState, MyStoreState {
-    // entities: {
-    //     jobs: {
-    //         byId: Map<string, Job>
-    //     }
-    // },
-
+  // entities: {
+  //     jobs: {
+  //         byId: Map<string, Job>
+  //     }
+  // },
 }
 
 // App Stats
 
 export interface PublicAppStatsQuery {
-    query: string;
+  query: string;
 }
 
 export interface PublicAppStatsView {
-    searchState: SearchState;
-    rawAppStats: Array<AppStat>;
-    appStats: Array<AppStat>;
-    query: PublicAppStatsQuery;
+  searchState: SearchState;
+  rawAppStats: Array<AppStat>;
+  appStats: Array<AppStat>;
+  query: PublicAppStatsQuery;
 }
 
 export interface AppStat {
-    appId: string;
-    functionId: string;
-    functionTitle: string;
-    moduleId: string;
-    moduleTitle: string;
-    runCount: number;
-    errorCount: number;
-    successRate: number;
-    averageRunTime: number;
-    averageQueueTime: number;
-    totalRunTime: number;
+  appId: string;
+  functionId: string;
+  functionTitle: string;
+  moduleId: string;
+  moduleTitle: string;
+  runCount: number;
+  errorCount: number;
+  successRate: number;
+  averageRunTime: number;
+  averageQueueTime: number;
+  totalRunTime: number;
 }
 
 /**
@@ -369,68 +373,69 @@ export interface AppStat {
  */
 
 export interface UserRunSummaryQuery {
-    query: string;
+  query: string;
 }
 
 export interface UserRunSummaryStat {
-    username: string;
-    isApp: boolean;
-    appId: string | null;
-    moduleName: string;
-    functionName: string;
-    runCount: number;
+  username: string;
+  isApp: boolean;
+  appId: string | null;
+  moduleName: string;
+  functionName: string;
+  runCount: number;
 }
 
 export interface UserRunSummaryView {
-    searchState: SearchState;
-    userRunSummary: Array<UserRunSummaryStat>;
-    query: UserRunSummaryQuery;
+  searchState: SearchState;
+  userRunSummary: Array<UserRunSummaryStat>;
+  query: UserRunSummaryQuery;
 }
 
 export function makeInitialStoreState(): StoreState {
-    const jobs: Array<Job> = [];
-    const baseState = makeBaseStoreState();
-    return {
-        ...baseState,
-        views: {
-            mainView: {
-                loadingState: ComponentLoadingState.NONE,
-                error: null,
-                isAdmin: false
-            },
-            myJobsView: {
-                searchState: SearchState.NONE,
-                searchExpression: null,
-                jobsFetchedAt: null,
-                rawJobs: jobs,
-                jobs
-            },
-            userJobsView: {
-                searchState: SearchState.NONE,
-                searchExpression: null,
-                jobsFetchedAt: null,
-                rawJobs: jobs,
-                jobs
-            },
-            publicAppStatsView: {
-                searchState: SearchState.NONE,
-                rawAppStats: [],
-                appStats: [],
-                query: {
-                    query: ''
-                }
-            },
-            userRunSummaryView: {
-                searchState: SearchState.NONE,
-                userRunSummary: [],
-                query: {
-                    query: ''
-                }
-            }
+  const jobs: Array<Job> = [];
+  const baseState = makeBaseStoreState();
+  return {
+    ...baseState,
+    views: {
+      mainView: {
+        loadingState: ComponentLoadingState.NONE,
+        error: null,
+        isAdmin: false
+      },
+      myJobsView: {
+        searchState: SearchState.NONE,
+        error: null,
+        searchExpression: null,
+        jobsFetchedAt: null,
+        rawJobs: jobs,
+        jobs
+      },
+      userJobsView: {
+        searchState: SearchState.NONE,
+        searchExpression: null,
+        jobsFetchedAt: null,
+        rawJobs: jobs,
+        jobs
+      },
+      publicAppStatsView: {
+        searchState: SearchState.NONE,
+        rawAppStats: [],
+        appStats: [],
+        query: {
+          query: ""
         }
-    };
+      },
+      userRunSummaryView: {
+        searchState: SearchState.NONE,
+        userRunSummary: [],
+        query: {
+          query: ""
+        }
+      }
+    }
+  };
 }
 
 export function createReduxStore() {
-    return createStore(reducer, makeInitialStoreState(), compose(applyMiddleware(thunk)));
+  return createStore(reducer, makeInitialStoreState(), compose(applyMiddleware(thunk)));
 }

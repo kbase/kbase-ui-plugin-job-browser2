@@ -62,7 +62,7 @@ interface UserJobsParam {
     token: string,
     serviceWizardURL: string,
     from: number,
-    to: number
+    to: number;
 }
 
 type UserJobsResult = Array<Job>;
@@ -71,7 +71,8 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
     request({ token, serviceWizardURL, from, to }: UserJobsParam): Task<UserJobsResult> {
         const client = new MetricsServiceClient({
             url: serviceWizardURL,
-            token: token
+            authorization: token,
+            timeout: 10000
             // version: 'dev'
         });
         const promise = client
@@ -84,13 +85,13 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
                     return serviceJobToUIJob(jobState, 'UNKNOWN');
                 });
                 return converted;
-            })
+            });
 
         const task: Task<UserJobsResult> = {
             id: this.newID(),
             promise,
             isCanceled: false
-        }
+        };
         this.pendingTasks.set(task.id, task);
         return task;
     }
@@ -160,7 +161,7 @@ export function userJobsSearch(searchExpression: JobsSearchExpression) {
         const newJobs = rawJobs.filter((job) => {
             return (
                 searchTerms.every((term) => {
-                    return term.test(job.appTitle) || term.test(job.narrativeTitle) || term.test(job.id) || term.test(job.username)
+                    return term.test(job.appTitle) || term.test(job.narrativeTitle) || term.test(job.id) || term.test(job.username);
                 }) &&
                 compareTimeRange(
                     job,

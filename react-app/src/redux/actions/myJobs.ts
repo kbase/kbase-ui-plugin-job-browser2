@@ -1,12 +1,12 @@
-import { Action } from 'redux';
-import { ActionType } from '.';
-import { JobsSearchExpression, Job, EpochTime, StoreState } from '../store';
-import { NarrativeJobServiceClient } from '@kbase/ui-lib';
-import { AppError } from '@kbase/ui-components';
-import MetricsServiceClient from '../../lib/MetricsServiceClient';
-import { serviceJobToUIJob, compareTimeRange, compareStatus, extractTimeRange } from './utils';
-import { ThunkDispatch } from 'redux-thunk';
-import CancelableRequest, { Task } from '../../lib/CancelableRequest';
+import { Action } from "redux";
+import { ActionType } from ".";
+import { JobsSearchExpression, Job, EpochTime, StoreState } from "../store";
+import { NarrativeJobServiceClient } from "@kbase/ui-lib";
+import { AppError } from "@kbase/ui-components";
+import MetricsServiceClient from "../../lib/MetricsServiceClient";
+import { serviceJobToUIJob, compareTimeRange, compareStatus, extractTimeRange } from "./utils";
+import { ThunkDispatch } from "redux-thunk";
+import CancelableRequest, { Task } from "../../lib/CancelableRequest";
 
 // MY JOBS TAB
 
@@ -61,10 +61,10 @@ export function myJobsSearchError(error: AppError) {
 }
 
 interface MyJobsParam {
-    token: string,
-    username: string,
-    serviceWizardURL: string,
-    from: number,
+    token: string;
+    username: string;
+    serviceWizardURL: string;
+    from: number;
     to: number;
 }
 
@@ -74,7 +74,7 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
     request({ token, username, serviceWizardURL, from, to }: MyJobsParam): Task<MyJobsResult> {
         const client = new MetricsServiceClient({
             url: serviceWizardURL,
-            token: token,
+            authorization: token,
             // version: 'dev',
             // urlBaseOverride: 'http://localhost:3000',
             timeout: 60000
@@ -84,12 +84,16 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
                 epoch_range: [from, to],
                 user_ids: [username]
             })
-            .then((metrics) => {
-                const converted = metrics.job_states.map((jobState) => {
+            .then(metrics => {
+                const converted = metrics.job_states.map(jobState => {
                     return serviceJobToUIJob(jobState, username);
                 });
 
                 return converted;
+            })
+            .catch((error) => {
+                console.error('Error fetching job', error);
+                throw error;
             });
 
         const task: Task<MyJobsResult> = {
@@ -101,7 +105,6 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
         return task;
     }
 }
-
 
 const myJobsSearchRequests = new MyJobsRequests();
 
@@ -116,8 +119,8 @@ export function myJobsSearch(searchExpression: JobsSearchExpression) {
         if (!userAuthorization) {
             dispatch(
                 myJobsSearchError({
-                    message: 'Not authorized',
-                    code: 'unauthorized'
+                    message: "Not authorized",
+                    code: "unauthorized"
                 })
             );
             return;
@@ -136,13 +139,13 @@ export function myJobsSearch(searchExpression: JobsSearchExpression) {
             }
         } = getState();
 
-        const searchTerms = searchExpression.query.split(/\s+/).map((term) => {
-            return new RegExp(term, 'i');
+        const searchTerms = searchExpression.query.split(/\s+/).map(term => {
+            return new RegExp(term, "i");
         });
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
-        // Umm, there must be other conditions which make a real search happen, or is 
+        // Umm, there must be other conditions which make a real search happen, or is
         // forceSearch now the way to do this? ...
         if (!jobsFetchedAt || searchExpression.forceSearch) {
             const task = myJobsSearchRequests.spawn({
@@ -153,7 +156,18 @@ export function myJobsSearch(searchExpression: JobsSearchExpression) {
                 to: timeRangeEnd
             });
 
-            rawJobs = await task.promise;
+            try {
+                rawJobs = await task.promise;
+            } catch (ex) {
+                console.error("ERROR", ex);
+                dispatch(
+                    myJobsSearchError({
+                        code: "my-jobs-fetch-error",
+                        message: "Error fetching jobs: " + ex.message
+                    })
+                );
+                return;
+            }
             if (task.isCanceled) {
                 // just do nothing
                 return;
@@ -163,9 +177,9 @@ export function myJobsSearch(searchExpression: JobsSearchExpression) {
             // UPDATE: update the raw jobs
         }
 
-        const newJobs = rawJobs.filter((job) => {
+        const newJobs = rawJobs.filter(job => {
             return (
-                searchTerms.every((term) => {
+                searchTerms.every(term => {
                     return term.test(job.appTitle) || term.test(job.narrativeTitle);
                 }) &&
                 compareTimeRange(job, timeRangeStart, timeRangeEnd) &&
@@ -190,8 +204,8 @@ export function myJobsRefreshSearch() {
         if (!userAuthorization) {
             dispatch(
                 myJobsSearchError({
-                    message: 'Not authorized',
-                    code: 'unauthorized'
+                    message: "Not authorized",
+                    code: "unauthorized"
                 })
             );
             return;
@@ -212,16 +226,16 @@ export function myJobsRefreshSearch() {
 
         if (!searchExpression) {
             myJobsSearchError({
-                message: 'No search expression',
-                code: 'nosearchexpression'
+                message: "No search expression",
+                code: "nosearchexpression"
             });
             return;
         }
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
-        const searchTerms = searchExpression.query.split(/\s+/).map((term) => {
-            return new RegExp(term, 'i');
+        const searchTerms = searchExpression.query.split(/\s+/).map(term => {
+            return new RegExp(term, "i");
         });
 
         const task = myJobsSearchRequests.spawn({
@@ -248,9 +262,9 @@ export function myJobsRefreshSearch() {
         //     timeRangeEnd
         // );
 
-        const newJobs = rawJobs.filter((job) => {
+        const newJobs = rawJobs.filter(job => {
             return (
-                searchTerms.every((term) => {
+                searchTerms.every(term => {
                     return term.test(job.appTitle) || term.test(job.narrativeTitle);
                 }) &&
                 compareTimeRange(
@@ -326,8 +340,8 @@ export function myJobsCancelJob(jobID: string) {
         if (!userAuthorization) {
             dispatch(
                 myJobsCancelJobError({
-                    message: 'no authorization',
-                    code: 'no-authorization'
+                    message: "no authorization",
+                    code: "no-authorization"
                 })
             );
             return;
@@ -337,7 +351,7 @@ export function myJobsCancelJob(jobID: string) {
         const njsClient = new NarrativeJobServiceClient({
             url: njsURL,
             token: userAuthorization.token,
-            module: 'NarrativeJobService'
+            module: "NarrativeJobService"
         });
         njsClient
             .cancelJob({ job_id: jobID })
@@ -345,12 +359,12 @@ export function myJobsCancelJob(jobID: string) {
                 dispatch(myJobsCancelJobSuccess());
                 dispatch(myJobsRefreshSearch());
             })
-            .catch((err) => {
-                console.error('error canceling job', err);
+            .catch(err => {
+                console.error("error canceling job", err);
                 dispatch(
                     myJobsCancelJobError({
-                        message: 'error canceling job: ' + err.message,
-                        code: 'error-canceling'
+                        message: "error canceling job: " + err.message,
+                        code: "error-canceling"
                     })
                 );
             });

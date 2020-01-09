@@ -29,6 +29,7 @@
     visibility: visible;
 } */
 
+/* Colors mimic ant design */
 
 .FlexTabs-tab {
     padding: 6px 8x;
@@ -36,6 +37,24 @@
     margin-right: 32px;
 }
 
+.FlexTabs-tab .ant-btn-link {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.FlexTabs-tab:hover .ant-btn-link {
+    color: #1663ba;
+}
+
+/* .FlexTabs-tab:hover {
+    border-bottom: 2px solid #1663ba;
+    color: #1663ba;
+} */
+
 .FlexTabs-tab-active {
     border-bottom: 2px solid #1663ba;
+    color: #1663ba;
+}
+
+.FlexTabs-tab-active .ant-btn-link {
+    color: #1663ba;
 }

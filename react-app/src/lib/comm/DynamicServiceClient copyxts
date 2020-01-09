@@ -1,0 +1,164 @@
+import { ServiceWizardClient, GetServiceStatusResult } from './ServiceWizard';
+import { ServiceClient } from './ServiceClient';
+import Cache from './Cache';
+import { JSONRPCClient } from './JSONRPC11';
+// now import the service wizard, and one auth generic client
+
+// type Promise<T> = Promise<T>
+
+var moduleCache = new Cache<any>({
+    itemLifetime: 1800000,
+    monitoringFrequency: 60000,
+    waiterTimeout: 30000,
+    waiterFrequency: 100
+});
+
+/*
+ * arg is:
+ * url - service wizard url
+ * timeout - request timeout
+ * version - service release version or tag
+ * auth - auth structure
+ *   token - auth token
+ *   username - username
+ * rpcContext
+ */
+
+export interface DynamicServiceClientParams {
+    url: string;
+    timeout: number;
+    authorization?: string;
+    isDynamic?: boolean;
+    version?: string;
+}
+
+const DEFAULT_TIMEOUT = 10000;
+
+export class DynamicServiceClient {
+    version: string | null;
+
+    static module: string;
+
+    url: string | null;
+    timeout: number;
+    authorization?: string;
+    isDynamic: boolean;
+
+    serviceDiscoveryURL?: string;
+
+    constructor({ url, timeout, authorization, version, isDynamic }: DynamicServiceClientParams) {
+
+        this.timeout = timeout;
+        this.authorization = authorization;
+
+        this.version = version || null;
+        if (this.version === 'auto') {
+            this.version = null;
+        }
+
+        if (isDynamic) {
+            this.isDynamic = true;
+            this.serviceDiscoveryURL = url;
+            this.url = null;
+        } else {
+            this.isDynamic = false;
+            this.url = url;
+        }
+
+    }
+
+    private getModule() {
+        return DynamicServiceClient.module;
+    }
+
+    private moduleId() {
+        let moduleId;
+        if (!this.version) {
+            moduleId = this.getModule() + ':auto';
+        } else {
+            moduleId = this.getModule() + ':' + this.version;
+        }
+        return moduleId;
+    }
+
+    private getCached(fetcher: () => Promise<GetServiceStatusResult>) {
+        return moduleCache.getItemWithWait({
+            id: this.moduleId(),
+            fetcher: fetcher
+        });
+    }
+
+    // setCached(value: any) {
+    //     moduleCache.setItem(this.moduleId(), value);
+    // }
+
+    // TODO: Promise<any> -> Promise<ServiceStatusResult>
+    private async lookupModule(): Promise<GetServiceStatusResult> {
+        return this.getCached(
+            (): Promise<GetServiceStatusResult> => {
+                const client = new ServiceWizardClient({
+                    url: this.serviceDiscoveryURL!,
+                    authorization: this.authorization,
+                    timeout: this.timeout
+                });
+                // NB wrapped in promise.resolve because the promise we have 
+                // here is bluebird, which supports cancellation, which we need.
+                return Promise.resolve(
+                    client.getServiceStatus({
+                        module_name: this.getModule(),
+                        version: this.version
+                    })
+                );
+            }
+        );
+    }
+
+    // async callFunc<P, T>(funcName: string, params: P): Promise<T> {
+    //     const moduleInfo = await this.lookupModule();
+    //     const client = new ServiceClient({
+    //         module: moduleInfo.module_name,
+    //         url: moduleInfo.url,
+    //         token: this.token
+    //     });
+
+    //     return await client.callFunc<P, T>(funcName, params);
+    // }
+
+    async callFunc<ParamType, ReturnType>(funcName: string, params: ParamType): Promise<ReturnType> {
+        let url: string;
+        if (this.isDynamic) {
+            const moduleInfo = await this.lookupModule();
+            url = moduleInfo.url;
+        } else {
+            url = this.url!;
+        }
+        const client = new JSONRPCClient({ url, timeout: this.timeout, authorization: this.authorization });
+        const method = ServiceClient.module + '.' + funcName;
+        const result = await client.callMethod(method, [params], { timeout: this.timeout });
+
+        if (result.length === 0) {
+            throw new Error('Too few (none) return values in return array');
+        }
+
+        return (result[0] as unknown) as ReturnType;
+    }
+    async callFuncEmptyResult<ParamType, ReturnType>(funcName: string, params: ParamType): Promise<void> {
+        let url: string;
+        if (this.isDynamic) {
+            const moduleInfo = await this.lookupModule();
+            url = moduleInfo.url;
+        } else {
+            url = this.url!;
+        }
+        const client = new JSONRPCClient({ url, timeout: this.timeout, authorization: this.authorization });
+        const method = ServiceClient.module + '.' + funcName;
+        const result = await client.callMethod(method, [params], { timeout: this.timeout });
+
+        if (result.length !== 0) {
+            throw new Error(`Too many (${result.length}) return values in return array`);
+        }
+
+        return;
+    }
+}
+
