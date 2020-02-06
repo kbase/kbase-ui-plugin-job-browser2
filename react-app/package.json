@@ -40,9 +40,8 @@
         "start": "nodemon -w ./craco.config.js -w ./node_modules/@kbase/ui-lib/lib/custom/antd/theme.less --exec 'craco start'",
         "build": "craco build",
         "install-plugin": "node scripts/install-plugin.js",
-        "testx": "craco test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!@kbase/ui-lib).+\\.js$\"",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "test-disabled-until-fixed": "craco test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!@kbase/ui-lib).+\\.js$\"",
+        "test": "react-scripts test"
     },
     "jest": {
         "collectCoverageFrom": [

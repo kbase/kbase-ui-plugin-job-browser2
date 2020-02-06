@@ -1,48 +1,16 @@
 # kbase-ui-plugin-job-browser2
 
-> A kbase-ui plugin to allow a KBase user to view their existing jobs; and for job admins to manage all jobs.
+> A kbase-ui plugin to allow a KBase user to view their Narrative jobs; and for job admins to manage all jobs.
 
-[background details relevant to understanding what this module does]
+This plugin provides a single top level component designed to serve both regular users and administrators. It's primary purpose is to allow the user to view their current and past jobs. Administrative users can use it to inspect jobs for all users.
 
 ## Usage
 
-This plugin is only useful when installed into [KBase UI](https://github.com/kbase/kbase-ui), as it is a plugin which extends the functionality of said web app.
+This plugin is only useful when installed into [kbase-ui](https://github.com/kbase/kbase-ui), as it is a plugin which extends the functionality of said web app.
 
 If kbase-ui is currently configured to use this plugin, it will already be present in the default build (we only support one build of kbase-ui anyway).
 
-Generally, documentation for using this plugin with kbase-ui can be found in the [KBase UI Documentation]().
-
-For hacking on this plugin, the short version, however, goes like this:
-
-- Create a project directory, which we'll call `project`
-  
-    ```bash
-    mkdir project
-    cd project
-    ```
-
-- Clone kbase-ui:
-
-    ```bash
-    clone -b develop https://github.com/kbase/kbase-ui
-    ```
-
-- Clone this plugin:
-
-    ```bash
-    clone https://github.com/kbase/kbase-ui-plugin-job-browser2
-    ```
-
-- Start up kbase-ui with this plugin installed from the local source tree:
-  
-    ```bash
-    cd kbase-ui
-    make dev-start plugins="jobbrowser"
-    ```
-
-> Note: In order to develop any aspect of kbase-ui, you should be familiar with (what KBase is)[https://kbase.us]
-
-## Install
+## Installation
 
 This plugin is installed into a kbase-ui build, and does not operate independently.
 
@@ -50,15 +18,49 @@ This plugin is installed into a kbase-ui build, and does not operate independent
 
 ### For Users
 
-Users may spawn jobs within the KBase infrastructure from the [KBase Narrative](https://github.com/kbase/narrative). These jobs may take from a few minutes to may hours or days to work through the job queue and execute. A given user may need to span dozens of jobs concurrently, of which some may be executed in parallel, others in sequence. KBase utilizes a fair-share system to provide equitable job execution for an arbitrary number of users. Thus the order and timing of jobs is not deterministic.
+Users may spawn jobs within the KBase infrastructure from the [KBase Narrative](https://github.com/kbase/narrative). These jobs may take from a few minutes, hours or even days to work through the job queue, run, and finish. Most jobs are spawned by running Narrative Apps. 
 
-KBase users can monitor their job status from the Narrative, but this practice is not efficient because the "app cells" which specify the jobs and provide job status may not be visible or accessible to the user. E.g. in a Narrative with many app cells some cells may be "below the fold"; or the active jobs may be spread across more than one Narrative.
+Within the Narrative, running Apps will report the status of the associated jobs.
 
-The Job Browser comes to the rescue! The job browser provides access to all of a user's jobs, including past, completed jobs and current, queued or running jobs. The Job Browser provides several filtering facets, and sorting, allowing a user to research past jobs (e.g. to look for failures), as well as monitor all running jobs.
+However, a user may spawn many jobs concurrently, of which some may be executed in parallel, others in sequence. KBase utilizes a fair-share system to provide equitable job execution for an arbitrary number of users. Thus the order and timing of jobs is not deterministic.
+
+The Job Browser allows a user to observe all of their jobs across all of their Narratives. Therefore, it is especially useful for such a user, because otherwise it would be difficult to monitor job progress in multiple open Narratives, each with multiple running Apps.
+
+The Job Browser is also useful for inspecting all of a user's jobs, including past, completed jobs and current, queued or running jobs. The Job Browser provides several filtering facets, and sorting, allowing a user to research past jobs (e.g. to look for failures), as well as monitor all running jobs.
 
 ### For Admins
 
 The Job Browser is also suitable for KBase administrators, who are often called up on the diagnose a user's failed jobs, or jobs which have been queued or running for longer than expected. The Job Browser, when accessed by a KBase Catalog Administrator, will show not just the current user's jobs, but all user jobs.
+
+## Development
+
+Complete development information [is available](./docs/development.md).
+
+The quick version:
+
+1. Clone the repo
+
+    ```text
+    git clone https://github.com/kbase/kbase-ui-plugin-job-browser2
+    ```
+
+    > Note - plugins operate purely on the master branch; feature branches may be utilized if need be for a particular effort.
+
+2. Enter the app directory
+
+    This plugin is a React web app utilizing CRA (Create React App), Typescript, Redux, and Ant Design as primary dependencies. As a CRA web app, development always starts with a local instance, like so:
+
+    ```text
+    cd kbase-ui-plugin-job-browser2/react-app
+    yarn install
+    yarn start
+    ```
+
+    This will compile the web app, start a local instance (at http://localhost:3000), open a browser to the local instance, and watch the source files, recompiling up on any change.
+
+3. From here you may edit source files, after which the web app will automatically recompile and reload in the browser.
+
+[Additional development information](./docs/development.md)
 
 ## Acknowledgments
 

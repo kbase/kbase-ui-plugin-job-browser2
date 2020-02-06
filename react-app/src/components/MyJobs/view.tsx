@@ -401,7 +401,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                 {dateControls}
 
                 <Form.Item>
-                    <Button icon="search" type="primary" htmlType="submit" />
+                    <Tooltip title="Clicking this button triggers a search to be run using all of the current search input">
+                        <Button icon="search" type="link" htmlType="submit" />
+                    </Tooltip>
                 </Form.Item>
 
                 <Form.Item>
@@ -593,7 +595,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
     renderJobsTable() {
-        console.log('render jobs table...', this.props, this.props.searchState === SearchState.ERROR);
         if (this.props.searchState === SearchState.ERROR) {
             if (this.props.error) {
                 return this.renderError(this.props.error);
