@@ -1,4 +1,8 @@
-import { JobStatus, Job, EpochTime, TimeRangePresets, TimeRange, JobQueued, JobRunning, JobFinished, JobCanceledWhileQueued, JobCanceledWhileRunning, JobErroredWhileQueued, JobErroredWhileRunning } from '../store';
+import {
+    JobStatus, Job, EpochTime, TimeRangePresets, TimeRange,
+    JobQueued, JobRunning, JobFinished, JobCanceledWhileQueued,
+    JobCanceledWhileRunning, JobErroredWhileQueued, JobErroredWhileRunning
+} from '../store';
 import { JobState } from '../../lib/MetricsServiceClient';
 
 function getJobStatus(job: JobState): JobStatus {
