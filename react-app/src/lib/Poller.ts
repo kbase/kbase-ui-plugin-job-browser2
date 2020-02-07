@@ -1,9 +1,5 @@
 import PubSub, { PubSubProxy } from "./PubSub";
 
-// const MONITORING_INTERVAL = 10000;
-// const MONITORING_FEEDBACK_STEPS = 100;
-// const WATCH_INTERVAL = 100;
-
 const POLLING_TIMEOUT = 10000;
 
 export interface PollerParams {
@@ -14,7 +10,7 @@ export interface PollerParams {
     pubsub: PubSub,
     progressSteps: number,
     pollInterval: number,
-    watchInterval: number
+    watchInterval: number;
 }
 
 export enum PollerState {
@@ -28,39 +24,25 @@ export enum PollerState {
 
 export class Poller {
     params: PollerParams;
-
     statusTimer: number | null;
     statusCount: number;
-
     watchStartAt: number;
     status: PollerState;
-    // isPollerRunning: boolean;
-    // isPollerPaused: boolean;
     error: string;
-
     watcherTimer: number | null;
     waitTimer: number | null;
-
     pubsubProxy: PubSubProxy;
 
     constructor(params: PollerParams) {
         this.params = params;
-
         this.statusTimer = null;
         this.statusCount = 0;
-
         this.watchStartAt = 0;
-        // this.isPollerRunning = false;
-        // this.isPollerPaused = true;
         this.status = PollerState.STOPPED;
-
         this.watcherTimer = null;
-
-        this.waitTimer = null
-
+        this.waitTimer = null;
         this.pubsubProxy = new PubSubProxy(this.params.pubsub);
         this.error = '';
-
     }
 
     stop() {
@@ -96,16 +78,12 @@ export class Poller {
             const elapsed = Date.now() - this.watchStartAt;
             if (elapsed > POLLING_TIMEOUT) {
                 this.status = PollerState.ERROR;
-                this.error = `Polling took too long (${elapsed}ms)`
+                this.error = `Polling took too long (${elapsed}ms)`;
                 this.stopPolling();
                 return;
             }
 
             switch (this.status) {
-                // case PollerState.NONE:
-                //     console.error('Error: Invalid state NONE');
-                //     this.stopPolling();
-                //     break;
                 case PollerState.STARTED:
                 case PollerState.POLLING:
                     pollWatcherLoop();
@@ -128,10 +106,10 @@ export class Poller {
                     console.warn('unexpected state ERROR');
                     break;
             }
-        }
+        };
         const pollWatcherLoop = () => {
             this.watcherTimer = window.setTimeout(pollWatch, this.params.watchInterval);
-        }
+        };
 
         pollWatcherLoop();
     }
@@ -145,7 +123,7 @@ export class Poller {
             this.waitTimer = window.setTimeout(this.runPoll.bind(this), this.params.pollInterval);
             this.statusCount = 0;
             pollWaitProgressLoop();
-        }
+        };
 
         // This interval timer is for animating the progress bar.
         // It is an interval which should run for the same period that the poll
@@ -155,9 +133,9 @@ export class Poller {
                 this.statusCount += 1;
                 this.updateOnProgress();
             }, this.params.pollInterval / this.params.progressSteps);
-        }
+        };
 
-        pollWaitLoop()
+        pollWaitLoop();
     }
 
     runPoll() {
@@ -174,9 +152,6 @@ export class Poller {
         this.pubsubProxy.on('searching', ({ is }) => {
             if (is) {
                 switch (this.status) {
-                    // case PollerState.NONE:
-                    //     // Should not occur, but move into polling state.
-                    //     this.status = PollerState.POLLING;
                     case PollerState.STARTED:
                         // this is where we move into the polling state!
                         this.status = PollerState.POLLING;
@@ -199,8 +174,6 @@ export class Poller {
                 }
             } else {
                 switch (this.status) {
-                    // case PollerState.NONE:
-                    //     break;
                     case PollerState.STARTED:
                         break;
                     case PollerState.POLLING:
@@ -211,8 +184,6 @@ export class Poller {
                     case PollerState.STOPPED:
                         break;
                     case PollerState.PAUSED:
-                        // this.status = this.play();;
-                        // nothing to do
                         this.play();
                         break;
                     case PollerState.ERROR:
@@ -250,5 +221,4 @@ export class Poller {
         this.updateOnProgress();
         this.stopListeningForPollingEvent();
     }
-
 }
