@@ -348,8 +348,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     />
                 </Form.Item>
 
-                <Form.Item label="TimeRange" />
-                <Form.Item>
+                <Form.Item label="Time Range">
                     {this.renderTimeRangeSelectionControl()}
                 </Form.Item>
 
@@ -369,10 +368,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             this.doSearch(true);
                         }}
                         pubsub={this.pubsub}
-                        startPolling={true}
-                        isPollerRunning={this.props.searchState === SearchState.SEARCHING}
-                        showControls={this.props.showMonitoringControls}
-                        startOpen={true}
+                        defaultRunning={false}
                     />
                 </Form.Item>
             </Form>

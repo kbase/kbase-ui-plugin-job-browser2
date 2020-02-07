@@ -6,7 +6,9 @@
 /** imports */
 // 3rd party imports
 import React from "react";
-import { Table, Form, Input, Button, Checkbox, Select, DatePicker, Popconfirm, Tooltip, Modal, Switch, Alert } from "antd";
+import {
+    Table, Form, Input, Button, Checkbox, Select, DatePicker, Popconfirm, Tooltip, Modal, Switch, Alert
+} from "antd";
 import { CheckboxValueType } from "antd/lib/checkbox/Group";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import moment, { Moment } from "moment";
@@ -383,8 +385,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     />
                 </Form.Item>
 
-                <Form.Item label="TimeRange" />
-                <Form.Item>
+                <Form.Item label="Time Range">
                     <Select
                         defaultValue={MyJobs.defaultTimeRangePreset}
                         onChange={this.onChangeTimeRange.bind(this)}
@@ -402,7 +403,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
                 <Form.Item>
                     <Tooltip title="Clicking this button triggers a search to be run using all of the current search input">
-                        <Button icon="search" type="link" htmlType="submit" />
+                        <Button icon="search" type="primary" htmlType="submit" />
                     </Tooltip>
                 </Form.Item>
 
@@ -420,10 +421,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             this.doSearch(true);
                         }}
                         pubsub={this.pubsub}
-                        isPollerRunning={this.props.searchState === SearchState.SEARCHING}
-                        startPolling={false}
-                        showControls={this.props.showMonitoringControls}
-                        startOpen={false}
+                        defaultRunning={false}
                     />
                 </Form.Item>
             </Form>
@@ -432,7 +430,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     onToggleFilterArea(isFilterOpen: boolean) {
         this.setState({ isFilterOpen });
-        // this.setState({ isFilterOpen: !this.state.isFilterOpen });
     }
 
     onFilterChange(filters: Array<CheckboxValueType>) {
@@ -621,23 +618,26 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             // scroll={{ y: '100%' }}
             >
                 <Table.Column
-                    title="ID"
+                    title="Job"
                     dataIndex="id"
                     key="id"
-                    width="10%"
+                    width="5%"
                     render={(jobID: string, job: Job): any => {
-                        const title = jobID;
+                        const title = <div>
+                            <p><span style={{ color: 'silver' }}>Job ID</span>{' '}{jobID}</p>
+                            <p>Click to view job log and detail</p>
+                        </div>;
                         return (
                             <Tooltip title={title}>
-                                <a
-                                    href="https://example.com"
+                                <Button
+                                    // href="https://example.com"
+                                    type="link"
                                     onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
                                         e.preventDefault();
                                         this.onClickDetail(job);
                                     }}
-                                >
-                                    {jobID}
-                                </a>
+                                    icon="info-circle"
+                                />
                             </Tooltip>
                         );
                     }}
@@ -646,7 +646,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     title="Narrative"
                     dataIndex="narrativeTitle"
                     key="narrativeTitle"
-                    width="17%"
+                    width="20%"
                     render={(title: string, job: Job): any => {
                         if (!title || !job.narrativeID) {
                             return "n/a";
@@ -658,7 +658,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     title="App"
                     dataIndex="appTitle"
                     key="appTitle"
-                    width="20%"
+                    width="22%"
                     render={(title: string, job: Job): any => {
                         if (!title) {
                             return "n/a";

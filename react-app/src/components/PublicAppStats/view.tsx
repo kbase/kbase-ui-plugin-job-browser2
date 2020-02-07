@@ -87,7 +87,6 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     sorter={(a: AppStat, b: AppStat) => {
                         return a.moduleTitle.localeCompare(b.moduleTitle);
                     }}
-                    defaultSortOrder="ascend"
                 />
                 <Table.Column
                     title="Function"
@@ -126,6 +125,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     sorter={(a: AppStat, b: AppStat) => {
                         return a.runCount - b.runCount;
                     }}
+                    defaultSortOrder="descend"
                 />
                 <Table.Column
                     title="Errors"
