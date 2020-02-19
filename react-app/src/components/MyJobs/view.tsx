@@ -630,7 +630,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         return (
                             <Tooltip title={title}>
                                 <Button
-                                    // href="https://example.com"
                                     type="link"
                                     onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
                                         e.preventDefault();

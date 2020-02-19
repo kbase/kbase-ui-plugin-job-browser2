@@ -541,10 +541,12 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         const title = jobID;
                         return (
                             <Tooltip title={title}>
-                                <a href="https://example.com" onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-                                    e.preventDefault();
-                                    this.onClickDetail(job);
-                                }}>{jobID}</a>
+                                <Button type="link"
+                                    onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+                                        e.preventDefault();
+                                        this.onClickDetail(job);
+                                    }}>{jobID}
+                                </Button>
                             </Tooltip>
                         );
                     }}
