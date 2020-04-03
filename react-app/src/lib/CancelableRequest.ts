@@ -1,10 +1,10 @@
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export type TaskID = string;
 
 export interface Task<ResultType> {
     id: TaskID;
-    promise: Promise<ResultType>
+    promise: Promise<ResultType>;
     isCanceled: boolean;
 }
 
@@ -19,7 +19,7 @@ export default abstract class CancelableRequest<ParamType, ResultType> {
     }
 
     newID() {
-        return uuid.v4();
+        return uuidv4();
     }
 
     cancel(task: Task<ResultType>) {
