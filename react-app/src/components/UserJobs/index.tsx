@@ -1,91 +1,84 @@
-/**
- * A redux adapter container for the User Jobs view component.
- *
- * For those not familiar with redux-based apps: Redux exists as a parallel system to the react component hierarchy. The react "store" (database)
- * is established in the top level `App` component. A component can access the store data and the store actions through what is commonly
- * referred to as a "container" module. We prefer to call them "redux adapters", to be more specific.
- *
- * A redux adapter is a separate component file. It essentially creates a component (via the `connect` function) which "wraps" the underlying
- * view component. It extracts the data and action generators and supplies them to the view component.
- */
-
-/**
- * Imports, ignore
- */
-// 3rd party
-import { Dispatch, Action } from 'redux';
+import React from 'react';
 import { connect } from 'react-redux';
+import { Spin, Alert } from 'antd';
 
-// project
-import UserJobs from './view';
-import { StoreState, Job, JobsSearchExpression, SearchState } from '../../redux/store';
-import { userJobsSearch, userJobsCancelJob } from '../../redux/actions/userJobs';
+import { Action, Dispatch } from 'redux';
 
-/**
- * The props which this redux adapter requires in it's invocation.
- *
- * Current empty
- */
-export interface OwnProps { }
+import { StoreState } from '../../redux/store';
+import ReduxInterface from './redux';
+import { userJobsLoad } from '../../redux/actions/userJobs';
+import { ComponentLoadingState } from '../../redux/store/base';
 
-/**
- * The props this redux adapter extracts from the store and injects in
- * its call to the child component, UserJobs.
- *
- * @note These properties must exist in UserJobs.
- */
-interface StateProps {
-    jobs: Array<Job>;
-    searchState: SearchState;
-    showMonitoringControls: boolean;
-    // searchExpression: JobsSearchExpression;
+export interface GateProps {
+    loadingState: ComponentLoadingState;
+    onLoad: () => void;
 }
 
-/**
- * The props this redux adapter extracts from actions and injects into
- * its call to the child component, UserJobs.
- *
- * @note These properties must exist in UserJobs.
- */
+export interface GateState {
+}
+
+export class Gate extends React.Component<GateProps, GateState> {
+
+    componentDidMount() {
+        this.props.onLoad();
+    }
+
+    renderLoading() {
+        return <Spin />;
+    }
+
+    renderSuccess() {
+        return <ReduxInterface />;
+    }
+
+    renderError() {
+        return <Alert type="error" message="Error!" />;
+    }
+
+    render() {
+        switch (this.props.loadingState) {
+            case ComponentLoadingState.NONE:
+            case ComponentLoadingState.LOADING:
+                return this.renderLoading();
+            case ComponentLoadingState.SUCCESS:
+                return this.renderSuccess();
+            case ComponentLoadingState.ERROR:
+                return this.renderError();
+        }
+    }
+}
+
+// Store interface
+
+interface OwnProps {
+}
+
+interface StateProps {
+    loadingState: ComponentLoadingState;
+}
+
 interface DispatchProps {
-    search: (searchExpression: JobsSearchExpression) => void;
-    cancelJob: (jobID: string) => void;
+    onLoad: () => void;
 }
 
 function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
-    const {
-        auth: { userAuthorization },
-        views: {
-            userJobsView: { searchState, jobs }
+    const { views: {
+        userJobsView: {
+            loadingState
         }
-    } = state;
-
-    if (!userAuthorization) {
-        throw new Error('Not authorized!');
-    }
-
-    // const { roles } = userAuthorization
-    // const showMonitoringControls = roles.some((role) => {
-    //     return role === 'DevToken';
-    // })
-    const showMonitoringControls = true;
-    return { jobs, searchState, showMonitoringControls };
+    } } = state;
+    return { loadingState };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {
     return {
-        search: (searchExpression: JobsSearchExpression) => {
-            dispatch(userJobsSearch(searchExpression) as any);
-        },
-        cancelJob: (jobID: string) => {
-            dispatch(userJobsCancelJob(jobID) as any);
+        onLoad: () => {
+            dispatch(userJobsLoad() as any);
         }
     };
 }
 
-const UserJobsReduxAdapter = connect<StateProps, DispatchProps, OwnProps, StoreState>(
+export default connect<StateProps, DispatchProps, OwnProps, StoreState>(
     mapStateToProps,
     mapDispatchToProps
-)(UserJobs);
-
-export default UserJobsReduxAdapter;
+)(Gate);

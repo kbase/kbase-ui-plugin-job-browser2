@@ -1,10 +1,11 @@
 import React from 'react';
-import { Job, JobStatus } from '../redux/store';
+import { Job, JobContextType } from '../redux/store';
 import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
-import JobStatusBadge, { jobColor } from './JobStatus';
+import JobStatusBadge, { jobColor } from './JobStatusBadge';
 import { Spin } from 'antd';
-import UILink from './UILink';
+import { JobEvent, JobStateType } from '../redux/types/jobState';
 import NarrativeLink from './NarrativeLink';
+import UILink from './UILink';
 
 export interface Props {
     job: Job;
@@ -15,73 +16,98 @@ interface State {
 }
 
 export default class JobInfo extends React.Component<Props, State> {
-    renderSubmitted() {
-        const date = this.props.job.queuedAt;
-        if (!date) {
-            return <span>** empty **</span>;
+    currentJobState(job: Job): JobEvent {
+        return job.eventHistory[job.eventHistory.length - 1];
+    }
+
+    lastEvent(job: Job, type: JobStateType): JobEvent {
+        for (let i = job.eventHistory.length - 1; i >= 0; i -= 1) {
+            const jobEvent = job.eventHistory[i];
+            if (jobEvent.type === type) {
+                return jobEvent;
+            }
         }
+        // TODO: a better way of ensuring we have the right sequence of events (as defined in types)
+        throw new Error('Matching state not found: ' + type);
+
+    }
+    renderSubmitted() {
+        const date = new Date(this.props.job.eventHistory[0].at);
         return <NiceRelativeTime time={new Date(date)} />;
     }
     renderQueuedFor() {
         const job = this.props.job;
-        switch (job.status) {
-            case JobStatus.QUEUED:
-                return <NiceElapsedTime from={job.queuedAt} precision={2} useClock={true} />;
-            case JobStatus.RUNNING:
-                return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
-            case JobStatus.FINISHED:
-                return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
-            case JobStatus.CANCELED_QUEUED:
-                return <NiceElapsedTime from={job.queuedAt} to={job.finishAt} precision={2} />;
-            case JobStatus.CANCELED_RUNNING:
-                return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
-            case JobStatus.ERRORED_QUEUED:
-                return <NiceElapsedTime from={job.queuedAt} to={job.finishAt} precision={2} />;
-            case JobStatus.ERRORED_RUNNING:
-                return <NiceElapsedTime from={job.queuedAt} to={job.runAt} precision={2} />;
+        const currentState = this.currentJobState(job);
+        switch (currentState.type) {  // left off here
+            case JobStateType.CREATE:
+                return <span>-</span>;
+            case JobStateType.QUEUE:
+                return <NiceElapsedTime
+                    from={currentState.at}
+                    precision={2}
+                    useClock={true} />;
+            case JobStateType.RUN:
+                return <NiceElapsedTime
+                    from={this.lastEvent(job, JobStateType.QUEUE).at}
+                    to={currentState.at}
+                    precision={2} />;
+            default:
+                return <NiceElapsedTime
+                    from={this.lastEvent(job, JobStateType.QUEUE).at}
+                    to={this.lastEvent(job, JobStateType.RUN).at}
+                    precision={2} />;
         }
     }
     renderRunFor() {
         const job = this.props.job;
-        switch (job.status) {
-            case JobStatus.QUEUED:
+        const currentState = this.currentJobState(job);
+        switch (currentState.type) {
+            case JobStateType.CREATE:
+            case JobStateType.QUEUE:
                 return <span>-</span>;
-            case JobStatus.RUNNING:
-                return <NiceElapsedTime from={job.runAt} precision={2} useClock={true} />;
-            case JobStatus.FINISHED:
-                return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
-            case JobStatus.CANCELED_QUEUED:
-                return <span>-</span>;
-            case JobStatus.CANCELED_RUNNING:
-                return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
-            case JobStatus.ERRORED_QUEUED:
-                return <span>-</span>;
-            case JobStatus.ERRORED_RUNNING:
-                return <NiceElapsedTime from={job.runAt} to={job.finishAt} precision={2} />;
+            case JobStateType.RUN:
+                return <NiceElapsedTime
+                    from={currentState.at}
+                    precision={2}
+                    useClock={true} />;
+            default:
+                return <NiceElapsedTime
+                    from={this.lastEvent(job, JobStateType.RUN).at}
+                    to={currentState.at}
+                    precision={2} />;
         }
-        // if (!this.props.job.runElapsed) {
-        //     return <span>-</span>
-        // }
-        // return <NiceElapsedTime duration={this.props.job.runElapsed} precision={2} />;
     }
 
-    renderStateSpinner(jobStatus: JobStatus) {
-        if (this.props.job.status === jobStatus) {
+    renderSpinnerFor(jobEventType: JobStateType) {
+        const currentJobState = this.currentJobState(this.props.job);
+        if (currentJobState.type === jobEventType) {
             return <span>
                 {' '}
-                <Spin size="small" style={{ color: jobColor(jobStatus) }} />
+                <Spin size="small" style={{ color: jobColor(this.props.job) }} />
             </span>;
         }
     }
 
-    renderNarrativeLink() {
-        const id = this.props.job.narrativeID;
-        if (id === null) {
-            return;
+    renderNarrative() {
+        const job = this.props.job;
+        switch (job.request.context.type) {
+            case JobContextType.NARRATIVE:
+                return <NarrativeLink narrativeID={job.request.context.workspace.id}>
+                    {job.request.context.title}
+                </NarrativeLink>;
+            default:
+                return 'n/a';
         }
-        return <NarrativeLink narrativeID={id}>
-            {this.props.job.narrativeTitle}
-        </NarrativeLink>;
+    }
+
+    renderApp() {
+        if (this.props.job.request.app === null) {
+            return 'n/a';
+        }
+        return <UILink path={`catalog/apps/${this.props.job.request.app.id}`}
+            openIn='new-tab'>
+            {this.props.job.request.app.title}
+        </UILink>;
     }
 
     render() {
@@ -108,7 +134,7 @@ export default class JobInfo extends React.Component<Props, State> {
                         Narrative
                     </div>
                     <div className="InfoTable-dataCol">
-                        {this.renderNarrativeLink()}
+                        {this.renderNarrative()}
                     </div>
                 </div>
                 <div className="InfoTable-row">
@@ -116,10 +142,7 @@ export default class JobInfo extends React.Component<Props, State> {
                         App
                     </div>
                     <div className="InfoTable-dataCol">
-                        <UILink path={`catalog/apps/${this.props.job.appID}`}
-                            openIn='new-tab'>
-                            {this.props.job.appTitle}
-                        </UILink>
+                        {this.renderApp()}
                     </div>
                 </div>
                 <div className="InfoTable-row">
@@ -136,7 +159,7 @@ export default class JobInfo extends React.Component<Props, State> {
                     </div>
                     <div className="InfoTable-dataCol">
                         {this.renderQueuedFor()}
-                        {this.renderStateSpinner(JobStatus.QUEUED)}
+                        {this.renderSpinnerFor(JobStateType.QUEUE)}
                     </div>
                 </div>
                 <div className="InfoTable-row">
@@ -145,7 +168,7 @@ export default class JobInfo extends React.Component<Props, State> {
                 </div>
                     <div className="InfoTable-dataCol">
                         {this.renderRunFor()}
-                        {this.renderStateSpinner(JobStatus.RUNNING)}
+                        {this.renderSpinnerFor(JobStateType.RUN)}
                     </div>
                 </div>
             </div>

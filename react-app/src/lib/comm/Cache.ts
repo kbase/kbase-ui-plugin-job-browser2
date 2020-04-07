@@ -215,7 +215,7 @@ export default class Cache<T> {
     async getItemWithWait({ id, fetcher }: { id: string; fetcher: Fetcher<T>; }): Promise<T> {
         const cached = this.cache.get(id);
 
-        // If there is no item cached yet, we reserve it and then fetch it. We don't 
+        // If there is no item cached yet, we reserve it and then fetch it. We don't
         // need to wait. (Others asking for this cache item, though, will need to wait
         // until the reserve is cleared.)
         if (typeof cached === 'undefined') {

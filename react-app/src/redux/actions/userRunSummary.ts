@@ -1,10 +1,68 @@
 import { Action } from 'redux';
 import { ActionType } from '.';
-import { StoreState, UserRunSummaryQuery, UserRunSummaryStat } from '../store';
+import { StoreState } from '../store';
 import { CatalogClient } from '@kbase/ui-lib';
 import { AppError } from '@kbase/ui-components';
 import { ThunkDispatch } from 'redux-thunk';
-import { } from './utils';
+import {
+    UserRunSummaryQuery, UserRunSummaryStat, UserRunSummaryViewData, UserRunSummaryViewDataInitialSearching
+} from '../store/UserRunSummary';
+import { SearchState } from '../store/base';
+import { UIError } from '../types/error';
+
+// Loading
+
+export interface LoadLoading extends Action<ActionType.USER_RUN_SUMMARY_LOAD_LOADING> {
+    type: ActionType.USER_RUN_SUMMARY_LOAD_LOADING;
+}
+
+export interface LoadSuccess extends Action<ActionType.USER_RUN_SUMMARY_LOAD_SUCCESS> {
+    type: ActionType.USER_RUN_SUMMARY_LOAD_SUCCESS;
+    view: UserRunSummaryViewData;
+}
+
+export interface LoadError extends Action<ActionType.USER_RUN_SUMMARY_LOAD_ERROR> {
+    type: ActionType.USER_RUN_SUMMARY_LOAD_ERROR;
+    error: UIError;
+}
+
+export function loadLoading(): LoadLoading {
+    return {
+        type: ActionType.USER_RUN_SUMMARY_LOAD_LOADING
+    };
+}
+
+export function loadSuccess(view: UserRunSummaryViewDataInitialSearching): LoadSuccess {
+    return {
+        type: ActionType.USER_RUN_SUMMARY_LOAD_SUCCESS,
+        view
+    };
+}
+
+export function loadError(error: UIError) {
+    return {
+        type: ActionType.USER_RUN_SUMMARY_LOAD_ERROR,
+        error
+    };
+}
+
+export function load() {
+    return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
+        dispatch(loadLoading());
+
+        dispatch(loadSuccess({
+            searchState: SearchState.INITIAL_SEARCHING,
+            query: {
+                query: ''
+            }
+        }));
+
+        dispatch(search({
+            query: ''
+        }));
+    };
+}
+
 
 // Search
 
@@ -25,6 +83,7 @@ export interface SearchError extends Action<ActionType.USER_RUN_SUMMARY_SEARCH_E
 export interface SearchSuccess extends Action<ActionType.USER_RUN_SUMMARY_SEARCH_SUCCESS> {
     type: ActionType.USER_RUN_SUMMARY_SEARCH_SUCCESS;
     userRunSummary: Array<UserRunSummaryStat>;
+    query: UserRunSummaryQuery;
 }
 
 function searchStart(): SearchStart {
@@ -40,10 +99,11 @@ function searchError(error: AppError): SearchError {
     };
 }
 
-function searchSuccess(userRunSummary: Array<UserRunSummaryStat>): SearchSuccess {
+function searchSuccess(userRunSummary: Array<UserRunSummaryStat>, query: UserRunSummaryQuery): SearchSuccess {
     return {
         type: ActionType.USER_RUN_SUMMARY_SEARCH_SUCCESS,
-        userRunSummary
+        userRunSummary,
+        query
     };
 }
 
@@ -122,6 +182,6 @@ export function search(query: UserRunSummaryQuery) {
             });
         });
 
-        dispatch(searchSuccess(filtered));
+        dispatch(searchSuccess(filtered, query));
     };
 }

@@ -1,22 +1,21 @@
 import React from 'react';
-import { Job, JobID, JobStatus } from '../../redux/store';
+import { Job, JobID } from '../../redux/store';
 import JobLogComponent from './view';
 import { Spin, Alert } from 'antd';
-import { NarrativeJobServiceClient } from '@kbase/ui-lib';
-import MetricsServiceClient from '../../lib/MetricsServiceClient';
 import { serviceJobToUIJob } from '../../redux/actions/utils';
+import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
+import { JobEvent, JobStateType } from '../../redux/types/jobState';
 
 const POLLING_INTERVAL = 5000;
 
 // A simple state wrapper for job logs.
 
-export interface JobLogLine {
+export interface JobLogEntry {
     lineNumber: number;
-    line: string;
+    loggedAt: Date,
+    message: string;
     isError: boolean;
 }
-export type JobLog = Array<JobLogLine>;
-
 export enum JobLogState {
     NONE,
     JOB_QUEUED,
@@ -41,19 +40,19 @@ export interface JobLogViewInitialLoading {
 
 export interface JobLogViewActiveLoaded {
     status: JobLogState.ACTIVE_LOADED,
-    log: Array<JobLogLine>;
+    log: Array<JobLogEntry>;
     job: Job;
 }
 
 export interface JobLogViewActiveLoading {
     status: JobLogState.ACTIVE_LOADING,
-    log: Array<JobLogLine>;
+    log: Array<JobLogEntry>;
     job: Job;
 }
 
 export interface JobLogViewFinishedLoaded {
     status: JobLogState.FINISHED_LOADED,
-    log: Array<JobLogLine>;
+    log: Array<JobLogEntry>;
     job: Job;
 }
 
@@ -83,35 +82,47 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     }
 
     async getJob(): Promise<Job> {
-        const metricsClient = new MetricsServiceClient({
-            authorization: this.props.token,
+        const jobBrowserBFF = new JobBrowserBFFClient({
+            token: this.props.token,
             url: this.props.serviceWizardURL,
-            timeout: 10000
-            // version: 'dev'
         });
 
-        const job_id = this.props.jobID;
+        const jobs = await jobBrowserBFF.get_jobs({
+            job_ids: [this.props.jobID],
+            // TODO: admin??
+            admin: 0,
+            // TODO: from config
+            timeout: 10000
+        });
 
-        const job = await metricsClient.getJob({ job_id });
-        return serviceJobToUIJob(job.job_state, 'UNKNOWN');
+        return serviceJobToUIJob(jobs.jobs[0], 'UNKNOWN');
     }
 
-    async getJobLog(skipLines: number): Promise<Array<JobLogLine>> {
-        const njsClient = new NarrativeJobServiceClient({
+    async getJobLog(offset: number, limit: number, timeout: number, admin: boolean): Promise<Array<JobLogEntry>> {
+        const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
-            url: this.props.njsURL,
-            module: 'NarrativeJobService'
+            url: this.props.serviceWizardURL,
         });
 
-        const [jobLog] = await njsClient.getJobLogs({ job_id: this.props.jobID, skip_lines: skipLines });
 
-        return jobLog.lines.map((line, index) => {
+        const jobLog = await jobBrowserBFF.get_job_log({
+            job_id: this.props.jobID,
+            offset, limit, timeout,
+            admin: admin ? 1 : 0
+        });
+
+        return jobLog.log.map((entry) => {
             return {
-                lineNumber: skipLines + index + 1,
-                line: line.line,
-                isError: line.is_error ? true : false
+                lineNumber: entry.row,
+                message: entry.message,
+                isError: entry.level === 'error',
+                loggedAt: new Date(entry.logged_at)
             };
         });
+    }
+
+    currentJobState(job: Job): JobEvent {
+        return job.eventHistory[job.eventHistory.length - 1];
     }
 
     startPolling() {
@@ -130,15 +141,23 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 log
             });
             const job = await this.getJob();
-            const startingLines = log.length;
-            const newLog = await this.getJobLog(startingLines);
+            const offset = log.length;
+            // TODO: how to mimic offset at end of log (above, done), and 
+            // an indefinite limit? For now, just use 1000.
+            const limit = 1000;
+            // TODO: get from somewhere else... 
+            const timeout = 10000;
+            // TODO: get from somewhere else...
+            const admin = false;
+            const newLog = await this.getJobLog(offset, limit, timeout, admin);
 
-            switch (job.status) {
-                case JobStatus.QUEUED:
+            switch (this.currentJobState(job).type) {
+                case JobStateType.CREATE:
+                case JobStateType.QUEUE:
                     // should not occur!
                     this.startQueuedPolling();
                     break;
-                case JobStatus.RUNNING:
+                case JobStateType.RUN:
                     this.setState({
                         status: JobLogState.ACTIVE_LOADED,
                         log: log.concat(newLog),
@@ -146,11 +165,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     });
                     loop();
                     break;
-                case JobStatus.FINISHED:
-                case JobStatus.ERRORED_QUEUED:
-                case JobStatus.ERRORED_RUNNING:
-                case JobStatus.CANCELED_QUEUED:
-                case JobStatus.CANCELED_RUNNING:
+                default:
                     this.setState({
                         status: JobLogState.FINISHED_LOADED,
                         log: log.concat(newLog),
@@ -165,35 +180,38 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     }
 
     startQueuedPolling() {
+        // TODO: how to mimic offset at end of log (above, done), and 
+        // an indefinite limit? For now, just use 1000.
+        const limit = 1000;
+        // TODO: get from somewhere else... 
+        const timeout = 10000;
+        // TODO: get from somewhere else...
+        const admin = false;
+
         const poller = async () => {
             const job = await this.getJob();
-            switch (job.status) {
-                case JobStatus.QUEUED:
+            switch (this.currentJobState(job).type) {
+                case JobStateType.CREATE:
+                case JobStateType.QUEUE:
                     // still queued, eh?
                     loop();
                     return;
+                case JobStateType.RUN:
+                    var log = await this.getJobLog(0, limit, timeout, admin);
+                    this.setState({
+                        status: JobLogState.ACTIVE_LOADED,
+                        log,
+                        job
+                    });
+                    loop();
+                    break;
                 default:
-                    const log = await this.getJobLog(0);
-                    switch (job.status) {
-                        case JobStatus.RUNNING:
-                            this.setState({
-                                status: JobLogState.ACTIVE_LOADED,
-                                log,
-                                job
-                            });
-                            loop();
-                            break;
-                        case JobStatus.FINISHED:
-                        case JobStatus.ERRORED_QUEUED:
-                        case JobStatus.ERRORED_RUNNING:
-                        case JobStatus.CANCELED_QUEUED:
-                        case JobStatus.CANCELED_RUNNING:
-                            this.setState({
-                                status: JobLogState.FINISHED_LOADED,
-                                log,
-                                job
-                            });
-                    }
+                    var log = await this.getJobLog(0, limit, timeout, admin);
+                    this.setState({
+                        status: JobLogState.FINISHED_LOADED,
+                        log,
+                        job
+                    });
             }
         };
 
@@ -210,29 +228,34 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         });
         const job = await this.getJob();
 
+        // TODO: how to mimic offset at end of log (above, done), and 
+        // an indefinite limit? For now, just use 1000.
+        const limit = 1000;
+        // TODO: get from somewhere else... 
+        const timeout = 10000;
+        // TODO: get from somewhere else...
+        const admin = false;
+
         let log;
-        switch (job.status) {
-            case JobStatus.QUEUED:
+        switch (this.currentJobState(job).type) {
+            case JobStateType.CREATE:
+            case JobStateType.QUEUE:
                 // still queued, eh?
                 this.setState({
                     status: JobLogState.JOB_QUEUED
                 });
                 this.startQueuedPolling();
                 return;
-            case JobStatus.RUNNING:
-                log = await this.getJobLog(0);
+            case JobStateType.RUN:
+                log = await this.getJobLog(0, limit, timeout, admin);
                 this.setState({
                     status: JobLogState.ACTIVE_LOADED,
                     log,
                     job
                 });
                 return;
-            case JobStatus.FINISHED:
-            case JobStatus.ERRORED_QUEUED:
-            case JobStatus.ERRORED_RUNNING:
-            case JobStatus.CANCELED_QUEUED:
-            case JobStatus.CANCELED_RUNNING:
-                log = await this.getJobLog(0);
+            default:
+                log = await this.getJobLog(0, limit, timeout, admin);
                 this.setState({
                     status: JobLogState.FINISHED_LOADED,
                     log,

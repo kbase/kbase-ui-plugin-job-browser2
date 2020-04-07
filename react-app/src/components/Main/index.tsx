@@ -2,7 +2,7 @@
  * This is a "loader" component. It is solely responsible for
  */
 import * as React from 'react';
-import { ComponentLoadingState, StoreState, MainView } from '../../redux/store';
+import { StoreState, MainView } from '../../redux/store';
 import Container from './state';
 
 // The redux connection
@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 
 import { Spin, Alert } from 'antd';
 import { mainLoad, unload } from '../../redux/actions/app';
+import { ComponentLoadingState } from '../../redux/store/base';
 
 // First the loader component, which takes care of a loading view, error view, and the
 // container.

@@ -1,14 +1,20 @@
 import React from 'react';
-import { AppStat, PublicAppStatsQuery, SearchState } from '../../redux/store';
-import { Table, Form, Progress, Input, Button, Tooltip } from 'antd';
+import { } from '../../redux/store';
+import { Table, Form, Progress, Input, Button, Tooltip, Spin, Alert } from 'antd';
 import { NiceTimeDuration } from '@kbase/ui-components';
 import { PaginationConfig, SorterResult } from 'antd/lib/table';
 import './style.css';
+
+import { PublicAppStatsViewData, PublicAppStatsQuery, PublicAppStatsViewDataSearched, PublicAppStatsViewDataSearching, PublicAppStatsViewDataError } from '../../redux/store/PublicAppStats';
+import { AppStat, SearchState } from '../../redux/store/base';
+
 import UILink from '../UILink';
 
+
 export interface PublicAppStatsProps {
-    searchState: SearchState;
-    appStats: Array<AppStat>;
+    view: PublicAppStatsViewData;
+    // searchState: SearchState;
+    // appStats: Array<AppStat>;
     onSearch: (query: PublicAppStatsQuery) => void;
 }
 
@@ -33,9 +39,11 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
             query: this.currentQuery
         });
     }
+
     onChangeQuery(event: React.ChangeEvent<HTMLInputElement>) {
         this.currentQuery = event.target.value;
     }
+
     renderControlBar() {
         return (
             <Form layout="inline" onSubmit={this.onSubmitSearch.bind(this)}>
@@ -53,12 +61,14 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
             </Form>
         );
     }
+
     onTableChange(pagination: PaginationConfig, filters: any, sorter: SorterResult<AppStat>) { }
-    renderAppStatsTable() {
+
+    renderAppStatsTable(view: PublicAppStatsViewDataSearched | PublicAppStatsViewDataSearching) {
         return (
             <Table<AppStat>
-                dataSource={this.props.appStats}
-                loading={this.props.searchState === SearchState.SEARCHING}
+                dataSource={view.appStats}
+                loading={this.props.view.searchState === SearchState.SEARCHING}
                 rowKey={(stat: AppStat) => {
                     return stat.appId;
                 }}
@@ -206,10 +216,34 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
             </Table>
         );
     }
+
+    renderLoading() {
+        return <Spin />;
+    }
+
+    renderError(view: PublicAppStatsViewDataError) {
+        return <Alert type="error" message={view.error.message} />;
+    }
+
+    renderViewState() {
+        const view = this.props.view;
+        console.log('rendering?', view);
+        switch (view.searchState) {
+            case SearchState.NONE:
+            case SearchState.INITIAL_SEARCHING:
+                return this.renderLoading();
+            case SearchState.SEARCHING:
+            case SearchState.SEARCHED:
+                return this.renderAppStatsTable(view);
+            case SearchState.ERROR:
+                return this.renderError(view);
+        }
+    }
+
     render() {
         return <div className="PublicAppStats">
             {this.renderControlBar()}
-            {this.renderAppStatsTable()}
+            {this.renderViewState()}
         </div>;
     }
 }

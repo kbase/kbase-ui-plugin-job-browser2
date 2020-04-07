@@ -3,7 +3,7 @@ import {
     RequestOptions, HTTPHeader
 } from './HTTPClient';
 
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { JSONValue } from '../json';
 
 export interface JSONRPCRequestOptions {
@@ -114,7 +114,7 @@ export class JSONRPCClient {
         return {
             version: '1.1',
             method,
-            id: uuid.v4(),
+            id: uuid(),
             params: params
         };
     }

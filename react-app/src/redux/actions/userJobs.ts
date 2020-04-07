@@ -1,12 +1,54 @@
-import { Job, JobsSearchExpression, EpochTime, StoreState } from '../store';
-import MetricsServiceClient from '../../lib/MetricsServiceClient';
-import { serviceJobToUIJob, compareTimeRange, compareStatus, extractTimeRange } from './utils';
+import {
+    Job, JobsSearchExpression, StoreState, UserJobsViewData, JobSearchState
+} from '../store';
+import { serviceJobToUIJob, extractTimeRange } from './utils';
 import { Action } from 'redux';
 import { ActionType } from '.';
 import { NarrativeJobServiceClient } from '@kbase/ui-lib';
 import { AppError } from '@kbase/ui-components';
 import { ThunkDispatch } from 'redux-thunk';
 import CancelableRequest, { Task } from '../../lib/CancelableRequest';
+import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
+import { EpochTime } from '../types/base';
+import { ComponentLoadingState } from '../store/base';
+import { UIError } from '../types/error';
+
+// Loading
+export interface UserJobsLoadLoading extends Action<ActionType.USER_JOBS_LOAD_LOADING> {
+    type: ActionType.USER_JOBS_LOAD_LOADING;
+}
+
+export interface UserJobsLoadError extends Action<ActionType.USER_JOBS_LOAD_ERROR> {
+    type: ActionType.USER_JOBS_LOAD_ERROR;
+    error: UIError;
+}
+
+export interface UserJobsLoadSuccess extends Action<ActionType.USER_JOBS_LOAD_SUCCESS> {
+    type: ActionType.USER_JOBS_LOAD_SUCCESS;
+    data: UserJobsViewData;
+}
+
+export function userJobsLoadLoading(): UserJobsLoadLoading {
+    return {
+        type: ActionType.USER_JOBS_LOAD_LOADING
+    };
+}
+
+export function userJobsLoadError(error: UIError): UserJobsLoadError {
+    return {
+        type: ActionType.USER_JOBS_LOAD_ERROR,
+        error
+    };
+}
+
+export function userJobsLoadSuccess(data: UserJobsViewData): UserJobsLoadSuccess {
+    return {
+        type: ActionType.USER_JOBS_LOAD_SUCCESS,
+        data
+    };
+}
+
+// Search
 
 export interface UserJobsSearch extends Action<ActionType.USER_JOBS_SEARCH> {
     type: ActionType.USER_JOBS_SEARCH;
@@ -20,8 +62,9 @@ export interface UserJobsSearchStart extends Action<ActionType.USER_JOBS_SEARCH_
 export interface UserJobsSearchSuccess extends Action<ActionType.USER_JOBS_SEARCH_SUCCESS> {
     type: ActionType.USER_JOBS_SEARCH_SUCCESS;
     searchExpression: JobsSearchExpression;
-    rawJobs: Array<Job>;
     jobs: Array<Job>;
+    foundCount: number;
+    totalCount: number;
     jobsFetchedAt: EpochTime;
 }
 
@@ -37,16 +80,18 @@ export function userJobsSearchStart(): UserJobsSearchStart {
 }
 
 export function userJobsSearchSuccess(
-    rawJobs: Array<Job>,
     jobs: Array<Job>,
+    foundCount: number,
+    totalCount: number,
     jobsFetchedAt: EpochTime,
-    searchExpression: JobsSearchExpression
+    searchExpression: JobsSearchExpression,
 ): UserJobsSearchSuccess {
     return {
         type: ActionType.USER_JOBS_SEARCH_SUCCESS,
         searchExpression,
-        rawJobs,
         jobs,
+        foundCount,
+        totalCount,
         jobsFetchedAt
     };
 }
@@ -60,31 +105,60 @@ export function userJobsSearchError(error: AppError): UserJobsSearchError {
 
 interface UserJobsParam {
     token: string,
+    searchExpression: JobsSearchExpression;
     serviceWizardURL: string,
-    from: number,
-    to: number;
 }
 
-type UserJobsResult = Array<Job>;
+type UserJobsResult = {
+    jobs: Array<Job>,
+    foundCount: number,
+    totalCount: number;
+};
 
 class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
-    request({ token, serviceWizardURL, from, to }: UserJobsParam): Task<UserJobsResult> {
-        const client = new MetricsServiceClient({
+    request({ token, searchExpression, serviceWizardURL }: UserJobsParam): Task<UserJobsResult> {
+
+        const jobBrowserBFF = new JobBrowserBFFClient({
+            token,
             url: serviceWizardURL,
-            authorization: token,
-            timeout: 10000
-            // version: 'dev'
         });
-        const promise = client
-            .getJobs({
-                epoch_range: [from, to],
-                user_ids: []
-            })
-            .then((metrics) => {
-                const converted = metrics.job_states.map((jobState) => {
-                    return serviceJobToUIJob(jobState, 'UNKNOWN');
-                });
-                return converted;
+
+        const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
+
+        const queryParams: QueryJobsParams = {
+            time_span: {
+                from: timeRangeStart,
+                to: timeRangeEnd
+            }, // TODO: really handle sort
+            offset: searchExpression.offset,
+            limit: searchExpression.limit,
+            timeout: 10000,
+            admin: 1,
+            filter: {
+                status: searchExpression.jobStatus
+            }
+        };
+
+        if (searchExpression.sort) {
+            switch (searchExpression.sort.field) {
+                case 'created':
+                    queryParams.sort = [{
+                        key: 'created',
+                        direction: searchExpression.sort.direction
+                    }];
+            }
+        }
+
+        const promise = jobBrowserBFF
+            .query_jobs(queryParams)
+            .then(({ jobs, found_count, total_count }) => {
+                return {
+                    jobs: jobs.map((jobInfo) => {
+                        return serviceJobToUIJob(jobInfo, 'UNKNOWN');
+                    }),
+                    foundCount: found_count,
+                    totalCount: total_count
+                };
             });
 
         const task: Task<UserJobsResult> = {
@@ -99,6 +173,80 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
 
 const userJobsSearchRequest = new UserJobsRequest();
 
+export function userJobsLoad() {
+    return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
+        dispatch(userJobsLoadLoading());
+
+        const {
+            auth: { userAuthorization },
+            app: {
+                config: {
+                    services: {
+                        ServiceWizard: { url: serviceWizardURL }
+                    }
+                }
+            },
+        } = getState();
+
+        if (!userAuthorization) {
+            dispatch(
+                userJobsSearchError({
+                    message: 'Not authorized',
+                    code: 'unauthorized'
+                })
+            );
+            return;
+        }
+
+        const searchExpression: JobsSearchExpression = {
+            forceSearch: true,
+            jobStatus: ["create", "queue", "run", "complete", "error", "terminate"],
+            offset: 0,
+            limit: 10,
+            query: '',
+            sort: {
+                field: 'created',
+                direction: 'descending'
+            },
+            timeRange: {
+                kind: 'preset',
+                preset: 'lastMonth'
+            }
+        };
+        const initialData: UserJobsViewData = {
+            searchState: JobSearchState.INITIAL_SEARCHING,
+            searchExpression
+        };
+        dispatch(userJobsLoadSuccess(initialData));
+
+        const task = userJobsSearchRequest.spawn({
+            token: userAuthorization.token,
+            serviceWizardURL,
+            searchExpression
+        });
+
+
+        // const task = userJobsSearchRequest.spawn({
+        //     token: userAuthorization.token,
+        //     serviceWizardURL,
+        //     searchExpression
+        // });
+
+        const { jobs, foundCount, totalCount } = await task.promise;
+
+        if (task.isCanceled) {
+            // just do nothing
+            return;
+        }
+        const jobsFetchedAt = new Date().getTime();
+        userJobsSearchRequest.done(task);
+
+        console.log('GOT JOBS', jobs, foundCount, totalCount);
+
+        dispatch(userJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
+    };
+}
+
 export function userJobsSearch(searchExpression: JobsSearchExpression) {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
         dispatch(userJobsSearchStart());
@@ -111,6 +259,9 @@ export function userJobsSearch(searchExpression: JobsSearchExpression) {
                         ServiceWizard: { url: serviceWizardURL }
                     }
                 }
+            },
+            views: {
+                userJobsView
             }
         } = getState();
 
@@ -124,56 +275,31 @@ export function userJobsSearch(searchExpression: JobsSearchExpression) {
             return;
         }
 
-        let {
-            views: {
-                userJobsView: { jobsFetchedAt, rawJobs }
-            }
-        } = getState();
-
-        const searchTerms = searchExpression.query.split(/\s+/).map((term) => {
-            return new RegExp(term, 'i');
-        });
-
-        const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
-
-        if (!jobsFetchedAt || searchExpression.forceSearch) {
-
-            const task = userJobsSearchRequest.spawn({
-                token: userAuthorization.token,
-                serviceWizardURL,
-                from: timeRangeStart,
-                to: timeRangeEnd
-            });
-
-            rawJobs = await task.promise;
-            if (task.isCanceled) {
-                // just do nothing
-                return;
-            }
-            jobsFetchedAt = new Date().getTime();
-            userJobsSearchRequest.done(task);
-
-            // rawJobs = await fetchAllUserJobs(userAuthorization.token, serviceWizardURL, timeRangeStart, timeRangeEnd);
-            jobsFetchedAt = new Date().getTime();
-            // UPDATE: update the raw jobs
+        if (userJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
+            dispatch(
+                userJobsSearchError({
+                    message: 'Invalid State',
+                    code: 'invalid-loading-state'
+                })
+            );
+            return;
         }
 
-        const newJobs = rawJobs.filter((job) => {
-            return (
-                searchTerms.every((term) => {
-                    return term.test(job.appTitle) || term.test(job.narrativeTitle) || term.test(job.id) || term.test(job.username);
-                }) &&
-                compareTimeRange(
-                    job,
-                    // searchExpression.timeRange,
-                    timeRangeStart,
-                    timeRangeEnd
-                ) &&
-                compareStatus(job, searchExpression.jobStatus)
-            );
+        const task = userJobsSearchRequest.spawn({
+            token: userAuthorization.token,
+            serviceWizardURL,
+            searchExpression
         });
 
-        dispatch(userJobsSearchSuccess(rawJobs, newJobs, jobsFetchedAt, searchExpression));
+        const { jobs, foundCount, totalCount } = await task.promise;
+        if (task.isCanceled) {
+            // just do nothing
+            return;
+        }
+        userJobsSearchRequest.done(task);
+        const jobsFetchedAt = new Date().getTime();
+
+        dispatch(userJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
     };
 }
 
@@ -204,9 +330,28 @@ export function userJobsRefreshSearch() {
                 }
             },
             views: {
-                userJobsView: { searchExpression }
+                userJobsView
             }
         } = getState();
+
+        if (userJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
+            dispatch(
+                userJobsSearchError({
+                    message: 'Invalid State',
+                    code: 'invalid-loading-state'
+                })
+            );
+            return;
+        }
+
+        if (userJobsView.data.searchState === JobSearchState.ERROR) {
+            return;
+        }
+
+        dispatch(userJobsSearchStart());
+
+
+        const searchExpression = userJobsView.data.searchExpression;
 
         if (!searchExpression) {
             userJobsSearchError({
@@ -216,21 +361,14 @@ export function userJobsRefreshSearch() {
             return;
         }
 
-        const searchTerms = searchExpression.query.split(/\s+/).map((term) => {
-            return new RegExp(term, 'i');
-        });
-
-        const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
-
-
         const task = userJobsSearchRequest.spawn({
             token: userAuthorization.token,
             serviceWizardURL,
-            from: timeRangeStart,
-            to: timeRangeEnd
+            searchExpression
         });
 
-        const rawJobs = await task.promise;
+        const { jobs, foundCount, totalCount } = await task.promise;
+
         if (task.isCanceled) {
             // just do nothing
             return;
@@ -238,22 +376,7 @@ export function userJobsRefreshSearch() {
 
         userJobsSearchRequest.done(task);
 
-        const newJobs = rawJobs.filter((job) => {
-            return (
-                searchTerms.every((term) => {
-                    return term.test(job.appTitle) || term.test(job.narrativeTitle);
-                }) &&
-                compareTimeRange(
-                    job,
-                    // searchExpression.timeRange,
-                    timeRangeStart,
-                    timeRangeEnd
-                ) &&
-                compareStatus(job, searchExpression.jobStatus)
-            );
-        });
-
-        dispatch(userJobsSearchSuccess(rawJobs, newJobs, Date.now(), searchExpression));
+        dispatch(userJobsSearchSuccess(jobs, foundCount, totalCount, Date.now(), searchExpression));
     };
 }
 

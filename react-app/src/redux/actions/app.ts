@@ -1,10 +1,10 @@
 import { Action } from 'redux';
 import { ActionType } from '.';
-import { CatalogClient } from '@kbase/ui-lib';
 import { AppError } from '@kbase/ui-components';
 
 import { ThunkDispatch } from 'redux-thunk';
 import { StoreState } from '../store';
+import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
 
 // MAIN Loading
 
@@ -58,7 +58,7 @@ export function mainLoad() {
             app: {
                 config: {
                     services: {
-                        Catalog: { url: catalogURL }
+                        ServiceWizard: { url: serviceWizardURL }
                     }
                 }
             }
@@ -74,18 +74,17 @@ export function mainLoad() {
             return;
         }
 
-        // determine auth
-        // TODO: we need a model object for interacting with the outside world
-        const catalogClient = new CatalogClient({
+        const jobBrowserBFF = new JobBrowserBFFClient({
             token: userAuthorization.token,
-            url: catalogURL,
-            module: 'Catalog'
+            url: serviceWizardURL,
         });
 
         try {
-            const isAdmin = await catalogClient.isAdmin();
-            dispatch(mainLoadSuccess(isAdmin ? true : false));
+            const { is_admin } = await jobBrowserBFF.is_admin();
+            dispatch(mainLoadSuccess(is_admin ? true : false));
         } catch (ex) {
+            // TODO improve detection of interesting errors, like jsonrpc,
+            // to pull out more info to display to user.
             dispatch(
                 mainLoadError({
                     message: ex.message,

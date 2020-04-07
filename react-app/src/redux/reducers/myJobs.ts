@@ -1,53 +1,79 @@
-import { Reducer } from "react";
-import { StoreState, SearchState } from "../store";
-import { Action } from "redux";
-import { MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess, MyJobsSearchError } from "../actions/myJobs";
-import { ActionType } from "../actions";
+import { Reducer } from 'react';
+import { StoreState, JobSearchState } from '../store';
+import { Action } from 'redux';
+import {
+    MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess, MyJobsLoadLoading, MyJobsLoadError, MyJobsLoadSuccess, MyJobsSearchError
+} from '../actions/myJobs';
+import { ActionType } from '../actions';
+import { ComponentLoadingState, SearchState } from '../store/base';
 
 function myJobsSearchStart(state: StoreState, action: MyJobsSearchStart): StoreState {
+    if (state.views.myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
+        return state;
+    }
+    if (state.views.myJobsView.data.searchState !== JobSearchState.SEARCHING &&
+        state.views.myJobsView.data.searchState !== JobSearchState.READY) {
+        return state;
+    }
     return {
         ...state,
         views: {
             ...state.views,
             myJobsView: {
                 ...state.views.myJobsView,
-                searchState: SearchState.SEARCHING
+
+                data: {
+                    ...state.views.myJobsView.data,
+                    searchState: JobSearchState.SEARCHING
+                }
+
             }
         }
     };
 }
 
 function myJobsSearchSuccess(state: StoreState, action: MyJobsSearchSuccess): StoreState {
-    const newState = {
-        ...state,
-        views: {
-            ...state.views,
-            myJobsView: {
-                ...state.views.myJobsView,
-                searchState: SearchState.SEARCHED,
-                rawJobs: action.rawJobs,
-                jobs: action.jobs,
-                jobsFetchedAt: action.jobsFetchedAt,
-                searchExpression: action.searchExpression
-            }
-        }
-    };
-    return newState;
-}
-
-function myJobsSearchError(state: StoreState, action: MyJobsSearchError): StoreState {
+    if (state.views.myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
+        return state;
+    }
+    if (state.views.myJobsView.data.searchState !== JobSearchState.SEARCHING &&
+        state.views.myJobsView.data.searchState !== JobSearchState.INITIAL_SEARCHING) {
+        return state;
+    }
     return {
         ...state,
         views: {
             ...state.views,
             myJobsView: {
                 ...state.views.myJobsView,
-                searchState: SearchState.ERROR,
-                error: action.error
+                data: {
+                    searchState: JobSearchState.READY,
+                    searchExpression: action.searchExpression,
+                    searchResult: {
+                        jobs: action.jobs,
+                        jobsFetchedAt: action.jobsFetchedAt,
+                        foundCount: action.foundCount,
+                        totalCount: action.totalCount
+                    }
+                }
             }
         }
     };
 }
+
+// function myJobsSearchError(state: StoreState, action: MyJobsSearchError): StoreState {
+//     return {
+//         ...state,
+//         views: {
+//             ...state.views,
+//             myJobsView: {
+//                 ...state.views.myJobsView,
+//                 searchState: SearchState.ERROR,
+//                 error: action.error
+//             }
+//         }
+//     };
+// }
 
 function myJobsCancelJobSuccess(state: StoreState, action: MyJobsCancelJobSuccess): StoreState {
     return {
@@ -57,6 +83,44 @@ function myJobsCancelJobSuccess(state: StoreState, action: MyJobsCancelJobSucces
             myJobsView: {
                 ...state.views.myJobsView
                 // TODO: should twiddle a cancellation status for the job.
+            }
+        }
+    };
+}
+
+function myJobsLoadLoading(state: StoreState, action: MyJobsLoadLoading): StoreState {
+    return {
+        ...state,
+        views: {
+            ...state.views,
+            myJobsView: {
+                loadingState: ComponentLoadingState.LOADING
+            }
+        }
+    };
+}
+
+function myJobsLoadError(state: StoreState, action: MyJobsLoadError): StoreState {
+    return {
+        ...state,
+        views: {
+            ...state.views,
+            myJobsView: {
+                loadingState: ComponentLoadingState.ERROR,
+                error: action.error
+            }
+        }
+    };
+}
+
+function myJobsLoadSuccess(state: StoreState, action: MyJobsLoadSuccess): StoreState {
+    return {
+        ...state,
+        views: {
+            ...state.views,
+            myJobsView: {
+                loadingState: ComponentLoadingState.SUCCESS,
+                data: action.data
             }
         }
     };
@@ -73,8 +137,12 @@ const reducer: Reducer<StoreState | undefined, Action> = (state: StoreState | un
             return myJobsSearchStart(state, action as MyJobsSearchStart);
         case ActionType.MY_JOBS_CANCEL_SUCCESS:
             return myJobsCancelJobSuccess(state, action as MyJobsCancelJobSuccess);
-        case ActionType.MY_JOBS_SEARCH_ERROR:
-            return myJobsSearchError(state, action as MyJobsSearchError);
+        case ActionType.MY_JOBS_LOAD_LOADING:
+            return myJobsLoadLoading(state, action as MyJobsLoadLoading);
+        case ActionType.MY_JOBS_LOAD_ERROR:
+            return myJobsLoadError(state, action as MyJobsLoadError);
+        case ActionType.MY_JOBS_LOAD_SUCCESS:
+            return myJobsLoadSuccess(state, action as MyJobsLoadSuccess);
     }
 };
 

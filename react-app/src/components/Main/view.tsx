@@ -5,8 +5,9 @@ import MyJobs from '../MyJobs';
 import PublicAppStats from '../PublicAppStats';
 import UserRunSummary from '../UserRunSummary';
 import { MainParams } from './state';
-import FlexTabs, { Tab } from '../FlexTabs';
+import { Tab } from '../FlexTabs';
 import { Icon } from 'antd';
+import Tabs from '../AutoFlexTabs';
 
 export interface MainProps {
     isAdmin: boolean;
@@ -18,8 +19,7 @@ export interface MainProps {
 }
 
 interface MainState {
-    activeTabKey: string | null;
-    defaultActiveTabKey: string | null;
+    tabs: Array<Tab>;
 }
 
 export default class Main extends React.Component<MainProps, MainState> {
@@ -27,55 +27,26 @@ export default class Main extends React.Component<MainProps, MainState> {
     constructor(props: MainProps) {
         super(props);
         this.defaultTabKey = 'myJobs';
-        this.state = {
-            activeTabKey: this.defaultTabKey,
-            defaultActiveTabKey: this.defaultTabKey
-        };
-    }
 
-    componentDidMount() {
-        this.props.setTitle('Job Browser');
-    }
 
-    componentWillUnmount() {
-        this.setState({
-            activeTabKey: null
-            // defaultActiveTabKey: null
-        });
-    }
+        // const tabs: Map<string, Tab> = new Map();
+        // let tabOrder: Array<string>;
+        // const selectedTab = 'myjobs';
 
-    onTabsChange(activeKey: string) {
-        this.setState({ activeTabKey: activeKey });
-        // this.state.activeTabKey = activeKey;
-    }
-
-    renderJobsTab() { }
-
-    renderAdminJobsTab() { }
-
-    renderMyJobsTab() {
-        return <MyJobs />
-    }
-
-    renderUserJobsTab() {
-        return <UserJobs />
-    }
-
-    renderPublicAppStatsTab() {
-        return <PublicAppStats />
-    }
-
-    renderUserRunSummaryTab() {
-        return <UserRunSummary />
-    }
-
-    renderTabs() {
         const tabs: Array<Tab> = [];
+
+        // if (this.props.isAdmin) {
+        //     tabOrder = ['myjobs', 'userjobs', 'appstats', 'userrunsummary']
+        // } else {
+        //     tabOrder = ['myjobs', 'appstats',]
+        // }
 
         tabs.push({
             tab: 'myjobs',
             title: 'My Jobs',
-            component: this.renderMyJobsTab()
+            renderBody: () => {
+                return this.renderMyJobsTab();
+            }
         });
 
         if (this.props.isAdmin) {
@@ -87,14 +58,18 @@ export default class Main extends React.Component<MainProps, MainState> {
             tabs.push({
                 tab: 'userjobs',
                 title: userJobsTabLabel,
-                component: <UserJobs />
-            })
+                renderBody: () => {
+                    return <UserJobs />;
+                }
+            });
         }
 
         tabs.push({
             tab: 'appstats',
             title: 'Public AppStats',
-            component: this.renderPublicAppStatsTab()
+            renderBody: () => {
+                return this.renderPublicAppStatsTab();
+            }
         });
 
         if (this.props.isAdmin) {
@@ -106,13 +81,111 @@ export default class Main extends React.Component<MainProps, MainState> {
             tabs.push({
                 tab: 'userrunsummary',
                 title: tabLabel,
-                component: <UserRunSummary />
-            })
+                renderBody: () => {
+                    return <UserRunSummary />;
+                }
+            });
         }
 
+        this.state = {
+            tabs
+        };
+    }
+
+    componentDidMount() {
+        this.props.setTitle('Job Browser');
+    }
+
+    componentWillUnmount() {
+        // this.setState({
+        //     activeTabKey: null
+        //     // defaultActiveTabKey: null
+        // });
+    }
+
+    onTabsChange(activeKey: string) {
+        // console.log('tabs changed', activeKey, this.activeTabKey);
+        // this.setState({ activeTabKey: activeKey });
+        // this.state.activeTabKey = activeKey;
+    }
+
+    renderJobsTab() { }
+
+    renderAdminJobsTab() { }
+
+    renderMyJobsTab() {
+        return <MyJobs />;
+    }
+
+    renderUserJobsTab() {
+        return <UserJobs />;
+    }
+
+    renderPublicAppStatsTab() {
+        return <PublicAppStats />;
+    }
+
+    renderUserRunSummaryTab() {
+        return <UserRunSummary />;
+    }
+
+    renderTabs() {
+        // let userRunTab;
+        // let userJobsTab;
+        // console.log('rendering, admin?', this.props.isAdmin);
+        // if (this.props.isAdmin) {
+        //     const tabLabel = (
+        //         <span>
+        //             User Run Summary <Icon type="unlock" />
+        //         </span>
+        //     );
+        //     userRunTab = (
+        //         <Tabs.TabPane tab={tabLabel} key="userRunSummary">
+        //             <UserRunSummary />
+        //         </Tabs.TabPane>
+        //     );
+        //     const userJobsTabLabel = (
+        //         <span>
+        //             User Jobs <Icon type="unlock" />
+        //         </span>
+        //     );
+        //     userJobsTab = (
+        //         <Tabs.TabPane tab={userJobsTabLabel} key="userJobs">
+        //             <UserJobs />
+        //         </Tabs.TabPane>
+        //     );
+        // }
+
+        // FIXME: The animated flag is set to false below because for some reason antd (on safari at least) is not
+        // correctly rendering any tab other than the first one with animation enabled (which is default).
+        // Please investigate and either find what we have done wrong or antd has.
+        // console.log('default active tab key?', this.state.defaultActiveTabKey);
+        // return (
+        //     <Tabs
+        //         animated={false}
+        //         // defaultActiveKey={this.state.activeTabKey || undefined}
+        //         activeKey={this.props.params.tab || this.state.activeTabKey || undefined}
+        //         // className="FlexTabs"
+        //         onChange={this.onTabsChange.bind(this)}
+        //         destroyInactiveTabPane={true}
+        //     >
+        //         <Tabs.TabPane tab="My Jobs" key="myJobs">
+        //             <MyJobs />
+        //         </Tabs.TabPane>
+
+        //         <Tabs.TabPane tab="Public App Stats" key="publicAppStats">
+        //             <PublicAppStats />
+        //         </Tabs.TabPane>
+
+        //         {userJobsTab}
+        //         {userRunTab}
+        //     </Tabs>
+        // );
+
+
         return (
-            <FlexTabs
-                tabs={tabs}
+            <Tabs
+                tabs={this.state.tabs}
             />
         );
     }

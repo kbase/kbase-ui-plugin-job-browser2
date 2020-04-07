@@ -1,362 +1,255 @@
 import {
-    JobStatus, Job, EpochTime, TimeRangePresets, TimeRange,
-    JobQueued, JobRunning, JobFinished, JobCanceledWhileQueued,
-    JobCanceledWhileRunning, JobErroredWhileQueued, JobErroredWhileRunning
+    Job, TimeRangePresets, TimeRange,
+    JobContextType, JobContext, App
 } from '../store';
-import { JobState } from '../../lib/MetricsServiceClient';
+import {
+    JobInfo
+} from '../../lib/JobBrowserBFFClient';
+import { EpochTime } from '../types/base';
+import { JobEventHistory, JobStateType } from '../types/jobState';
 
-function getJobStatus(job: JobState): JobStatus {
-    switch (job.state) {
-        case 'QUEUED': return JobStatus.QUEUED;
-        case 'RUNNING': return JobStatus.RUNNING;
-        case 'FINISHED': return JobStatus.FINISHED;
-        case 'CANCELED_QUEUED': return JobStatus.CANCELED_QUEUED;
-        case 'CANCELED_RUNNING': return JobStatus.CANCELED_QUEUED;
-
-        // case 'ERRORED': return JobStatus.ERRORED;
-        case 'ERRORED_QUEUED':
-            // console.warn('QUEUE_ERRORED', job);
-            return JobStatus.ERRORED_QUEUED;
-        case 'ERRORED_RUNNING':
-            return JobStatus.ERRORED_RUNNING;
-        default:
-            throw new Error('Unknown job state: ' + job.state);
+function makeJobContext(job: JobInfo): JobContext {
+    switch (job.context.type) {
+        case 'narrative':
+            return {
+                type: JobContextType.NARRATIVE,
+                title: job.context.narrative.title,
+                workspace: {
+                    id: job.context.workspace.id,
+                    isAccessible: job.context.workspace.is_accessible,
+                    name: job.context.workspace.name,
+                    isDeleted: job.context.workspace.is_deleted
+                }
+            };
+        case 'workspace':
+            return {
+                type: JobContextType.WORKSPACE,
+                workspace: {
+                    id: job.context.workspace.id,
+                    isAccessible: job.context.workspace.is_accessible,
+                    name: job.context.workspace.name,
+                    isDeleted: job.context.workspace.is_deleted
+                }
+            };
+        case 'export':
+            return {
+                type: JobContextType.EXPORT,
+            };
+        case 'unknown':
+            return {
+                type: JobContextType.UNKNOWN,
+            };
     }
-    // Use most reliable fields first.
-    // if (job.complete) {
-    //     if (job.error) {
-    //         return JobStatus.ERRORED;
-    //     } else {
-    //         if (job.status === 'done') {
-    //             return JobStatus.FINISHED;
-    //         }
-    //         if (job.status.startsWith('canceled')) {
-    //             return JobStatus.CANCELED;
-    //         }
-    //         if (job.status === 'Unknown error') {
-    //             return JobStatus.ERRORED;
-    //         }
-    //         return JobStatus.ERRORED;
-    //         // TODO: handle this error by creating a new job state - UNKNOWN
-    //         // console.log('detection error', job);
-    //         // throw new Error('Cannot detect job state');
-    //     }
-    // } else {
-    //     if (!job.status || job.status === 'queued') {
-    //         return JobStatus.QUEUED;
-    //     }
-    //     // Various status values indicate the job is running, but
-    //     // we don't need any more evidence because that is the only possible
-    //     // other job state.
-    //     // E.g. 'in-progress', 'running', 'starting job so that it can be finished'
-
-    //     return JobStatus.RUNNING;
-    // }
-
-    // if (job.status === 'Unknown error') {
-    //     return JobStatus.ERRORED;
-    // }
-    // console.log('detection error', job);
-    // throw new Error('Cannot detect job state');
 }
 
-function makeJobQueued(job: JobState, username: string): JobQueued {
-    let narrativeID;
-    if (job.wsid) {
-        narrativeID = parseInt(job.wsid, 10);
+export function serviceJobToEventHistory(job: JobInfo): JobEventHistory {
+    switch (job.state.status) {
+        case 'create':
+            return [{
+                type: JobStateType.CREATE,
+                at: job.state.create_at
+            }];
+        case 'queue':
+            return [{
+                type: JobStateType.CREATE,
+                at: job.state.create_at
+            }, {
+                type: JobStateType.QUEUE,
+                at: job.state.queue_at
+            }];
+        case 'run':
+            return [{
+                type: JobStateType.CREATE,
+                at: job.state.create_at
+            }, {
+                type: JobStateType.QUEUE,
+                at: job.state.queue_at
+            }, {
+                type: JobStateType.RUN,
+                at: job.state.run_at
+            }];
+        case 'complete':
+            return [{
+                type: JobStateType.CREATE,
+                at: job.state.create_at
+            }, {
+                type: JobStateType.QUEUE,
+                at: job.state.queue_at
+            }, {
+                type: JobStateType.RUN,
+                at: job.state.run_at
+            }, {
+                type: JobStateType.COMPLETE,
+                at: job.state.finish_at
+            }];
+        case 'error':
+            if (job.state.run_at) {
+                return [
+                    {
+                        type: JobStateType.CREATE,
+                        at: job.state.create_at
+                    }, {
+                        type: JobStateType.QUEUE,
+                        at: job.state.queue_at
+                    }, {
+                        type: JobStateType.RUN,
+                        at: job.state.run_at
+                    }, {
+                        type: JobStateType.ERROR,
+                        at: job.state.finish_at,
+                        code: job.state.error.code,
+                        message: job.state.error.message
+                    }
+                ];
+            }
+            if (job.state.queue_at) {
+                return [
+                    {
+                        type: JobStateType.CREATE,
+                        at: job.state.create_at
+                    }, {
+                        type: JobStateType.QUEUE,
+                        at: job.state.queue_at
+                    }, {
+                        type: JobStateType.ERROR,
+                        at: job.state.finish_at,
+                        code: job.state.error.code,
+                        message: job.state.error.message
+                    }
+                ];
+            }
+
+            return [
+                {
+                    type: JobStateType.CREATE,
+                    at: job.state.create_at
+                }, {
+                    type: JobStateType.QUEUE,
+                    at: job.state.queue_at
+                }, {
+                    type: JobStateType.ERROR,
+                    at: job.state.finish_at,
+                    code: job.state.error.code,
+                    message: job.state.error.message
+                }
+            ];
+        case 'terminate':
+            if (job.state.run_at) {
+                return [
+                    {
+                        type: JobStateType.CREATE,
+                        at: job.state.create_at
+                    }, {
+                        type: JobStateType.QUEUE,
+                        at: job.state.queue_at
+                    }, {
+                        type: JobStateType.RUN,
+                        at: job.state.run_at
+                    }, {
+                        type: JobStateType.TERMINATE,
+                        at: job.state.finish_at,
+                        code: job.state.reason.code
+                    }
+                ];
+            }
+            if (job.state.queue_at) {
+                return [
+                    {
+                        type: JobStateType.CREATE,
+                        at: job.state.create_at
+                    }, {
+                        type: JobStateType.QUEUE,
+                        at: job.state.queue_at
+                    }, {
+                        type: JobStateType.TERMINATE,
+                        at: job.state.finish_at,
+                        code: job.state.reason.code
+                    }
+                ];
+            }
+
+            return [
+                {
+                    type: JobStateType.CREATE,
+                    at: job.state.create_at
+                }, {
+                    type: JobStateType.QUEUE,
+                    at: job.state.queue_at
+                }, {
+                    type: JobStateType.TERMINATE,
+                    at: job.state.finish_at,
+                    code: job.state.reason.code
+                }
+            ];
+    }
+}
+
+export function serviceJobToUIJob(job: JobInfo, username: string): Job {
+    const context = makeJobContext(job);
+    let app: App | null;
+    if (job.app) {
+        app = {
+            id: job.app.id,
+            moduleName: job.app.module_name,
+            functionName: job.app.function_name,
+            title: job.app.title,
+            clientGroups: job.app.client_groups
+        };
     } else {
-        narrativeID = null;
+        app = null;
     }
     return {
-        key: job.job_id,
         id: job.job_id,
-        status: JobStatus.QUEUED,
-        appID: job.app_id,
-        appTitle: job.app_id,
-        narrativeID,
-        narrativeTitle: job.narrative_name,
-        queuedAt: job.creation_time,
-        // runAt: job.exec_start_time! || null,
-        queuedElapsed: Date.now() - job.creation_time,
-        clientGroups: job.client_groups,
-        // TODO: a more affirmative method of providing current username
-        // for querying for own...?
-        username: job.user || username
+        request: {
+            context,
+            owner: {
+                username: job.owner.username,
+                realname: job.owner.realname
+            },
+            app
+        },
+        eventHistory: serviceJobToEventHistory(job)
     };
-}
-
-function makeJobRunning(job: JobState, username: string): JobRunning {
-    let narrativeID;
-    if (job.wsid) {
-        narrativeID = parseInt(job.wsid, 10);
-    } else {
-        narrativeID = null;
-    }
-    if (!job.exec_start_time) {
-        console.error('ERROR: Running job without exec_start_time!', job);
-        throw new Error('Running job without exec_start_time!');
-    }
-    return {
-        key: job.job_id,
-        id: job.job_id,
-        status: JobStatus.RUNNING,
-        appID: job.app_id,
-        appTitle: job.app_id,
-        narrativeID,
-        narrativeTitle: job.narrative_name,
-        queuedAt: job.creation_time,
-        runAt: job.exec_start_time,
-        runElapsed: Date.now() - job.exec_start_time,
-        queuedElapsed: Date.now() - job.creation_time,
-        clientGroups: job.client_groups,
-        // TODO: a more affirmative method of providing current username
-        // for querying for own...?
-        username: job.user || username
-    };
-}
-
-function makeJobFinished(job: JobState, username: string): JobFinished {
-    let narrativeID;
-    if (job.wsid) {
-        narrativeID = parseInt(job.wsid, 10);
-    } else {
-        narrativeID = null;
-    }
-    if (!job.exec_start_time) {
-        throw new Error('Running job without exec_start_time!');
-    }
-    if (!job.finish_time) {
-        throw new Error('Running job without finish_time!');
-    }
-    return {
-        key: job.job_id,
-        id: job.job_id,
-        status: JobStatus.FINISHED,
-        appID: job.app_id,
-        appTitle: job.app_id,
-        narrativeID,
-        narrativeTitle: job.narrative_name,
-        queuedAt: job.creation_time,
-        runAt: job.exec_start_time,
-        runElapsed: job.finish_time - job.exec_start_time,
-        finishAt: job.finish_time,
-        queuedElapsed: Date.now() - job.creation_time,
-        clientGroups: job.client_groups,
-        // TODO: a more affirmative method of providing current username
-        // for querying for own...?
-        username: job.user || username
-    };
-}
-
-function makeJobCanceledQueued(job: JobState, username: string): JobCanceledWhileQueued {
-    let narrativeID;
-    if (job.wsid) {
-        narrativeID = parseInt(job.wsid, 10);
-    } else {
-        narrativeID = null;
-    }
-
-    if (!job.finish_time) {
-        throw new Error('Canceled job without finish_time!');
-    }
-    return {
-        key: job.job_id,
-        id: job.job_id,
-        status: JobStatus.CANCELED_QUEUED,
-        appID: job.app_id,
-        appTitle: job.app_id,
-        narrativeID,
-        narrativeTitle: job.narrative_name,
-        queuedAt: job.creation_time,
-        queuedElapsed: Date.now() - job.creation_time,
-        clientGroups: job.client_groups,
-        finishAt: job.finish_time,
-        // TODO: a more affirmative method of providing current username
-        // for querying for own...?
-        username: job.user || username
-    };
-}
-
-function makeJobCanceledRunning(job: JobState, username: string): JobCanceledWhileRunning {
-    let narrativeID;
-    if (job.wsid) {
-        narrativeID = parseInt(job.wsid, 10);
-    } else {
-        narrativeID = null;
-    }
-    if (!job.exec_start_time) {
-        throw new Error('Canceled job without exec_start_time!');
-    }
-    if (!job.finish_time) {
-        throw new Error('Canceled job without finish_time!');
-    }
-    return {
-        key: job.job_id,
-        id: job.job_id,
-        status: JobStatus.CANCELED_RUNNING,
-        appID: job.app_id,
-        appTitle: job.app_id,
-        narrativeID,
-        narrativeTitle: job.narrative_name,
-        queuedAt: job.creation_time,
-        runAt: job.exec_start_time,
-        runElapsed: job.finish_time - job.exec_start_time,
-        finishAt: job.finish_time,
-        queuedElapsed: Date.now() - job.creation_time,
-        clientGroups: job.client_groups,
-        // TODO: a more affirmative method of providing current username
-        // for querying for own...?
-        username: job.user || username
-    };
-}
-
-function makeJobErroredQueued(job: JobState, username: string): JobErroredWhileQueued {
-    let narrativeID;
-    if (job.wsid) {
-        narrativeID = parseInt(job.wsid, 10);
-    } else {
-        narrativeID = null;
-    }
-    if (!job.finish_time) {
-        throw new Error('Errored job without finish_time!');
-    }
-    return {
-        key: job.job_id,
-        id: job.job_id,
-        status: JobStatus.ERRORED_QUEUED,
-        appID: job.app_id,
-        appTitle: job.app_id,
-        narrativeID,
-        narrativeTitle: job.narrative_name,
-        queuedAt: job.creation_time,
-        finishAt: job.finish_time,
-        queuedElapsed: job.finish_time - job.creation_time,
-        clientGroups: job.client_groups,
-        message: job.status,
-        // TODO: a more affirmative method of providing current username
-        // for querying for own...?
-        username: job.user || username
-    };
-}
-
-function makeJobErroredRunning(job: JobState, username: string): JobErroredWhileRunning {
-    let narrativeID;
-    if (job.wsid) {
-        narrativeID = parseInt(job.wsid, 10);
-    } else {
-        narrativeID = null;
-    }
-    if (!job.exec_start_time) {
-        console.error('ERROR: Errored job without exec_start_time!', job);
-        throw new Error('Errored job without exec_start_time!');
-    }
-    if (!job.finish_time) {
-        throw new Error('Errored job without finish_time!');
-    }
-    return {
-        key: job.job_id,
-        id: job.job_id,
-        status: JobStatus.ERRORED_RUNNING,
-        appID: job.app_id,
-        appTitle: job.app_id,
-        narrativeID,
-        narrativeTitle: job.narrative_name,
-        queuedAt: job.creation_time,
-        runAt: job.exec_start_time,
-        runElapsed: job.finish_time - job.exec_start_time,
-        finishAt: job.finish_time,
-        queuedElapsed: job.exec_start_time - job.creation_time,
-        clientGroups: job.client_groups,
-        message: job.status,
-        // TODO: a more affirmative method of providing current username
-        // for querying for own...?
-        username: job.user || username
-    };
-}
-
-export function serviceJobToUIJob(job: JobState, username: string): Job {
-    const status = getJobStatus(job);
-    switch (status) {
-        case JobStatus.QUEUED:
-            return makeJobQueued(job, username);
-        case JobStatus.RUNNING:
-            return makeJobRunning(job, username);
-        case JobStatus.FINISHED:
-            return makeJobFinished(job, username);
-        case JobStatus.ERRORED_QUEUED:
-            return makeJobErroredQueued(job, username);
-        case JobStatus.ERRORED_RUNNING:
-            return makeJobErroredRunning(job, username);
-        case JobStatus.CANCELED_QUEUED:
-            return makeJobCanceledQueued(job, username);
-        case JobStatus.CANCELED_RUNNING:
-            return makeJobCanceledRunning(job, username);
-        default:
-            throw new Error('Invalid job status: ' + job.status);
-    }
-}
-
-export function compareTimeRange(job: Job, timeRangeStart: EpochTime, timeRangeEnd: EpochTime) {
-    // // if any of the timestamps fall within the time range, we are good
-    // if (
-    //     [job.queuedAt, job.runAt, job.finishAt].some((eventTime) => {
-    //         if (!eventTime) {
-    //             return false;
-    //         }
-    //         return eventTime > timeRangeStart && eventTime < timeRangeEnd;
-    //     })
-    // ) {
-    //     return true;
+    // Note that the usage of "as" below to force the type is because I 
+    // can't figure out why type narrowing isn't happening through job.state.status.
+    // Logically it should, and it does if state is considered separately, but I 
+    // guess the discrimination based on job.state.status does not apply to job...
+    // switch (job.state.status) {
+    //     case 'create':
+    //         return makeJobCreate(job as JobInfoCreate);
+    //     case 'queue':
+    //         return makeJobQueue(job as JobInfoQueue);
+    //     case 'run':
+    //         return makeJobRun(job as JobInfoRun);
+    //     case 'complete':
+    //         return makeJobComplete(job as JobInfoComplete);
+    //     case 'error':
+    //         return makeJobError(job as JobInfoError);
+    //     case 'terminate':
+    //         return makeJobTerminate(job as JobInfoTerminate);
     // }
 
-    // // If the timestamps span the time range, we are also good.
-    // if (!job.queuedAt) {
-    //     return false;
-    // }
-    // // if start past the end time, no match.
-    // if (job.queuedAt > timeRangeEnd) {
-    //     return false;
-    // }
-    // // If start after or on start time, then, we have a match.
-    // if (job.queuedAt >= timeRangeStart) {
-    //     return true;
-    // }
 
-    // // Otherwise, the job started (queued) before out time range, but
-    // // there is still hope, maybe it is still queued or started after the
-    // // start date.
-    // if (!job.runAt) {
-    //     // Not run yet, a match.
-    //     return true;
+    // switch (status) {
+    //     case JobStatus.CREATED:
+    //         return makeJobCreated(job, username);
+    //     case JobStatus.QUEUED:
+    //         return makeJobQueued(job, username);
+    //     case JobStatus.RUNNING:
+    //         return makeJobRunning(job, username);
+    //     case JobStatus.FINISHED:
+    //         return makeJobFinished(job, username);
+    //     case JobStatus.ERRORED_QUEUED:
+    //         return makeJobErroredQueued(job, username);
+    //     case JobStatus.ERRORED_RUNNING:
+    //         return makeJobErroredRunning(job, username);
+    //     case JobStatus.CANCELED_QUEUED:
+    //         return makeJobCanceledQueued(job, username);
+    //     case JobStatus.CANCELED_RUNNING:
+    //         return makeJobCanceledRunning(job, username);
+    //     default:
+    //         throw new Error('Invalid job status: ' + job.status);
     // }
-    // // Otherwise, if it starts after the range start, a match
-    // if (job.runAt >= timeRangeStart) {
-    //     return true;
-    // }
-
-    // // Otherwise, yes, there is still hope...
-
-    // // If not finished yet, a match.
-    // if (!job.finishAt) {
-    //     return true;
-    // }
-
-    // // Otherwise, if it finished after the range start, a match
-    // if (job.finishAt >= timeRangeStart) {
-    //     return true;
-    // }
-
-    // return false;
-    return true;
-}
-
-export function compareStatus(job: Job, jobStatus?: Array<JobStatus>) {
-    if (!jobStatus) {
-        return true;
-    }
-    return jobStatus.some((status) => {
-        return job.status === status;
-    });
 }
 
 export function calcAverage(total: number, count: number) {
