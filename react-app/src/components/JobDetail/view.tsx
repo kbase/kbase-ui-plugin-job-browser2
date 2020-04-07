@@ -4,12 +4,12 @@ import { Spin, Alert } from 'antd';
 import AutoFlexTabs from '../AutoFlexTabs';
 import JobLog from '../JobLog/view';
 import JobInfo from '../JobInfo';
-import './style.css'
+import './style.css';
 import { JobLogView, JobLogState, JobLogViewError } from './state';
 import JobStatusBadge from '../JobStatusBadge';
 
 interface JobLogGateProps {
-    view: JobLogView
+    view: JobLogView;
 }
 
 interface JobLogGateState {
@@ -45,10 +45,9 @@ class JobLogGate extends React.Component<JobLogGateProps, JobLogGateState> {
     renderError(view: JobLogViewError) {
         return (
             <Alert type="error" message={view.error} />
-        )
+        );
     }
     render() {
-        console.log('should be RENDERING', this.props);
         switch (this.props.view.status) {
             case JobLogState.NONE:
                 return this.renderNone();
@@ -68,7 +67,7 @@ class JobLogGate extends React.Component<JobLogGateProps, JobLogGateState> {
 }
 
 interface JobInfoGateProps {
-    view: JobLogView
+    view: JobLogView;
 }
 
 interface JobInfoGateState {
@@ -86,7 +85,7 @@ class JobInfoGate extends React.Component<JobInfoGateProps, JobInfoGateState> {
     renderError(view: JobLogViewError) {
         return (
             <Alert type="error" message={view.error} />
-        )
+        );
     }
     render() {
         switch (this.props.view.status) {
@@ -108,7 +107,7 @@ class JobInfoGate extends React.Component<JobInfoGateProps, JobInfoGateState> {
 }
 
 export interface JobDetailProps {
-    view: JobLogView
+    view: JobLogView;
 }
 
 interface JobDetailState {
@@ -119,37 +118,37 @@ export default class JobDetail extends React.Component<JobDetailProps, JobDetail
         switch (this.props.view.status) {
             case JobLogState.NONE:
             case JobLogState.INITIAL_LOADING:
-                return <Spin size="small" />
+                return <Spin size="small" />;
             case JobLogState.ERROR:
-                return <Alert type="error" message={this.props.view.error} />
+                return <Alert type="error" message={this.props.view.error} />;
             default:
-                return <JobStatusBadge job={this.props.view.job} showTiming={true} />
+                return <JobStatusBadge job={this.props.view.job} showTiming={true} />;
         }
     }
     renderMiniDetails() {
         return <div style={{ flex: '0 0 auto' }}>
             {this.renderStatus()}
-        </div>
+        </div>;
 
     }
     selectTab(selectedTab: string) {
         this.setState({
             selectedTab
-        })
+        });
     }
     render() {
         const tabs = [{
             tab: 'log',
             title: 'Log',
             renderBody: () => {
-                return <JobLogGate view={this.props.view} />
+                return <JobLogGate view={this.props.view} />;
             }
         },
         {
             tab: 'detail',
             title: 'Detail',
             renderBody: () => {
-                return <JobInfoGate view={this.props.view} />
+                return <JobInfoGate view={this.props.view} />;
             }
         }];
         return (
@@ -157,6 +156,6 @@ export default class JobDetail extends React.Component<JobDetailProps, JobDetail
                 {this.renderMiniDetails()}
                 <AutoFlexTabs tabs={tabs} />
             </React.Fragment>
-        )
+        );
     }
 }

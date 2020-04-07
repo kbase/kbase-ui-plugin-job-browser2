@@ -1,4 +1,4 @@
-import { JSONObject } from '../types/json'
+import { UIError } from '../types/error';
 
 export enum ComponentLoadingState {
     NONE = 0,
@@ -7,28 +7,21 @@ export enum ComponentLoadingState {
     ERROR
 }
 
-
-export interface UIError {
-    code: number;
-    message: string;
-    data: JSONObject
-}
-
 export interface ViewBase {
-    loadingState: ComponentLoadingState
+    loadingState: ComponentLoadingState;
 }
 
 export interface ViewNone extends ViewBase {
-    loadingState: ComponentLoadingState.NONE
+    loadingState: ComponentLoadingState.NONE;
 }
 
 export interface ViewLoading extends ViewBase {
-    loadingState: ComponentLoadingState.LOADING
+    loadingState: ComponentLoadingState.LOADING;
 }
 
 export interface ViewError extends ViewBase {
     loadingState: ComponentLoadingState.ERROR;
-    error: UIError
+    error: UIError;
 }
 
 export interface ViewSuccess extends ViewBase {

@@ -101,7 +101,7 @@ export class DynamicServiceClient {
             (): Promise<GetServiceStatusResult> => {
                 const client = new ServiceWizardClient({
                     url: this.url,
-                    token: this.token,
+                    authorization: this.token,
                     timeout: this.timeout
                 });
                 // NB wrapped in promise.resolve because the promise we have 

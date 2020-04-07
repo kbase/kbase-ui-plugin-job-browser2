@@ -5,15 +5,41 @@ export interface CacheParams {
     waiterFrequency: number;
 }
 
-export interface CacheItem<T> {
-    id: string;
-    value: T | null;
-    createdAt: number;
-    fetcher: () => Promise<T>;
-    reserved: boolean;
+export enum CacheItemState {
+    RESERVED,
+    PRESENT
 }
 
-export type Fetcher<T> = () => Promise<T>
+export interface CacheItemBase<T> {
+    state: CacheItemState;
+    id: string;
+    fetcher: () => Promise<T>;
+}
+
+export interface CacheItemReserved<T> extends CacheItemBase<T> {
+    state: CacheItemState.RESERVED;
+    reservedAt: number;
+}
+
+export interface CacheItemPresent<T> extends CacheItemBase<T> {
+    state: CacheItemState.PRESENT;
+    createdAt: number;
+    value: T;
+}
+
+export type CacheItem<T> = CacheItemReserved<T> | CacheItemPresent<T>;
+
+// export interface CacheItemBase<T> {
+//     state: CacheItemState;
+//     id: string;
+//     value: T ;
+//     createdAt: number;
+//     fetcher: () => Promise<T>;
+//     reserved: boolean;
+// }
+
+
+export type Fetcher<T> = () => Promise<T>;
 
 export default class Cache<T> {
     cache: Map<string, CacheItem<T>>;
@@ -95,61 +121,43 @@ export default class Cache<T> {
      * @param id - an identifier which uniquely identifies an item of type T
      * @param fetcher - a function returning a promise of an item of type T
      */
-    private reserveWaiter(id: string, fetcher: Fetcher<T>): Promise<CacheItem<T>> {
-        return new Promise<CacheItem<T>>((resolve, reject) => {
+    private async reserveWaiter(id: string, fetcher: Fetcher<T>): Promise<CacheItemPresent<T>> {
+        return new Promise<CacheItemPresent<T>>((resolve, reject) => {
             const started = new Date().getTime();
-            const waiting = true;
+            const resolveItem = async () => {
+                const item = this.cache.get(id);
 
-            const waiter = () => {
-                if (!waiting) {
-                    return;
+                // If on a wait-loop cycle we discover that the
+                // cache item has been deleted, we volunteer
+                // to attempt to fetch it ourselves.
+                // The only case now for this is a cancellation
+                // of the first request to any dynamic service,
+                // which may cancel the initial service wizard
+                // call rather than the service call.
+
+                // Handle case of an item disappearing from the cache.
+                if (typeof item === 'undefined') {
+                    return await this.reserveAndFetch(id, fetcher);
                 }
-                setTimeout(() => {
-                    const item = this.cache.get(id);
-                    // Handle case of an item disappearing from the cache.
-                    if (!item) {
-                        // If on a wait-loop cycle we discover that the
-                        // cache item has been deleted, we volunteer
-                        // to attempt to fetch it ourselves.
-                        // The only case now for this is a cancellation
-                        // of the first request to any dynamic service,
-                        // which may cancel the initial service wizard
-                        // call rather than the service call.
 
-                        this.reserveAndFetch(id, fetcher)
-                            .then(() => {
-                                // resolve(result);
-                                // we resolve with the cache item just
-                                // as if we had waited for it.
-                                resolve(this.cache.get(id));
-                            })
-                            .catch((err: Error) => {
-                                reject(err);
-                            });
-                    } else if (item.reserved) {
-                        // Not ready yet, so either ...
+                switch (item.state) {
+                    case CacheItemState.RESERVED:
                         const elapsed = new Date().getTime() - started;
                         if (elapsed < this.waiterTimeout) {
                             // Our time spent waiting is still within the timeout window, so keep going.
                             waiter();
-                            return;
                         } else {
                             // Otherwise we have waited too long, and we just give up.
-                            // this.cache.delete(item.id);
-                            reject(
-                                new Error(
-                                    'Timed-out waiting for cache item to become available; timeout ' +
-                                    this.waiterTimeout +
-                                    ', waited ' +
-                                    elapsed
-                                )
-                            );
-                            return;
+                            reject(new Error(`Timed-out waiting for cache item to become available; timeout ${this.waiterTimeout}, waited ${elapsed}`));
                         }
-                    } else {
+                        break;
+                    case CacheItemState.PRESENT:
                         resolve(item);
-                    }
-                }, this.waiterFrequency);
+                }
+            };
+
+            const waiter = async () => {
+                setTimeout(resolveItem, this.waiterFrequency);
             };
             waiter();
         });
@@ -162,28 +170,38 @@ export default class Cache<T> {
      * @param id - 
      * @param fetcher - a function which returns promise of a thing T
      */
-    private reserveAndFetch(id: string, fetcher: Fetcher<T>) {
+    private async reserveAndFetch(id: string, fetcher: Fetcher<T>): Promise<T> {
         // now, reserve it.
         this.reserveItem(id, fetcher);
 
-        // and then fetch it.
-        // We keep a reference to the fetch so that we can determine if
-        // the fetch was cancelled.
-        const fetchPromise = fetcher()
-            .then((result: any) => {
-                this.setItem(id, result, fetcher);
-                return result;
-            })
-            .finally(() => {
-                // If the fetch was cancelled, we need to remove
-                // the reserved item. This should signal any queued waiters
-                // to spawn their own fetch.
-                // TODO: restore this!
-                // if (fetchPromise.isCancelled()) {
-                //     this.cache.delete(id);
-                // }
-            });
-        return fetchPromise;
+        const newItem = await fetcher();
+        const newCacheItem: CacheItemPresent<T> = {
+            id, fetcher,
+            createdAt: new Date().getTime(),
+            value: newItem,
+            state: CacheItemState.PRESENT
+        };
+        this.cache.set(id, newCacheItem);
+        this.runMonitor();
+        return newItem;
+        // // and then fetch it.
+        // // We keep a reference to the fetch so that we can determine if
+        // // the fetch was cancelled.
+        // const fetchPromise = fetcher()
+        //     .then((result: any) => {
+        //         this.setItem(id, result, fetcher);
+        //         return result;
+        //     })
+        //     .finally(() => {
+        //         // If the fetch was cancelled, we need to remove
+        //         // the reserved item. This should signal any queued waiters
+        //         // to spawn their own fetch.
+        //         // TODO: restore this!
+        //         // if (fetchPromise.isCancelled()) {
+        //         //     this.cache.delete(id);
+        //         // }
+        //     });
+        // return fetchPromise;
     }
 
     /**
@@ -194,24 +212,28 @@ export default class Cache<T> {
      * @param id - unique identifier for an object of type T
      * @param fetcher - a function returning a promise of an item of type T
      */
-    getItemWithWait({ id, fetcher }: { id: string; fetcher: Fetcher<T> }) {
+    async getItemWithWait({ id, fetcher }: { id: string; fetcher: Fetcher<T>; }): Promise<T> {
         const cached = this.cache.get(id);
-        if (cached) {
-            if (this.isExpired(cached)) {
-                this.cache.delete(id);
-            } else if (cached.reserved) {
-                // Wait until a reserved item is fulfilled (or not!)
-                return this.reserveWaiter(id, fetcher).then((cached) => {
-                    return cached.value;
-                });
-            } else {
-                // Success!
-                return Promise.resolve(cached.value);
-            }
+
+        // If there is no item cached yet, we reserve it and then fetch it. We don't
+        // need to wait. (Others asking for this cache item, though, will need to wait
+        // until the reserve is cleared.)
+        if (typeof cached === 'undefined') {
+            return this.reserveAndFetch(id, fetcher);
         }
 
-        // If not cached, then we try to fetch it.
-        return this.reserveAndFetch(id, fetcher);
+        // If an item is expired, we immediately remove it and then re-reserve-and-fetch-it
+        if (this.isExpired(cached)) {
+            this.cache.delete(id);
+            return this.reserveAndFetch(id, fetcher);
+        }
+
+        switch (cached.state) {
+            case CacheItemState.RESERVED:
+                return (await this.reserveWaiter(id, fetcher)).value;
+            case CacheItemState.PRESENT:
+                return cached.value;
+        }
     }
 
     /**
@@ -222,42 +244,42 @@ export default class Cache<T> {
      * @param id - some opaque string identifier uniquely associated with the thing T
      * @param fetcher 
      */
-    private reserveItem(id: string, fetcher: () => Promise<T>) {
-        this.cache.set(id, {
-            id: id,
-            createdAt: new Date().getTime(),
-            reserved: true,
-            value: null,
-            fetcher: fetcher
-        });
+    private reserveItem(id: string, fetcher: () => Promise<T>): CacheItemReserved<T> {
+        const reservedItem: CacheItemReserved<T> = {
+            id, fetcher,
+            reservedAt: new Date().getTime(),
+            state: CacheItemState.RESERVED
+        };
+        this.cache.set(id, reservedItem);
+        return reservedItem;
     }
 
-    private setItem(id: string, value: T, fetcher: () => Promise<T>) {
-        if (this.cache.has(id)) {
-            const item = this.cache.get(id);
-            if (item && item.reserved) {
-                item.reserved = false;
-                item.value = value;
-                item.fetcher = fetcher;
-            } else {
-                // overwriting? should we allow this?
-                this.cache.set(id, {
-                    id: id,
-                    createdAt: new Date().getTime(),
-                    fetcher: fetcher,
-                    reserved: false,
-                    value: value
-                });
-            }
-        } else {
-            this.cache.set(id, {
-                id: id,
-                createdAt: new Date().getTime(),
-                fetcher: fetcher,
-                reserved: false,
-                value: value
-            });
-        }
-        this.runMonitor();
-    }
+    // private setItem(id: string, value: T, fetcher: () => Promise<T>) {
+    //     if (this.cache.has(id)) {
+    //         const item = this.cache.get(id);
+    //         if (item && item.reserved) {
+    //             item.reserved = false;
+    //             item.value = value;
+    //             item.fetcher = fetcher;
+    //         } else {
+    //             // overwriting? should we allow this?
+    //             this.cache.set(id, {
+    //                 id: id,
+    //                 createdAt: new Date().getTime(),
+    //                 fetcher: fetcher,
+    //                 reserved: false,
+    //                 value: value
+    //             });
+    //         }
+    //     } else {
+    //         this.cache.set(id, {
+    //             id: id,
+    //             createdAt: new Date().getTime(),
+    //             fetcher: fetcher,
+    //             reserved: false,
+    //             value: value
+    //         });
+    //     }
+    //     this.runMonitor();
+    // }
 }

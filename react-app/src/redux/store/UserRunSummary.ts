@@ -1,7 +1,10 @@
 /**
  * User Run Summary types
  */
-import { ViewNone, ViewLoading, ViewError, ViewSuccess, UIError, SearchState, AppStat } from './base'
+import {
+    ViewNone, ViewLoading, ViewError, ViewSuccess, SearchState
+} from './base';
+import { UIError } from '../types/error';
 
 // Data 
 
@@ -32,7 +35,7 @@ export interface UserRunSummaryViewDataSearched extends UserRunSummaryViewDataBa
 
 export interface UserRunSummaryViewDataError extends UserRunSummaryViewDataBase {
     searchState: SearchState.ERROR;
-    error: UIError
+    error: UIError;
 }
 
 export type UserRunSummaryViewData =
@@ -61,7 +64,7 @@ export type UserRunSummaryViewNone = ViewNone;
 export type UserRunSummaryViewLoading = ViewLoading;
 export type UserRunSummaryViewError = ViewError;
 export interface UserRunSummaryViewSuccess extends ViewSuccess {
-    view: UserRunSummaryViewData
+    view: UserRunSummaryViewData;
 }
 export type UserRunSummaryView =
     UserRunSummaryViewNone |

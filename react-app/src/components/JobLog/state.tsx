@@ -27,41 +27,41 @@ export enum JobLogState {
 }
 
 export interface JobLogViewNone {
-    status: JobLogState.NONE
+    status: JobLogState.NONE;
 }
 
 export interface JobLogViewQueued {
-    status: JobLogState.JOB_QUEUED
+    status: JobLogState.JOB_QUEUED;
 }
 
 export interface JobLogViewInitialLoading {
-    status: JobLogState.INITIAL_LOADING
+    status: JobLogState.INITIAL_LOADING;
 }
 
 export interface JobLogViewActiveLoaded {
     status: JobLogState.ACTIVE_LOADED,
     log: Array<JobLogEntry>;
-    job: Job
+    job: Job;
 }
 
 export interface JobLogViewActiveLoading {
     status: JobLogState.ACTIVE_LOADING,
     log: Array<JobLogEntry>;
-    job: Job
+    job: Job;
 }
 
 export interface JobLogViewFinishedLoaded {
     status: JobLogState.FINISHED_LOADED,
     log: Array<JobLogEntry>;
-    job: Job
+    job: Job;
 }
 
 export interface JobLogViewError {
     status: JobLogState.ERROR,
-    error: string
+    error: string;
 }
 
-export type JobLogView = JobLogViewNone | JobLogViewQueued | JobLogViewInitialLoading | JobLogViewActiveLoaded | JobLogViewActiveLoading | JobLogViewFinishedLoaded | JobLogViewError
+export type JobLogView = JobLogViewNone | JobLogViewQueued | JobLogViewInitialLoading | JobLogViewActiveLoaded | JobLogViewActiveLoading | JobLogViewFinishedLoaded | JobLogViewError;
 
 export interface JobLogsStateProps {
     jobID: JobID;
@@ -149,7 +149,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             const timeout = 10000;
             // TODO: get from somewhere else...
             const admin = false;
-            const newLog = await this.getJobLog(offset, limit, timeout, admin)
+            const newLog = await this.getJobLog(offset, limit, timeout, admin);
 
             switch (this.currentJobState(job).type) {
                 case JobStateType.CREATE:
@@ -172,10 +172,10 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                         job
                     });
             }
-        }
+        };
         const loop = () => {
             setTimeout(poller, POLLING_INTERVAL);
-        }
+        };
         loop();
     }
 
@@ -213,11 +213,11 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                         job
                     });
             }
-        }
+        };
 
         const loop = () => {
             setTimeout(poller, POLLING_INTERVAL);
-        }
+        };
 
         loop();
     }
@@ -288,7 +288,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     renderError(view: JobLogViewError) {
         return (
             <Alert type="error" message={view.error} />
-        )
+        );
     }
 
     render() {

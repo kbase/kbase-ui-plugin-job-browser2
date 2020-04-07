@@ -1,4 +1,4 @@
-import { AuthorizedServiceClient, AuthorizedServiceClientConstructorParams } from '../ServiceClient';
+import { ServiceClient } from '../ServiceClient';
 
 // types from module
 
@@ -73,7 +73,7 @@ function isGetServiceStatusResult(x: any): x is GetServiceStatusResult {
 /**
  * Params structure for client constructor
  */
-export interface ServiceWizardClientParams extends AuthorizedServiceClientConstructorParams { }
+// export interface ServiceWizardClientParams extends JSONRPCClientParams { }
 
 /**
  * Params (input) structure for the get_service_status call
@@ -88,28 +88,23 @@ export interface GetServiceStatusResult extends ServiceStatus { }
 /**
  * The service wizard client.
  */
-export class ServiceWizardClient extends AuthorizedServiceClient<ServiceWizardClientParams> {
-    static module: string = 'ServiceWizard';
+export class ServiceWizardClient extends ServiceClient {
+    module: string = 'ServiceWizard';
 
     // constructor(params: ServiceWizardClientParams) {
     //     super(params);
     // }
 
     async getServiceStatus(params: GetServiceStatusParams): Promise<GetServiceStatusResult> {
-        const result = await this.callFunc('get_service_status', params);
+        const result = await this.callFunc<GetServiceStatusParams, GetServiceStatusResult>('get_service_status', params);
 
-        if (result.result && result.result.length > 0) {
-            const theResult = result.result[0];
-            if (!theResult) {
-                throw new Error('Crazy as it seems, result is falsy');
-            }
-            if (isGetServiceStatusResult(theResult)) {
-                return theResult;
-            } else {
-                throw new Error('Sorry, result does not conform to "GetServiceStatusResult"');
-            }
+        if (!result) {
+            throw new Error('Crazy as it seems, result is falsy');
+        }
+        if (isGetServiceStatusResult(result)) {
+            return result;
         } else {
-            throw new Error('Crazy as it seems, no result');
+            throw new Error('Sorry, result does not conform to "GetServiceStatusResult"');
         }
     }
 }

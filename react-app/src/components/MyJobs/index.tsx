@@ -2,12 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Spin, Alert } from 'antd';
 
-import { Action, Dispatch } from '@kbase/ui-components/node_modules/redux';
-
 import { StoreState } from '../../redux/store';
 import ReduxInterface from './redux';
 import { myJobsLoad } from '../../redux/actions/myJobs';
 import { ComponentLoadingState } from '../../redux/store/base';
+import { Action, Dispatch } from 'redux';
 
 export interface GateProps {
     loadingState: ComponentLoadingState;

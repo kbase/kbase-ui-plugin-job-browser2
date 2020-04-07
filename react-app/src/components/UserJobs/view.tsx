@@ -69,16 +69,16 @@ const jobStatusFilterOptions: Array<JobStatusFilterOption> = [
         value: 'run'
     },
     {
-        label: 'Canceled',
-        value: 'terminate'
-    },
-    {
         label: 'Completed',
         value: 'complete'
     },
     {
         label: 'Error',
         value: 'error'
+    },
+    {
+        label: 'Canceled',
+        value: 'terminate'
     }
 ];
 
@@ -140,6 +140,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
     currentQuery?: string;
     offset: number;
     limit: number;
+    sorting: SortSpec;
 
     static defaultTimeRangePreset: TimeRangePresets = 'lastWeek';
 
@@ -152,6 +153,10 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         this.pubsub = new PubSub();
         this.offset = 0;
         this.limit = 10;
+        this.sorting = {
+            field: 'created',
+            direction: 'descending'
+        };
 
         this.state = {
             showDates: false,
@@ -234,14 +239,44 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
     }
 
     onTableChanged(pagination: PaginationConfig, filters: any, sorter: any) {
-        console.log('table changed', pagination, filters, sorter);
+        // if (typeof pagination.current !== 'undefined') {
+        //     this.offset = pagination.current;
+        // }
 
-        if (typeof pagination.current !== 'undefined') {
-            this.offset = pagination.current;
-        }
+        // if (typeof pagination.pageSize !== 'undefined') {
+        //     this.limit = pagination.pageSize;
+        // }
 
-        if (typeof pagination.pageSize !== 'undefined') {
-            this.limit = pagination.pageSize;
+        const currentPage = (pagination.current || 1) - 1;
+        const currentPageSize = pagination.pageSize || 10;
+
+        this.offset = currentPage * currentPageSize;
+        this.limit = currentPageSize;
+
+        // Calculate the sort spec 
+        // Only create at sort order is supported.
+        switch (sorter.columnKey) {
+            case 'createAt':
+                switch (sorter.order) {
+                    case 'ascend':
+                        this.sorting = {
+                            field: 'created',
+                            direction: 'ascending'
+                        };
+                        break;
+                    case 'descend':
+                    default:
+                        this.sorting = {
+                            field: 'created',
+                            direction: 'descending'
+                        };
+                }
+                break;
+            default:
+                this.sorting = {
+                    field: 'created',
+                    direction: 'descending'
+                };
         }
 
         // const searchExpression: JobsSearchExpression = {
@@ -255,6 +290,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         //     limit: this.limit
         //     // sort: this.state.currentSort
         // };
+        // console.log('TABLE CHANGED', pagination, this.offset, this.limit);
 
         this.doSearch(false);
 
@@ -283,10 +319,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
             timeRange: this.state.timeRange,
             jobStatus: this.state.currentJobStatusFilter,
             forceSearch,
-            sort: null,
-            offset: 0,
-            limit: 10
-            // sort: this.state.currentSort
+            sort: this.sorting,
+            offset: this.offset,
+            limit: this.limit
         };
 
         // TODO: document wth is happening here.
@@ -444,10 +479,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                             this.doSearch(true);
                         }}
                         pubsub={this.pubsub}
-                        isPollerRunning={this.props.view.searchState === JobSearchState.SEARCHING}
-                        startPolling={false}
-                        showControls={true}
-                        startOpen={false}
+                        defaultRunning={false}
                     />
                 </Form.Item>
             </Form>
@@ -635,13 +667,15 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     key="id"
                     width="10%"
                     render={(_: any, job: Job): any => {
+                        // TODO: what is what here?
                         return (
                             <Tooltip title={job.id}>
-                                <a href="https://example.com"
+                                <Button type="link"
+                                    style={{ padding: "0px" }}
                                     onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-                                        e.preventDefault();
                                         this.onClickDetail(job);
-                                    }}>{job.id}</a>
+                                    }}>{job.id}
+                                </Button>
                             </Tooltip>
                         );
                     }}
@@ -717,6 +751,9 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     render={(_, job: Job) => {
                         return <NiceRelativeTime time={new Date(this.firstState(job).at)} />;
                     }}
+                    defaultSortOrder="descend"
+                    sorter={true}
+                    sortDirections={['ascend', 'descend']}
                 />
                 <Table.Column
                     title="Queued"

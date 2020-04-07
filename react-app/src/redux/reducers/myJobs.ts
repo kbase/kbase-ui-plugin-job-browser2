@@ -1,9 +1,11 @@
 import { Reducer } from 'react';
 import { StoreState, JobSearchState } from '../store';
 import { Action } from 'redux';
-import { MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess, MyJobsLoadLoading, MyJobsLoadError, MyJobsLoadSuccess } from '../actions/myJobs';
+import {
+    MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess, MyJobsLoadLoading, MyJobsLoadError, MyJobsLoadSuccess, MyJobsSearchError
+} from '../actions/myJobs';
 import { ActionType } from '../actions';
-import { ComponentLoadingState } from '../store/base';
+import { ComponentLoadingState, SearchState } from '../store/base';
 
 function myJobsSearchStart(state: StoreState, action: MyJobsSearchStart): StoreState {
     if (state.views.myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
@@ -59,6 +61,20 @@ function myJobsSearchSuccess(state: StoreState, action: MyJobsSearchSuccess): St
     };
 }
 
+// function myJobsSearchError(state: StoreState, action: MyJobsSearchError): StoreState {
+//     return {
+//         ...state,
+//         views: {
+//             ...state.views,
+//             myJobsView: {
+//                 ...state.views.myJobsView,
+//                 searchState: SearchState.ERROR,
+//                 error: action.error
+//             }
+//         }
+//     };
+// }
+
 function myJobsCancelJobSuccess(state: StoreState, action: MyJobsCancelJobSuccess): StoreState {
     return {
         ...state,
@@ -81,7 +97,7 @@ function myJobsLoadLoading(state: StoreState, action: MyJobsLoadLoading): StoreS
                 loadingState: ComponentLoadingState.LOADING
             }
         }
-    }
+    };
 }
 
 function myJobsLoadError(state: StoreState, action: MyJobsLoadError): StoreState {
@@ -94,7 +110,7 @@ function myJobsLoadError(state: StoreState, action: MyJobsLoadError): StoreState
                 error: action.error
             }
         }
-    }
+    };
 }
 
 function myJobsLoadSuccess(state: StoreState, action: MyJobsLoadSuccess): StoreState {
@@ -107,7 +123,7 @@ function myJobsLoadSuccess(state: StoreState, action: MyJobsLoadSuccess): StoreS
                 data: action.data
             }
         }
-    }
+    };
 }
 
 const reducer: Reducer<StoreState | undefined, Action> = (state: StoreState | undefined, action: Action) => {

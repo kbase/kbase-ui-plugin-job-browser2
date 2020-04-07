@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 export interface SubscriptionDefinition {
     channel: string | null;
@@ -8,11 +8,11 @@ export interface SubscriptionDefinition {
 export interface Subscription {
     id: string,
     channelName: string,
-    messageName: string
+    messageName: string;
 }
 
 export interface Channel {
-    messages: Map<string, MessageListener>
+    messages: Map<string, MessageListener>;
 }
 
 // export interface Listener {
@@ -29,7 +29,7 @@ export interface Payload { }
 
 export interface Message {
     id: MessageID,
-    payload: any
+    payload: any;
 }
 
 const SEND_WINDOW = 1000 / 60;
@@ -38,7 +38,7 @@ const SEND_WINDOW = 1000 / 60;
 export interface Listener {
     id: string;
     messageID: MessageID;
-    handler: (message: Message) => void
+    handler: (message: Message) => void;
 }
 
 export interface MessageListener {
@@ -64,14 +64,14 @@ export class PubSubProxy {
     off() {
         this.subscriptions.forEach((id) => {
             this.pubsub.off(id);
-        })
+        });
     }
 }
 
 export default class PubSub {
-    sendQueue: Array<Message>
-    messageListeners: Map<MessageID, MessageListener>
-    allListeners: Map<string, Listener>
+    sendQueue: Array<Message>;
+    messageListeners: Map<MessageID, MessageListener>;
+    allListeners: Map<string, Listener>;
     constructor() {
         this.sendQueue = [];
         this.messageListeners = new Map<MessageID, MessageListener>();
@@ -102,14 +102,14 @@ export default class PubSub {
         }
         window.setTimeout(() => {
             this.sendMessages();
-        }, SEND_WINDOW)
+        }, SEND_WINDOW);
     }
 
     send<T>(messageID: string, payload: any) {
         const message: Message = {
             id: messageID,
             payload
-        }
+        };
         this.sendQueue.push(message);
         this.processQueue();
     }
@@ -119,13 +119,13 @@ export default class PubSub {
         if (!messageListener) {
             messageListener = {
                 listeners: []
-            }
+            };
             this.messageListeners.set(messageID, messageListener);
         }
-        const id = uuid.v4();
+        const id = uuid();
         const listener = {
             id, messageID, handler
-        }
+        };
         messageListener.listeners.push(listener);
         this.allListeners.set(id, listener);
         return id;
@@ -141,7 +141,7 @@ export default class PubSub {
             return;
         }
         messageListener.listeners = messageListener.listeners.filter((l) => {
-            return l.id !== listener.id
-        })
+            return l.id !== listener.id;
+        });
     }
 }

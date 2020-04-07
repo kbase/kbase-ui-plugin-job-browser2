@@ -35,7 +35,7 @@ const DEFAULT_TIMEOUT = 10000;
 export interface ServiceCallResult<T> {
     version: '1.1',
     id: string,
-    result: T
+    result: T;
 }
 
 export class DynamicServiceClient {
@@ -105,7 +105,7 @@ export class DynamicServiceClient {
             (): Promise<GetServiceStatusResult> => {
                 const client = new ServiceWizardClient({
                     url: this.url,
-                    token: this.token,
+                    authorization: this.token,
                     timeout: this.timeout
                 });
                 // NB wrapped in promise.resolve because the promise we have 

@@ -4,19 +4,21 @@ import { StoreState } from '../store';
 import { CatalogClient } from '@kbase/ui-lib';
 import { AppError } from '@kbase/ui-components';
 import { ThunkDispatch } from 'redux-thunk';
-import { } from './utils';
-import { UserRunSummaryQuery, UserRunSummaryStat, UserRunSummaryViewData, UserRunSummaryViewDataInitialSearching } from '../store/UserRunSummary';
-import { UIError, SearchState } from '../store/base';
+import {
+    UserRunSummaryQuery, UserRunSummaryStat, UserRunSummaryViewData, UserRunSummaryViewDataInitialSearching
+} from '../store/UserRunSummary';
+import { SearchState } from '../store/base';
+import { UIError } from '../types/error';
 
 // Loading
 
 export interface LoadLoading extends Action<ActionType.USER_RUN_SUMMARY_LOAD_LOADING> {
-    type: ActionType.USER_RUN_SUMMARY_LOAD_LOADING
+    type: ActionType.USER_RUN_SUMMARY_LOAD_LOADING;
 }
 
 export interface LoadSuccess extends Action<ActionType.USER_RUN_SUMMARY_LOAD_SUCCESS> {
     type: ActionType.USER_RUN_SUMMARY_LOAD_SUCCESS;
-    view: UserRunSummaryViewData
+    view: UserRunSummaryViewData;
 }
 
 export interface LoadError extends Action<ActionType.USER_RUN_SUMMARY_LOAD_ERROR> {
@@ -27,21 +29,21 @@ export interface LoadError extends Action<ActionType.USER_RUN_SUMMARY_LOAD_ERROR
 export function loadLoading(): LoadLoading {
     return {
         type: ActionType.USER_RUN_SUMMARY_LOAD_LOADING
-    }
+    };
 }
 
 export function loadSuccess(view: UserRunSummaryViewDataInitialSearching): LoadSuccess {
     return {
         type: ActionType.USER_RUN_SUMMARY_LOAD_SUCCESS,
         view
-    }
+    };
 }
 
 export function loadError(error: UIError) {
     return {
         type: ActionType.USER_RUN_SUMMARY_LOAD_ERROR,
         error
-    }
+    };
 }
 
 export function load() {
@@ -58,7 +60,7 @@ export function load() {
         dispatch(search({
             query: ''
         }));
-    }
+    };
 }
 
 
@@ -81,7 +83,7 @@ export interface SearchError extends Action<ActionType.USER_RUN_SUMMARY_SEARCH_E
 export interface SearchSuccess extends Action<ActionType.USER_RUN_SUMMARY_SEARCH_SUCCESS> {
     type: ActionType.USER_RUN_SUMMARY_SEARCH_SUCCESS;
     userRunSummary: Array<UserRunSummaryStat>;
-    query: UserRunSummaryQuery
+    query: UserRunSummaryQuery;
 }
 
 function searchStart(): SearchStart {

@@ -1,4 +1,4 @@
-import { GenericClient } from '../JSONRPC11/GenericClient';
+import { ServiceClient } from '../ServiceClient';
 
 // interface IsAdminParam {
 //     username?: string;
@@ -37,13 +37,12 @@ interface GetExecAggrStatsResult {
     total_exec_time: number;
 }
 
-export default class CatalogClient extends GenericClient {
-    static module: string = 'Catalog';
+export default class CatalogClient extends ServiceClient {
+    module: string = 'Catalog';
 
     async isAdmin(): Promise<IsAdminResult> {
         try {
-            const [result] = await this.callFunc<[IsAdminParam], [IsAdminResult]>('is_admin', [null]);
-            return result;
+            return await this.callFunc<IsAdminParam, IsAdminResult>('is_admin', null);
         } catch (ex) {
             console.error('ERROR', ex);
             throw ex;
@@ -51,12 +50,10 @@ export default class CatalogClient extends GenericClient {
     }
 
     async getExecAggrTable(param: GetExecAggrTableParam): Promise<Array<GetExecAggrTableResult>> {
-        const [result] = await this.callFunc<[GetExecAggrTableParam], [Array<GetExecAggrTableResult>]>('get_exec_aggr_table', [param]);
-        return result;
+        return await this.callFunc<GetExecAggrTableParam, Array<GetExecAggrTableResult>>('get_exec_aggr_table', param);
     }
 
     async getExecAggrStats(param: GetExecAggrStatsParam): Promise<Array<GetExecAggrStatsResult>> {
-        const [result] = await this.callFunc<[GetExecAggrStatsParam], [Array<GetExecAggrStatsResult>]>('get_exec_aggr_stats', [param]);
-        return result;
+        return await this.callFunc<GetExecAggrStatsParam, Array<GetExecAggrStatsResult>>('get_exec_aggr_stats', param);
     }
 }

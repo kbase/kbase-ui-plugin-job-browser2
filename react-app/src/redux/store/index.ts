@@ -9,10 +9,11 @@ import { EpochTime } from '../types/base';
 import { JobEventHistory } from '../types/jobState';
 import reducer from '../reducers';
 import {
-    ComponentLoadingState, UIError, ViewSuccess, ViewNone, ViewLoading, ViewError
+    ComponentLoadingState, ViewSuccess, ViewNone, ViewLoading, ViewError
 } from './base';
 import { UserRunSummaryView } from './UserRunSummary';
 import { PublicAppStatsView } from './PublicAppStats';
+import { UIError } from '../types/error';
 
 export type ClientGroup = string;
 export type JobID = string;
@@ -52,7 +53,7 @@ export interface JobContextExport extends JobContextBase {
 }
 
 export interface JobContextUnknown extends JobContextBase {
-    type: JobContextType.UNKNOWN
+    type: JobContextType.UNKNOWN;
 }
 
 export type JobContext =
@@ -66,7 +67,7 @@ export interface App {
     moduleName: string;
     functionName: string;
     title: string;
-    clientGroups: Array<ClientGroup>
+    clientGroups: Array<ClientGroup>;
 }
 
 // TODO: this needs to represent narrative / workspace / export job / unknown
@@ -76,8 +77,8 @@ export interface JobRequest {
     // TODO: should be User structure
     owner: {
         username: string;
-        realname: string
-    }
+        realname: string;
+    };
 }
 
 
@@ -108,14 +109,14 @@ export enum JobFate {
 
 export interface JobActivityBase {
     activity: JobActivity;
-    timeline: {}
+    timeline: {};
 }
 
 export interface JobActivityCreate {
     activity: JobActivity.CREATE;
     timeline: {
         createAt: EpochTime;
-    }
+    };
 }
 
 export interface JobActivityQueue {
@@ -123,7 +124,7 @@ export interface JobActivityQueue {
     timeline: {
         createAt: EpochTime;
         queueAt: EpochTime;
-    }
+    };
 }
 
 export interface JobActivityRun {
@@ -132,7 +133,7 @@ export interface JobActivityRun {
         createAt: EpochTime;
         queueAt: EpochTime;
         runAt: EpochTime;
-    }
+    };
 }
 
 export interface JobActivityFinishBase {
@@ -143,26 +144,26 @@ export interface JobActivityFinishBase {
         queueAt: EpochTime;
         runAt: EpochTime;
         finishAt: EpochTime;
-    }
+    };
 }
 
 export interface JobActivityFinishComplete extends JobActivityFinishBase {
-    fate: JobFate.COMPLETE
+    fate: JobFate.COMPLETE;
 }
 
 export interface JobActivityFinishError extends JobActivityFinishBase {
     fate: JobFate.ERROR,
     error: {
         code: number;
-        message: string
-    }
+        message: string;
+    };
 }
 
 export interface JobActivityFinishTerminate extends JobActivityFinishBase {
     fate: JobFate.TERMINATE,
     terminate: {
-        code: number
-    }
+        code: number;
+    };
 }
 
 export type JobActivityState =
@@ -190,20 +191,20 @@ export interface JobStateBase {
 }
 
 export interface JobStateCreate extends JobStateBase {
-    activity: JobActivityCreate
+    activity: JobActivityCreate;
 }
 
 export interface JobStateQueue extends JobStateBase {
-    activity: JobActivityQueue
+    activity: JobActivityQueue;
 }
 
 export interface JobStateRun extends JobStateBase {
-    activity: JobActivityRun
+    activity: JobActivityRun;
 }
 
 // NB this covers 
 export interface JobStateComplete extends JobStateBase {
-    activity: JobActivityFinishComplete
+    activity: JobActivityFinishComplete;
 }
 
 export interface JobStateError extends JobStateBase {
@@ -362,7 +363,7 @@ export interface MyJobsViewDataInitialSearching extends MyJobsViewDataBase {
 }
 
 export interface MyJobsViewDataSearching extends MyJobsViewDataBase {
-    searchState: JobSearchState.SEARCHING
+    searchState: JobSearchState.SEARCHING;
     searchExpression: JobsSearchExpression;
     searchResult: JobSearchResult;
 }
@@ -375,7 +376,7 @@ export interface MyJobsViewDataReady extends MyJobsViewDataBase {
 
 export interface MyJobsViewDataError extends MyJobsViewDataBase {
     searchState: JobSearchState.ERROR;
-    error: UIError
+    error: UIError;
 }
 
 export type MyJobsViewData =
@@ -396,7 +397,7 @@ export type MyJobsViewData =
 // }
 
 export interface MyJobsViewSuccess extends ViewSuccess {
-    data: MyJobsViewData
+    data: MyJobsViewData;
 }
 
 export type MyJobsView =
@@ -434,7 +435,7 @@ export interface UserJobsViewDataInitialSearching extends UserJobsViewDataBase {
 }
 
 export interface UserJobsViewDataSearching extends UserJobsViewDataBase {
-    searchState: JobSearchState.SEARCHING
+    searchState: JobSearchState.SEARCHING;
     searchExpression: JobsSearchExpression;
     searchResult: JobSearchResult;
 }
@@ -447,7 +448,7 @@ export interface UserJobsViewDataReady extends UserJobsViewDataBase {
 
 export interface UserJobsViewDataError extends UserJobsViewDataBase {
     searchState: JobSearchState.ERROR;
-    error: UIError
+    error: UIError;
 }
 
 export type UserJobsViewData =
@@ -459,7 +460,7 @@ export type UserJobsViewData =
 // Top Level View
 
 export interface UserJobsViewSuccess extends ViewSuccess {
-    data: UserJobsViewData
+    data: UserJobsViewData;
 }
 export type UserJobsView =
     UserJobsViewNone |

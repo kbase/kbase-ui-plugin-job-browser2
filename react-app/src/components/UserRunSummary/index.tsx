@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Spin, Alert } from 'antd';
 
-import { Action, Dispatch } from '@kbase/ui-components/node_modules/redux';
+import { Action, Dispatch } from 'redux';
 
 import {
     StoreState
@@ -13,7 +13,7 @@ import { ComponentLoadingState } from '../../redux/store/base';
 import { UserRunSummaryView, UserRunSummaryViewData } from '../../redux/store/UserRunSummary';
 
 export interface GateProps {
-    view: UserRunSummaryView
+    view: UserRunSummaryView;
     onLoad: () => void;
 }
 
@@ -27,7 +27,7 @@ export class Gate extends React.Component<GateProps, GateState> {
     }
 
     renderLoading() {
-        return <Spin />
+        return <Spin />;
     }
 
     renderSuccess(view: UserRunSummaryViewData) {
@@ -35,7 +35,7 @@ export class Gate extends React.Component<GateProps, GateState> {
     }
 
     renderError() {
-        return <Alert type="error" message="Error!" />
+        return <Alert type="error" message="Error!" />;
     }
 
     render() {
@@ -45,7 +45,7 @@ export class Gate extends React.Component<GateProps, GateState> {
             case ComponentLoadingState.LOADING:
                 return this.renderLoading();
             case ComponentLoadingState.SUCCESS:
-                return this.renderSuccess(view.view)
+                return this.renderSuccess(view.view);
             case ComponentLoadingState.ERROR:
                 return this.renderError();
         }
@@ -58,7 +58,7 @@ interface OwnProps {
 }
 
 interface StateProps {
-    view: UserRunSummaryView
+    view: UserRunSummaryView;
 }
 
 interface DispatchProps {
@@ -77,7 +77,7 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {
     return {
         onLoad: () => {
-            dispatch(load() as any)
+            dispatch(load() as any);
         }
     };
 }

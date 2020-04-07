@@ -27,7 +27,14 @@ if (DEPLOY_ENV === "prod") {
 }
 
 module.exports = function (app) {
-    // app.use(proxy('/services/service_wizard', { target: 'http://localhost:3001', changeOrigin: true }));
+    // Proxy service wizard requests locally.
+    app.use(
+        '/services/service_wizard',
+        createProxyMiddleware({ 
+        target: 'http://localhost:3002', 
+        changeOrigin: true,
+        secure: false
+    }));
     app.use(
         "/services/", 
         createProxyMiddleware({
@@ -36,14 +43,14 @@ module.exports = function (app) {
             secure: false
         })
     );
-    app.use(
-        "/dynserv/JobBrowserBFF", 
-        createProxyMiddleware({
-            target: `https://${HOST}`,
-            changeOrigin: true,
-            secure: false
-        })
-    );
+    // app.use(
+    //     "/dynserv/JobBrowserBFF", 
+    //     createProxyMiddleware({
+    //         target: `https://${HOST}`,
+    //         changeOrigin: true,
+    //         secure: false
+    //     })
+    // );
     app.use(
         "/dynserv/", 
         createProxyMiddleware({

@@ -39,10 +39,9 @@
     "scripts": {
         "start": "nodemon -w ./craco.config.js -w ./node_modules/@kbase/ui-lib/lib/custom/antd/theme.less --exec 'craco start'",
         "build": "craco build",
-        "install-plugin": "bash scripts/install-plugin.bash",
-        "testx": "craco test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!@kbase/ui-lib).+\\.js$\"",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "install-plugin": "node scripts/install-plugin.js",
+        "test-disabled-until-fixed": "craco test --transformIgnorePatterns  \"<rootDir>[\\/]node_modules[\\/](?!@kbase/ui-lib).+\\.js$\"",
+        "test": "react-scripts test"
     },
     "jest": {
         "collectCoverageFrom": [
@@ -71,6 +70,6 @@
         "http-proxy-middleware": "1.0.3",
         "morgan": "1.10.0",
         "nodemon": "2.0.2",
-        "typedoc": "0.17.3"
+        "typedoc": "0.17.4"
     }
 }

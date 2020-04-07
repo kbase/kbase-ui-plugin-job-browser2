@@ -24,39 +24,39 @@ export enum JobLogState {
 
 // TODO: rename this and other things to JobDetailView...
 export interface JobLogViewNone {
-    status: JobLogState.NONE
+    status: JobLogState.NONE;
 }
 
 export interface JobLogViewQueued {
-    status: JobLogState.JOB_QUEUED
-    job: Job
+    status: JobLogState.JOB_QUEUED;
+    job: Job;
 }
 
 export interface JobLogViewInitialLoading {
-    status: JobLogState.INITIAL_LOADING
+    status: JobLogState.INITIAL_LOADING;
 }
 
 export interface JobLogViewActiveLoaded {
     status: JobLogState.ACTIVE_LOADED,
     log: Array<JobLogEntry>;
-    job: Job
+    job: Job;
 }
 
 export interface JobLogViewActiveLoading {
     status: JobLogState.ACTIVE_LOADING,
     log: Array<JobLogEntry>;
-    job: Job
+    job: Job;
 }
 
 export interface JobLogViewFinishedLoaded {
     status: JobLogState.FINISHED_LOADED,
     log: Array<JobLogEntry>;
-    job: Job
+    job: Job;
 }
 
 export interface JobLogViewError {
     status: JobLogState.ERROR,
-    error: string
+    error: string;
 }
 
 export type JobLogView =
@@ -194,10 +194,10 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     job
                 });
             }
-        }
+        };
         const loop = () => {
             setTimeout(poller, POLLING_INTERVAL);
-        }
+        };
         loop();
     }
 
@@ -253,11 +253,11 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             } catch (ex) {
                 console.error('ERROR', ex);
             }
-        }
+        };
 
         const loop = () => {
             setTimeout(poller, POLLING_INTERVAL);
-        }
+        };
 
         loop();
     }
@@ -292,24 +292,37 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 this.startQueuedPolling();
                 return;
             case JobStateType.RUN:
-                log = await this.getJobLog(0, limit, timeout, admin);
-                this.setState({
-                    status: JobLogState.ACTIVE_LOADED,
-                    log,
-                    job
-                });
-                this.startRunningPolling();
+                try {
+                    log = await this.getJobLog(0, limit, timeout, admin);
+                    this.setState({
+                        status: JobLogState.ACTIVE_LOADED,
+                        log,
+                        job
+                    });
+                    this.startRunningPolling();
+                } catch (ex) {
+                    this.setState({
+                        status: JobLogState.ERROR,
+                        error: ex.message
+                    });
+                }
                 return;
             case JobStateType.COMPLETE:
             case JobStateType.ERROR:
             case JobStateType.TERMINATE:
-                log = await this.getJobLog(0, limit, timeout, admin);
-                console.log('setting new state...', log);
-                this.setState({
-                    status: JobLogState.FINISHED_LOADED,
-                    log,
-                    job
-                });
+                try {
+                    log = await this.getJobLog(0, limit, timeout, admin);
+                    this.setState({
+                        status: JobLogState.FINISHED_LOADED,
+                        log,
+                        job
+                    });
+                } catch (ex) {
+                    this.setState({
+                        status: JobLogState.ERROR,
+                        error: ex.message
+                    });
+                }
                 return;
         }
     }

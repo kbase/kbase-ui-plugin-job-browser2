@@ -1,4 +1,7 @@
-import { ViewNone, ViewLoading, ViewError, SearchState, UIError, ViewSuccess, AppStat } from "./base";
+import {
+    ViewNone, ViewLoading, ViewError, SearchState, ViewSuccess, AppStat
+} from "./base";
+import { UIError } from "../types/error";
 
 // App Stats
 
@@ -41,7 +44,7 @@ export interface PublicAppStatsViewDataSearched extends PublicAppStatsViewDataBa
 
 export interface PublicAppStatsViewDataError extends PublicAppStatsViewDataBase {
     searchState: SearchState.ERROR;
-    error: UIError
+    error: UIError;
 }
 
 export type PublicAppStatsViewData =
@@ -54,7 +57,7 @@ export type PublicAppStatsViewData =
 // View
 
 export interface PublicAppStatsViewSuccess extends ViewSuccess {
-    view: PublicAppStatsViewData
+    view: PublicAppStatsViewData;
 }
 
 export type PublicAppStatsView =

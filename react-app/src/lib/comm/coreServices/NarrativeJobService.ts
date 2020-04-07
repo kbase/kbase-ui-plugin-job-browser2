@@ -1,4 +1,5 @@
-import { GenericClient, JSONRPCError } from '../JSONRPC11/GenericClient';
+import { ServiceClient } from '../ServiceClient';
+import { JSONRPC11Error } from '../JSONRPC11';
 
 type Job_ID = string;
 
@@ -21,7 +22,6 @@ interface GetJobLogsResult {
     last_line_number: number;
 }
 
-
 type CheckJobParam = Job_ID;
 
 interface CheckJobResult {
@@ -30,7 +30,7 @@ interface CheckJobResult {
     ujs_url: string;
     status: any;
     result: any;
-    error: JSONRPCError;
+    error: JSONRPC11Error;
     job_state: string;
     position: number;
     creation_time: number;
@@ -40,18 +40,18 @@ interface CheckJobResult {
     canceled: boolean;
 }
 
-export default class NarrativeJobServiceClient extends GenericClient {
-    static module: string = 'NarrativeJobService';
+export default class NarrativeJobServiceClient extends ServiceClient {
+    module: string = 'NarrativeJobService';
 
     async cancelJob(param: CancelJobParam): Promise<void> {
-        await this.callFunc<[CancelJobParam], [void]>('cancel_job', [param]);
+        return await this.callFuncEmptyResult<CancelJobParam, void>('cancel_job', param);
     }
 
-    async getJobLogs(param: GetJobLogsParam): Promise<[GetJobLogsResult]> {
-        return await this.callFunc<[GetJobLogsParam], [GetJobLogsResult]>('get_job_logs', [param]);
+    async getJobLogs(param: GetJobLogsParam): Promise<GetJobLogsResult> {
+        return await this.callFunc<GetJobLogsParam, GetJobLogsResult>('get_job_logs', param);
     }
 
-    async checkJob(param: CheckJobParam): Promise<[CheckJobResult]> {
-        return await this.callFunc<[CheckJobParam], [CheckJobResult]>('check_job', [param]);
+    async checkJob(param: CheckJobParam): Promise<CheckJobResult> {
+        return await this.callFunc<CheckJobParam, CheckJobResult>('check_job', param);
     }
 }

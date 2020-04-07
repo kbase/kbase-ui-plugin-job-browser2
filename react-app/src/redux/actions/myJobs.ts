@@ -11,7 +11,8 @@ import { ThunkDispatch } from 'redux-thunk';
 import CancelableRequest, { Task } from '../../lib/CancelableRequest';
 import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
 import { EpochTime } from '../types/base';
-import { UIError, ComponentLoadingState } from '../store/base';
+import { ComponentLoadingState } from '../store/base';
+import { UIError } from '../types/error';
 
 // MY JOBS TAB
 
@@ -124,9 +125,6 @@ type MyJobsResult = {
 
 class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
     request({ token, searchExpression, username, serviceWizardURL }: MyJobsParam): Task<MyJobsResult> {
-
-        console.log('search', searchExpression);
-
         const jobBrowserBFF = new JobBrowserBFFClient({
             token,
             url: serviceWizardURL,
@@ -154,7 +152,6 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
                         key: 'created',
                         direction: searchExpression.sort.direction
                     }];
-                    console.log('YUP', queryParams);
             }
         }
 
@@ -259,8 +256,8 @@ export function myJobsSearch(searchExpression: JobsSearchExpression) {
         if (!userAuthorization) {
             dispatch(
                 myJobsSearchError({
-                    message: 'Not authorized',
-                    code: 'unauthorized'
+                    message: "Not authorized",
+                    code: "unauthorized"
                 })
             );
             return;
@@ -338,8 +335,8 @@ export function myJobsRefreshSearch() {
         if (!userAuthorization) {
             dispatch(
                 myJobsSearchError({
-                    message: 'Not authorized',
-                    code: 'unauthorized'
+                    message: "Not authorized",
+                    code: "unauthorized"
                 })
             );
             return;
@@ -378,8 +375,8 @@ export function myJobsRefreshSearch() {
 
         if (!searchExpression) {
             myJobsSearchError({
-                message: 'No search expression',
-                code: 'nosearchexpression'
+                message: "No search expression",
+                code: "nosearchexpression"
             });
             return;
         }
@@ -462,8 +459,8 @@ export function myJobsCancelJob(jobID: string) {
         if (!userAuthorization) {
             dispatch(
                 myJobsCancelJobError({
-                    message: 'no authorization',
-                    code: 'no-authorization'
+                    message: "no authorization",
+                    code: "no-authorization"
                 })
             );
             return;
@@ -473,7 +470,7 @@ export function myJobsCancelJob(jobID: string) {
         const njsClient = new NarrativeJobServiceClient({
             url: njsURL,
             token: userAuthorization.token,
-            module: 'NarrativeJobService'
+            module: "NarrativeJobService"
         });
         njsClient
             .cancelJob({ job_id: jobID })
@@ -481,12 +478,12 @@ export function myJobsCancelJob(jobID: string) {
                 dispatch(myJobsCancelJobSuccess());
                 dispatch(myJobsRefreshSearch());
             })
-            .catch((err) => {
-                console.error('error canceling job', err);
+            .catch(err => {
+                console.error("error canceling job", err);
                 dispatch(
                     myJobsCancelJobError({
-                        message: 'error canceling job: ' + err.message,
-                        code: 'error-canceling'
+                        message: "error canceling job: " + err.message,
+                        code: "error-canceling"
                     })
                 );
             });

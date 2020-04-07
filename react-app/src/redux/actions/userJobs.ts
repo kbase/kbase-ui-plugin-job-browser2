@@ -10,7 +10,8 @@ import { ThunkDispatch } from 'redux-thunk';
 import CancelableRequest, { Task } from '../../lib/CancelableRequest';
 import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
 import { EpochTime } from '../types/base';
-import { UIError, ComponentLoadingState } from '../store/base';
+import { ComponentLoadingState } from '../store/base';
+import { UIError } from '../types/error';
 
 // Loading
 export interface UserJobsLoadLoading extends Action<ActionType.USER_JOBS_LOAD_LOADING> {
@@ -132,7 +133,10 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
             offset: searchExpression.offset,
             limit: searchExpression.limit,
             timeout: 10000,
-            admin: 1
+            admin: 1,
+            filter: {
+                status: searchExpression.jobStatus
+            }
         };
 
         if (searchExpression.sort) {

@@ -7,7 +7,8 @@ import { AppError } from '@kbase/ui-components';
 import { ActionType } from '.';
 import { StoreState } from '../store';
 import { PublicAppStatsViewData, PublicAppStatsViewDataInitialSearching, PublicAppStatsQuery } from '../store/PublicAppStats';
-import { UIError, SearchState, AppStat } from '../store/base';
+import { SearchState, AppStat } from '../store/base';
+import { UIError } from '../types/error';
 
 function calcAverage(total: number, count: number) {
     if (total) {
@@ -44,12 +45,12 @@ function calcRate(part: number, whole: number) {
 // Loading
 
 export interface LoadLoading extends Action<ActionType.PUBLIC_APP_STATS_LOAD_LOADING> {
-    type: ActionType.PUBLIC_APP_STATS_LOAD_LOADING
+    type: ActionType.PUBLIC_APP_STATS_LOAD_LOADING;
 }
 
 export interface LoadSuccess extends Action<ActionType.PUBLIC_APP_STATS_LOAD_SUCCESS> {
     type: ActionType.PUBLIC_APP_STATS_LOAD_SUCCESS;
-    view: PublicAppStatsViewData
+    view: PublicAppStatsViewData;
 }
 
 export interface LoadError extends Action<ActionType.PUBLIC_APP_STATS_LOAD_ERROR> {
@@ -60,21 +61,21 @@ export interface LoadError extends Action<ActionType.PUBLIC_APP_STATS_LOAD_ERROR
 export function loadLoading(): LoadLoading {
     return {
         type: ActionType.PUBLIC_APP_STATS_LOAD_LOADING
-    }
+    };
 }
 
 export function loadSuccess(view: PublicAppStatsViewDataInitialSearching): LoadSuccess {
     return {
         type: ActionType.PUBLIC_APP_STATS_LOAD_SUCCESS,
         view
-    }
+    };
 }
 
 export function loadError(error: UIError) {
     return {
         type: ActionType.PUBLIC_APP_STATS_LOAD_ERROR,
         error
-    }
+    };
 }
 
 export function load() {
@@ -91,7 +92,7 @@ export function load() {
         dispatch(search({
             query: ''
         }));
-    }
+    };
 }
 
 // Search
