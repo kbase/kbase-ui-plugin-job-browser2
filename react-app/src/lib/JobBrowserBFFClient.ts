@@ -157,7 +157,7 @@ export type JobErrorReasonCode = 0 | 1 | 2 | 3 | 4 | 5;
 export interface JobErrorReason {
     code: JobErrorReasonCode;
     message: string;
-    jsonrpc_error: JSONRPCError
+    jsonrpc_error: JSONRPCError;
 }
 
 export interface JobStateError extends JobStateBase {
@@ -166,7 +166,7 @@ export interface JobStateError extends JobStateBase {
     queue_at: number;
     run_at: number;
     finish_at: number;
-    error: JobErrorReason
+    error: JobErrorReason;
 }
 
 export type TerminationReasonCode = 0 | 1 | 2;
@@ -198,7 +198,7 @@ export interface AppInfo {
     module_name: string;
     function_name: string;
     title: string;
-    client_groups: Array<ClientGroup>
+    client_groups: Array<ClientGroup>;
 }
 
 export interface Context {
@@ -219,7 +219,7 @@ export interface JobContextNarrative extends JobContextBase {
     },
     narrative: {
         title: string;
-    }
+    };
 }
 
 export interface JobContextWorkspace extends JobContextBase {
@@ -229,15 +229,15 @@ export interface JobContextWorkspace extends JobContextBase {
         is_accessible: boolean;
         is_deleted: boolean;
         name: string;
-    }
+    };
 }
 
 export interface JobContextExport extends JobContextBase {
-    type: 'export'
+    type: 'export';
 }
 
 export interface JobContextUnknown extends JobContextBase {
-    type: 'unknown'
+    type: 'unknown';
 }
 
 export type NodeClass = string;
@@ -246,7 +246,7 @@ export type JobContext =
     JobContextNarrative |
     JobContextWorkspace |
     JobContextExport |
-    JobContextUnknown
+    JobContextUnknown;
 
 export interface JobInfoBase {
     job_id: string;
@@ -259,27 +259,27 @@ export interface JobInfoBase {
 }
 
 export interface JobInfoCreate extends JobInfoBase {
-    state: JobStateCreate
+    state: JobStateCreate;
 }
 
 export interface JobInfoQueue extends JobInfoBase {
-    state: JobStateQueue
+    state: JobStateQueue;
 }
 
 export interface JobInfoRun extends JobInfoBase {
-    state: JobStateRun
+    state: JobStateRun;
 }
 
 export interface JobInfoComplete extends JobInfoBase {
-    state: JobStateComplete
+    state: JobStateComplete;
 }
 
 export interface JobInfoError extends JobInfoBase {
-    state: JobStateError
+    state: JobStateError;
 }
 
 export interface JobInfoTerminate extends JobInfoBase {
-    state: JobStateTerminate
+    state: JobStateTerminate;
 }
 
 export type JobInfo =
@@ -296,7 +296,7 @@ type JobID = string;
 
 interface ParamsBase {
     timeout: number;
-    admin?: number
+    admin?: number;
 }
 
 interface ParamsCollectionBase {
@@ -326,7 +326,7 @@ export interface GetJobsParams extends ParamsBase {
 }
 
 export interface GetJobsResult {
-    jobs: Array<JobInfo>
+    jobs: Array<JobInfo>;
 }
 
 // get_job_log
@@ -349,7 +349,17 @@ interface JobLogEntry {
 
 export interface GetJobLogResult {
     job: JobInfo;
-    log: Array<JobLogEntry>
+    log: Array<JobLogEntry>;
+}
+
+export interface CancelJobParams {
+    job_id: string;
+    timeout: number;
+    admin: boolean;
+}
+
+export interface CancelJobResult {
+    canceled: boolean;
 }
 
 export default class JobBrowserBFFClient extends DynamicServiceClient {
@@ -363,7 +373,7 @@ export default class JobBrowserBFFClient extends DynamicServiceClient {
     async query_jobs(params: QueryJobsParams): Promise<QueryJobsResult> {
         const result = await this.callFunc<[QueryJobsParams], [QueryJobsResult]>('query_jobs', [
             params
-        ])
+        ]);
         return result[0];
     }
 
@@ -376,6 +386,13 @@ export default class JobBrowserBFFClient extends DynamicServiceClient {
 
     async get_job_log(params: GetJobLogParams): Promise<GetJobLogResult> {
         const result = await this.callFunc<[GetJobLogParams], [GetJobLogResult]>('get_job_log', [
+            params
+        ]);
+        return result[0];
+    }
+
+    async cancel_job(params: CancelJobParams): Promise<CancelJobResult> {
+        const result = await this.callFunc<[CancelJobParams], [CancelJobResult]>('cancel_job', [
             params
         ]);
         return result[0];
