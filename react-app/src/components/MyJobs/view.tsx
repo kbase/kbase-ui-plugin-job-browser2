@@ -37,6 +37,8 @@ import NarrativeLink from '../NarrativeLink';
 import { JobContextNarrative } from '../../lib/JobBrowserBFFClient';
 import UILink from '../UILink';
 
+const CANCEL_TIMEOUT = 10000;
+
 /**
  * This version of the job status defines the set of strings that may be used
  * in the ui controls.
@@ -154,7 +156,7 @@ export interface MyJobsProps {
     search: (searchExpression: JobsSearchExpression) => void;
     refreshSearch: () => void;
     /** Triggers a redux action to cancel the indicated job */
-    cancelJob: (jobID: string) => void;
+    cancelJob: (jobID: string, timeout: number) => void;
     // searchExpression: JobsSearchExpression;
 }
 
@@ -618,7 +620,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
     onJobCancel(job: Job) {
-        this.props.cancelJob(job.id);
+        this.props.cancelJob(job.id, CANCEL_TIMEOUT);
     }
 
     renderJobAction(job: Job) {

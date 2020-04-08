@@ -34,6 +34,9 @@ import { PaginationConfig } from 'antd/lib/table';
 import UILink from '../UILink';
 import NarrativeLink from '../NarrativeLink';
 
+
+const CANCEL_TIMEOUT = 10000;
+
 /**
  * This version of the job status defines the set of strings that may be used
  * in the ui controls.
@@ -108,7 +111,7 @@ export interface UserJobsProps {
      */
     search: (searchExpression: JobsSearchExpression) => void;
     /** Triggers a redux action to cancel the indicated job */
-    cancelJob: (jobID: string) => void;
+    cancelJob: (jobID: string, timeout: number) => void;
 }
 
 /**
@@ -597,7 +600,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
     }
 
     onJobCancel(job: Job) {
-        this.props.cancelJob(job.id);
+        this.props.cancelJob(job.id, CANCEL_TIMEOUT);
     }
 
     renderJobAction(job: Job) {
@@ -663,19 +666,25 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
 
             >
                 <Table.Column
-                    title="#"
+                    title="Job"
+                    dataIndex="id"
                     key="id"
-                    width="10%"
-                    render={(_: any, job: Job): any => {
-                        // TODO: what is what here?
+                    width="5%"
+                    render={(jobID: string, job: Job): any => {
+                        const title = <div>
+                            <p><span style={{ color: 'silver' }}>Job ID</span>{' '}{jobID}</p>
+                            <p>Click to view job log and detail</p>
+                        </div>;
                         return (
-                            <Tooltip title={job.id}>
-                                <Button type="link"
-                                    style={{ padding: "0px" }}
+                            <Tooltip title={title}>
+                                <Button
+                                    type="link"
                                     onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+                                        e.preventDefault();
                                         this.onClickDetail(job);
-                                    }}>{job.id}
-                                </Button>
+                                    }}
+                                    icon="info-circle"
+                                />
                             </Tooltip>
                         );
                     }}
@@ -725,7 +734,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                 <Table.Column
                     title="App"
                     key="appTitle"
-                    width="20%"
+                    width="18%"
                     render={(_, job: Job): any => {
                         if (job.request.app === null) {
                             return 'n/a';
@@ -808,7 +817,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                     title="Status"
                     dataIndex="status"
                     key="status"
-                    width="10%"
+                    width="7%"
                     render={(_, job: Job) => {
                         return <JobStatusBadge job={job} />;
                     }}

@@ -407,6 +407,7 @@ export function myJobsRefreshSearch() {
 export interface MyJobsCancelJob {
     type: ActionType.MY_JOBS_CANCEL;
     jobID: string;
+    timeout: number;
 }
 
 export interface MyJobsCancelJobStart {
@@ -441,7 +442,7 @@ export function myJobsCancelJobError(error: AppError): MyJobsCancelJobError {
     };
 }
 
-export function myJobsCancelJob(jobID: string) {
+export function myJobsCancelJob(jobID: string, timeout: number) {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
         dispatch(myJobsCancelJobStart());
 
@@ -450,7 +451,7 @@ export function myJobsCancelJob(jobID: string) {
             app: {
                 config: {
                     services: {
-                        NarrativeJobService: { url: njsURL }
+                        ServiceWizard: { url: serviceWizardURL }
                     }
                 }
             }
@@ -467,13 +468,16 @@ export function myJobsCancelJob(jobID: string) {
         }
 
         // do it
-        const njsClient = new NarrativeJobServiceClient({
-            url: njsURL,
-            token: userAuthorization.token,
-            module: "NarrativeJobService"
+        const client = new JobBrowserBFFClient({
+            url: serviceWizardURL,
+            token: userAuthorization.token
         });
-        njsClient
-            .cancelJob({ job_id: jobID })
+        client
+            .cancel_job({
+                job_id: jobID,
+                timeout,
+                admin: false
+            })
             .then(() => {
                 dispatch(myJobsCancelJobSuccess());
                 dispatch(myJobsRefreshSearch());

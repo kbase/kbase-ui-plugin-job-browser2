@@ -14,12 +14,12 @@ export interface OwnProps {
 }
 
 interface StateProps {
-    view: MyJobsViewData
+    view: MyJobsViewData;
 }
 
 interface DispatchProps {
     search: (searchExpression: JobsSearchExpression) => void;
-    cancelJob: (jobID: string) => void;
+    cancelJob: (jobID: string, timeout: number) => void;
     refreshSearch: () => void;
 }
 
@@ -62,8 +62,8 @@ function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): Dis
         search: (searchExpression: JobsSearchExpression) => {
             dispatch(myJobsSearch(searchExpression) as any);
         },
-        cancelJob: (jobID: string) => {
-            dispatch(myJobsCancelJob(jobID) as any);
+        cancelJob: (jobID: string, timeout: number) => {
+            dispatch(myJobsCancelJob(jobID, timeout) as any);
         },
         refreshSearch: () => {
             dispatch(myJobsRefreshSearch() as any);
