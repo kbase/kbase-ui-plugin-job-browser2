@@ -39,7 +39,8 @@ export interface WorkspaceInfo {
 
 export interface JobContextNarrative extends JobContextBase {
     type: JobContextType.NARRATIVE;
-    title: string;
+    title: string | null;
+    isTemporary: boolean;
     workspace: WorkspaceInfo;
 }
 

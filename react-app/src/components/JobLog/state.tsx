@@ -68,6 +68,7 @@ export interface JobLogsStateProps {
     token: string;
     njsURL: string;
     serviceWizardURL: string;
+    admin: boolean;
 }
 
 type JobLogsStateState = JobLogView;
@@ -148,8 +149,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             // TODO: get from somewhere else... 
             const timeout = 10000;
             // TODO: get from somewhere else...
-            const admin = false;
-            const newLog = await this.getJobLog(offset, limit, timeout, admin);
+            const newLog = await this.getJobLog(offset, limit, timeout, this.props.admin);
 
             switch (this.currentJobState(job).type) {
                 case JobStateType.CREATE:
@@ -186,7 +186,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         // TODO: get from somewhere else... 
         const timeout = 10000;
         // TODO: get from somewhere else...
-        const admin = false;
 
         const poller = async () => {
             const job = await this.getJob();
@@ -197,7 +196,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     loop();
                     return;
                 case JobStateType.RUN:
-                    var log = await this.getJobLog(0, limit, timeout, admin);
+                    var log = await this.getJobLog(0, limit, timeout, this.props.admin);
                     this.setState({
                         status: JobLogState.ACTIVE_LOADED,
                         log,
@@ -206,7 +205,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     loop();
                     break;
                 default:
-                    var log = await this.getJobLog(0, limit, timeout, admin);
+                    var log = await this.getJobLog(0, limit, timeout, this.props.admin);
                     this.setState({
                         status: JobLogState.FINISHED_LOADED,
                         log,

@@ -743,13 +743,25 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         switch (job.request.context.type) {
                             case JobContextType.NARRATIVE:
                                 const title = job.request.context.title;
-                                return (
-                                    <Tooltip title={title}>
-                                        <NarrativeLink narrativeID={job.request.context.workspace.id}>
-                                            {title}
-                                        </NarrativeLink>
-                                    </Tooltip>
-                                );
+                                if (job.request.context.isTemporary) {
+                                    return (
+                                        <Tooltip title={'A temporary, unsaved narrative'}>
+                                            <NarrativeLink narrativeID={job.request.context.workspace.id}>
+                                                Unsaved Narrative
+                                            </NarrativeLink>
+                                        </Tooltip>
+                                    );
+                                } else {
+                                    return (
+                                        <Tooltip title={title || 'n/a'}>
+                                            <NarrativeLink narrativeID={job.request.context.workspace.id}>
+                                                {title || 'n/a'}
+                                            </NarrativeLink>
+                                        </Tooltip>
+                                    );
+                                }
+
+
                             case JobContextType.WORKSPACE:
                                 if (job.request.context.workspace.isAccessible) {
                                     return job.request.context.workspace.name;
