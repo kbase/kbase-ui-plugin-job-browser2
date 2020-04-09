@@ -4,7 +4,6 @@ import {
     JobsSearchExpression, Job, StoreState,
     MyJobsViewData, JobSearchState
 } from '../store';
-import { NarrativeJobServiceClient } from '@kbase/ui-lib';
 import { AppError } from '@kbase/ui-components';
 import { serviceJobToUIJob, extractTimeRange } from './utils';
 import { ThunkDispatch } from 'redux-thunk';

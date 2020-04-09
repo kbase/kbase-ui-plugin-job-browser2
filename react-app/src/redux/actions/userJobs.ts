@@ -4,7 +4,6 @@ import {
 import { serviceJobToUIJob, extractTimeRange } from './utils';
 import { Action } from 'redux';
 import { ActionType } from '.';
-import { NarrativeJobServiceClient } from '@kbase/ui-lib';
 import { AppError } from '@kbase/ui-components';
 import { ThunkDispatch } from 'redux-thunk';
 import CancelableRequest, { Task } from '../../lib/CancelableRequest';
