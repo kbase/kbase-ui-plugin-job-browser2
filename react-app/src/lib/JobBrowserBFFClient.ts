@@ -218,7 +218,8 @@ export interface JobContextNarrative extends JobContextBase {
         name: string;
     },
     narrative: {
-        title: string;
+        title: string | null;
+        is_temporary: boolean;
     };
 }
 

@@ -14,6 +14,7 @@ function makeJobContext(job: JobInfo): JobContext {
             return {
                 type: JobContextType.NARRATIVE,
                 title: job.context.narrative.title,
+                isTemporary: job.context.narrative.is_temporary,
                 workspace: {
                     id: job.context.workspace.id,
                     isAccessible: job.context.workspace.is_accessible,
