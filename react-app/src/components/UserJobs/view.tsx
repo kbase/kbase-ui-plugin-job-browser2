@@ -282,40 +282,13 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                 };
         }
 
-        // const searchExpression: JobsSearchExpression = {
-        //     query: '',
-        //     timeRange: this.state.timeRange,
-        //     jobStatus: this.state.currentJobStatusFilter,
-        //     forceSearch: true,
-        //     sort: null,
-        //     // TODO: offset, limit as globals or ...
-        //     offset: this.offset,
-        //     limit: this.limit
-        //     // sort: this.state.currentSort
-        // };
-        // console.log('TABLE CHANGED', pagination, this.offset, this.limit);
-
         this.doSearch(false);
-
-        // this.setState(
-        //     {
-        //         currentSort: {
-        //             field: sorter.field,
-        //             direction: sorter.order === 'ascend' ? 'ascending' : 'descending'
-        //         }
-        //     },
-        //     () => {
-        //         this.doSearch(false);
-        //     }
-        // );
     }
 
     doSearch(forceSearch: boolean) {
         if (typeof this.currentQuery === 'undefined') {
             return;
         }
-
-        // const jobStatusFilter = jobStatusFilterOptionsToJobStatus(this.state.currentJobStatusFilter);
 
         const searchExpression: JobsSearchExpression = {
             query: this.currentQuery,

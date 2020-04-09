@@ -163,7 +163,6 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
 
     renderViewState() {
         const view = this.props.view;
-        console.log('rendering?', view);
         switch (view.searchState) {
             case SearchState.NONE:
             case SearchState.INITIAL_SEARCHING:
