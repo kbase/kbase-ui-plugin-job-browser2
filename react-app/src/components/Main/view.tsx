@@ -130,36 +130,9 @@ export default class Main extends React.Component<MainProps, MainState> {
     }
 
     renderTabs() {
-        // let userRunTab;
-        // let userJobsTab;
-        // console.log('rendering, admin?', this.props.isAdmin);
-        // if (this.props.isAdmin) {
-        //     const tabLabel = (
-        //         <span>
-        //             User Run Summary <Icon type="unlock" />
-        //         </span>
-        //     );
-        //     userRunTab = (
-        //         <Tabs.TabPane tab={tabLabel} key="userRunSummary">
-        //             <UserRunSummary />
-        //         </Tabs.TabPane>
-        //     );
-        //     const userJobsTabLabel = (
-        //         <span>
-        //             User Jobs <Icon type="unlock" />
-        //         </span>
-        //     );
-        //     userJobsTab = (
-        //         <Tabs.TabPane tab={userJobsTabLabel} key="userJobs">
-        //             <UserJobs />
-        //         </Tabs.TabPane>
-        //     );
-        // }
-
         // FIXME: The animated flag is set to false below because for some reason antd (on safari at least) is not
         // correctly rendering any tab other than the first one with animation enabled (which is default).
         // Please investigate and either find what we have done wrong or antd has.
-        // console.log('default active tab key?', this.state.defaultActiveTabKey);
         // return (
         //     <Tabs
         //         animated={false}

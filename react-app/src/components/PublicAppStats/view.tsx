@@ -227,7 +227,6 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
 
     renderViewState() {
         const view = this.props.view;
-        console.log('rendering?', view);
         switch (view.searchState) {
             case SearchState.NONE:
             case SearchState.INITIAL_SEARCHING:

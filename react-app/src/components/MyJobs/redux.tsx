@@ -40,7 +40,6 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
     }
 
 
-    // console.log('roles?', roles);
     // const showMonitoringControls = roles.some((role) => {
     //     return role === 'DevToken';
     // })

@@ -241,8 +241,6 @@ export function userJobsLoad() {
         const jobsFetchedAt = new Date().getTime();
         userJobsSearchRequest.done(task);
 
-        console.log('GOT JOBS', jobs, foundCount, totalCount);
-
         dispatch(userJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
     };
 }

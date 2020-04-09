@@ -279,8 +279,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
 
         let log;
 
-        // console.log('getInitialJobLog: Got Job', this.currentJobState(job).type, job);
-
         switch (this.currentJobState(job).type) {
             case JobStateType.CREATE:
             case JobStateType.QUEUE:

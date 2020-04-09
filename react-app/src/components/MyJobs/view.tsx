@@ -293,36 +293,11 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                 };
         }
 
-        // Calculate job state filter.
-
-        // const searchExpression: JobsSearchExpression = {
-        //     query: '',
-        //     timeRange: this.state.timeRange,
-        //     jobStatus: this.state.currentJobStatusFilter,
-        //     forceSearch: true,
-        //     sort: null,
-        //     // TODO: offset, limit as globals or ...
-        //     offset: this.offset,
-        //     limit: this.limit
-        //     // sort: this.state.currentSort
-        // };
-
-        // console.log('TABLE CHANGED', pagination, this.offset, this.limit);
-
         this.doSearch(false);
     }
 
-    // doSearch(searchExpression: JobsSearchExpression) {
-
-    //     // TODO: document wth is happening here.
-    //     this.pubsub.send('search', {});
-
-    //     this.props.search(searchExpression);
-    //     return false;
-    // }
 
     doRefreshSearch() {
-
     }
 
     doSearch(forceSearch: boolean) {
