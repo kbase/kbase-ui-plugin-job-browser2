@@ -34,11 +34,15 @@
     background-color: transparent;
 }
 
-.JobLog .FlexTable-col:nth-child(1) {
+.JobLog .FlexTable-col.lineNumber {
     flex: 0 0 4em;
 }
 
-.JobLog .FlexTable-body .FlexTable-col:nth-child(2) {
+.JobLog .FlexTable-col.loggedAt {
+    flex: 0 0 7em;
+}
+
+.JobLog .FlexTable-body .FlexTable-col.message {
     font-family: monospace;
     font-size: 90%;
     white-space: pre-wrap

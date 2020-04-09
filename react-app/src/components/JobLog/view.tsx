@@ -27,7 +27,7 @@ interface JobLogState {
 
 export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
     playLogTimer: number;
-    bodyRef: React.RefObject<HTMLDivElement>
+    bodyRef: React.RefObject<HTMLDivElement>;
     // a hack to detect state change... 
     currentJobEventType: JobStateType | null;
 
@@ -39,7 +39,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         this.state = {
             playState: PlayState.NONE,
             isPaused: false
-        }
+        };
     }
     currentEvent(job: Job) {
         return job.eventHistory[job.eventHistory.length - 1];
@@ -94,54 +94,104 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             message = <span>
                 Polling for additional log entries...{' '}
                 <Spin size="small" />
-            </span>
+            </span>;
         } else {
-            message = <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Log complete</div>
+            message = <div style={{ textAlign: 'center', fontStyle: 'italic' }}>Log complete</div>;
         }
         return (
             <div className="FlexTable-row" key='END' style={{ backgroundColor: 'rgba(200, 200, 200, 0.5)' }} data-end="end">
                 <div className="FlexTable-col"></div>
                 <div className="FlexTable-col">{message}</div>
             </div>
-        )
+        );
+    }
+    formatLogDate(date: Date) {
+        const options = {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        const parts = Intl.DateTimeFormat('en-US', options).formatToParts(date);
+        const partsMap: Map<string, string> = parts.reduce((partsMap, { type, value }) => {
+            partsMap.set(type, value);
+            return partsMap;
+        }, new Map());
+        return <Tooltip title={Intl.DateTimeFormat('en-US', options).format(date)}>
+            <span>{partsMap.get('hour')}:{partsMap.get('minute')}:{partsMap.get('second')}{partsMap.get('dayPeriod')?.toLocaleLowerCase()}</span>
+        </Tooltip>;
     }
     renderJobLog() {
         const log = this.props.log;
         if (log.length === 0) {
             return (
                 <Empty />
-            )
+            );
         }
+        const hasTimestamp = log[0].loggedAt !== null;
         const rows = log.map((entry) => {
             const rowStyle: React.CSSProperties = {};
             if (entry.isError) {
                 rowStyle.color = 'red';
             }
-            return <div className="FlexTable-row" style={rowStyle} key={entry.lineNumber}>
-                <div className="FlexTable-col">
-                    {entry.lineNumber}
-                </div>
-                <div className="FlexTable-col">
-                    {entry.message}
-                </div>
-            </div>
-        })
+            if (hasTimestamp) {
+                return <div className="FlexTable-row" style={rowStyle} key={entry.lineNumber}>
+                    <div className="FlexTable-col lineNumber">
+                        {entry.lineNumber}
+                    </div>
+                    <div className="FlexTable-col loggedAt">
+                        {entry.loggedAt ? this.formatLogDate(entry.loggedAt) : ''}
+                    </div>
+                    <div className="FlexTable-col message">
+                        {entry.message}
+                    </div>
+                </div>;
+            } else {
+                return <div className="FlexTable-row" style={rowStyle} key={entry.lineNumber}>
+                    <div className="FlexTable-col lineNumber">
+                        {entry.lineNumber}
+                    </div>
+                    <div className="FlexTable-col message">
+                        {entry.message}
+                    </div>
+                </div>;
+            }
+        });
         rows.push(
             this.renderLastLine()
-        )
-        return (
-            <div className="FlexTable" key="log">
-                <div className="FlexTable-header">
-                    <div className="FlexTable-row">
-                        <div className="FlexTable-col">Line #</div>
-                        <div className="FlexTable-col">Log line</div>
+        );
+        if (hasTimestamp) {
+            return (
+                <div className="FlexTable" key="log">
+                    <div className="FlexTable-header">
+                        <div className="FlexTable-row">
+                            <div className="FlexTable-col lineNumber">Line #</div>
+                            <div className="FlexTable-col loggedAt">At</div>
+                            <div className="FlexTable-col message">Log line</div>
+                        </div>
+                    </div>
+                    <div className="FlexTable-body" ref={this.bodyRef}>
+                        {rows}
                     </div>
                 </div>
-                <div className="FlexTable-body" ref={this.bodyRef}>
-                    {rows}
+            );
+        } else {
+            return (
+                <div className="FlexTable" key="log">
+                    <div className="FlexTable-header">
+                        <div className="FlexTable-row">
+                            <div className="FlexTable-col lineNumber">Line #</div>
+                            <div className="FlexTable-col message">Log line</div>
+                        </div>
+                    </div>
+                    <div className="FlexTable-body" ref={this.bodyRef}>
+                        {rows}
+                    </div>
                 </div>
-            </div>
-        )
+            );
+        }
     }
 
     renderJobLogRow() {
@@ -253,12 +303,12 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 break;
         }
 
-        download('job-log.' + type, contentType, content)
+        download('job-log.' + type, contentType, content);
     }
 
     onMenuClick(param: ClickParam | undefined) {
         if (!param) {
-            return
+            return;
         }
         this.downloadLog(param.key, this.props.log);
     }
@@ -269,14 +319,14 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         this.setState({
             playState: PlayState.PLAYING,
             isPaused: false
-        })
+        });
     }
 
     onPauseLog() {
         this.setState({
             playState: PlayState.PAUSED,
             isPaused: true
-        })
+        });
     }
 
     renderPlayPauseTooltips() {
@@ -327,7 +377,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                     <Button icon="pause" disabled={irrelevant || this.state.isPaused} onClick={this.onPauseLog.bind(this)} />
                 </Tooltip>
             </ButtonGroup>
-        )
+        );
     }
     renderToolbar() {
         const disabled = this.props.log.length === 0;
@@ -338,7 +388,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 <Menu.Item key="json" disabled={disabled}>JSON</Menu.Item>
                 <Menu.Item key="text" disabled={disabled}>TEXT</Menu.Item>
             </Menu>
-        )
+        );
         return (
             <div key="toolbar">
                 <Dropdown overlay={menu}>
@@ -347,13 +397,13 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                 {' '}
                 {this.renderPlayPause()}
             </div>
-        )
+        );
     }
     render() {
         return <div className="JobLog">
             {this.renderToolbar()}
             {this.renderJobLog()}
-        </div>
+        </div>;
     }
     // render() {
     //     return this.renderJobLog();
