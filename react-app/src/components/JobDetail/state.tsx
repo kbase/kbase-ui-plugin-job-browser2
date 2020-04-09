@@ -121,7 +121,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 lineNumber: entry.row,
                 message: entry.message,
                 isError: entry.level === 'error',
-                loggedAt: new Date(entry.logged_at)
+                loggedAt: entry.logged_at ? new Date(entry.logged_at) : null
             };
         });
     }

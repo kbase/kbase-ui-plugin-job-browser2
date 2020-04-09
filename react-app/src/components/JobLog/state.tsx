@@ -12,7 +12,7 @@ const POLLING_INTERVAL = 5000;
 
 export interface JobLogEntry {
     lineNumber: number;
-    loggedAt: Date,
+    loggedAt: Date | null,
     message: string;
     isError: boolean;
 }
@@ -116,7 +116,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 lineNumber: entry.row,
                 message: entry.message,
                 isError: entry.level === 'error',
-                loggedAt: new Date(entry.logged_at)
+                loggedAt: entry.logged_at ? new Date(entry.logged_at) : null
             };
         });
     }
