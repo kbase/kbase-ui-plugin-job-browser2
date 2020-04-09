@@ -2,10 +2,10 @@ import { Reducer } from 'react';
 import { StoreState, JobSearchState } from '../store';
 import { Action } from 'redux';
 import {
-    MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess, MyJobsLoadLoading, MyJobsLoadError, MyJobsLoadSuccess, MyJobsSearchError
+    MyJobsSearchStart, MyJobsSearchSuccess, MyJobsCancelJobSuccess, MyJobsLoadLoading, MyJobsLoadError, MyJobsLoadSuccess
 } from '../actions/myJobs';
 import { ActionType } from '../actions';
-import { ComponentLoadingState, SearchState } from '../store/base';
+import { ComponentLoadingState } from '../store/base';
 
 function myJobsSearchStart(state: StoreState, action: MyJobsSearchStart): StoreState {
     if (state.views.myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {

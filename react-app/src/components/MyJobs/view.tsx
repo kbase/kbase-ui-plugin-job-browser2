@@ -296,10 +296,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.doSearch(false);
     }
 
-
-    doRefreshSearch() {
-    }
-
     doSearch(forceSearch: boolean) {
         if (typeof this.currentQuery === "undefined") {
             return;
@@ -472,7 +468,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                 <Form.Item>
                     <Monitor
                         onPoll={() => {
-                            this.doRefreshSearch();
+                            this.doSearch(true);
                         }}
                         pubsub={this.pubsub}
                         defaultRunning={false}

@@ -28,13 +28,13 @@ if (DEPLOY_ENV === "prod") {
 
 module.exports = function (app) {
     // Proxy service wizard requests locally.
-    app.use(
-        '/services/service_wizard',
-        createProxyMiddleware({ 
-        target: 'http://localhost:3002', 
-        changeOrigin: true,
-        secure: false
-    }));
+    // app.use(
+    //     '/services/service_wizard',
+    //     createProxyMiddleware({ 
+    //     target: 'http://localhost:3002', 
+    //     changeOrigin: true,
+    //     secure: false
+    // }));
     app.use(
         "/services/", 
         createProxyMiddleware({
