@@ -29,7 +29,16 @@ export default class JobInfo extends React.Component<Props, State> {
         }
         // TODO: a better way of ensuring we have the right sequence of events (as defined in types)
         throw new Error('Matching state not found: ' + type);
-
+    }
+    getLastEvent(job: Job, type: Array<JobStateType>): JobEvent {
+        for (let i = job.eventHistory.length - 1; i >= 0; i -= 1) {
+            const jobEvent = job.eventHistory[i];
+            if (type.includes(jobEvent.type)) {
+                return jobEvent;
+            }
+        }
+        // TODO: a better way of ensuring we have the right sequence of events (as defined in types)
+        throw new Error('Matching state not found: ' + type);
     }
     renderSubmitted() {
         const date = new Date(this.props.job.eventHistory[0].at);
@@ -51,7 +60,26 @@ export default class JobInfo extends React.Component<Props, State> {
                     from={this.lastEvent(job, JobStateType.QUEUE).at}
                     to={currentState.at}
                     precision={2} />;
-            default:
+            case JobStateType.ERROR:
+            case JobStateType.TERMINATE:
+                // May have stopped in any prior state - create, queue, run
+                const lastEvent = this.getLastEvent(job, [JobStateType.CREATE, JobStateType.QUEUE, JobStateType.RUN]);
+                switch (lastEvent.type) {
+                    case JobStateType.CREATE:
+                        return <span>-</span>;
+                    case JobStateType.QUEUE:
+                        return <NiceElapsedTime
+                            from={lastEvent.at}
+                            to={currentState.at}
+                            precision={2}
+                            useClock={false} />;
+                    case JobStateType.RUN:
+                        return <NiceElapsedTime
+                            from={this.lastEvent(job, JobStateType.QUEUE).at}
+                            to={lastEvent.at}
+                            precision={2} />;
+                }
+            case JobStateType.COMPLETE:
                 return <NiceElapsedTime
                     from={this.lastEvent(job, JobStateType.QUEUE).at}
                     to={this.lastEvent(job, JobStateType.RUN).at}
@@ -70,7 +98,22 @@ export default class JobInfo extends React.Component<Props, State> {
                     from={currentState.at}
                     precision={2}
                     useClock={true} />;
-            default:
+            case JobStateType.ERROR:
+            case JobStateType.TERMINATE:
+                // May have stopped in any prior state - create, queue, run
+                const lastEvent = this.getLastEvent(job, [JobStateType.CREATE, JobStateType.QUEUE, JobStateType.RUN]);
+                switch (lastEvent.type) {
+                    case JobStateType.CREATE:
+                        return <span>-</span>;
+                    case JobStateType.QUEUE:
+                        return <span>-</span>;
+                    case JobStateType.RUN:
+                        return <NiceElapsedTime
+                            from={lastEvent.at}
+                            to={currentState.at}
+                            precision={2} />;
+                }
+            case JobStateType.COMPLETE:
                 return <NiceElapsedTime
                     from={this.lastEvent(job, JobStateType.RUN).at}
                     to={currentState.at}
