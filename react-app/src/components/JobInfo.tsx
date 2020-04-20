@@ -78,6 +78,11 @@ export default class JobInfo extends React.Component<Props, State> {
                             from={this.lastEvent(job, JobStateType.QUEUE).at}
                             to={lastEvent.at}
                             precision={2} />;
+                    default:
+                        // hmm, no other states should be here
+                        // TODO: redesign states so that there are
+                        // active states (these ones), and inactive.
+                        return <span>?</span>;
                 }
             case JobStateType.COMPLETE:
                 return <NiceElapsedTime
@@ -112,6 +117,11 @@ export default class JobInfo extends React.Component<Props, State> {
                             from={lastEvent.at}
                             to={currentState.at}
                             precision={2} />;
+                    default:
+                        // hmm, no other states should be here
+                        // TODO: redesign states so that there are
+                        // active states (these ones), and inactive.
+                        return <span>?</span>;
                 }
             case JobStateType.COMPLETE:
                 return <NiceElapsedTime
