@@ -797,14 +797,10 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                 />
                 <Table.Column
                     title="Server"
-                    dataIndex="clientGroups"
-                    key="clientGroups"
+                    key="clientGroup"
                     width="8%"
                     render={(_, job: Job) => {
-                        if (job.request.app == null) {
-                            return 'n/a';
-                        }
-                        return job.request.app.clientGroups.join(',');
+                        return job.request.clientGroup;
                     }}
                 />
                 <Table.Column

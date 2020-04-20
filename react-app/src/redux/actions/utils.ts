@@ -207,50 +207,11 @@ export function serviceJobToUIJob(job: JobInfo, username: string): Job {
                 username: job.owner.username,
                 realname: job.owner.realname
             },
-            app
+            app,
+            clientGroup: job.state.client_group,
         },
         eventHistory: serviceJobToEventHistory(job)
     };
-    // Note that the usage of "as" below to force the type is because I 
-    // can't figure out why type narrowing isn't happening through job.state.status.
-    // Logically it should, and it does if state is considered separately, but I 
-    // guess the discrimination based on job.state.status does not apply to job...
-    // switch (job.state.status) {
-    //     case 'create':
-    //         return makeJobCreate(job as JobInfoCreate);
-    //     case 'queue':
-    //         return makeJobQueue(job as JobInfoQueue);
-    //     case 'run':
-    //         return makeJobRun(job as JobInfoRun);
-    //     case 'complete':
-    //         return makeJobComplete(job as JobInfoComplete);
-    //     case 'error':
-    //         return makeJobError(job as JobInfoError);
-    //     case 'terminate':
-    //         return makeJobTerminate(job as JobInfoTerminate);
-    // }
-
-
-    // switch (status) {
-    //     case JobStatus.CREATED:
-    //         return makeJobCreated(job, username);
-    //     case JobStatus.QUEUED:
-    //         return makeJobQueued(job, username);
-    //     case JobStatus.RUNNING:
-    //         return makeJobRunning(job, username);
-    //     case JobStatus.FINISHED:
-    //         return makeJobFinished(job, username);
-    //     case JobStatus.ERRORED_QUEUED:
-    //         return makeJobErroredQueued(job, username);
-    //     case JobStatus.ERRORED_RUNNING:
-    //         return makeJobErroredRunning(job, username);
-    //     case JobStatus.CANCELED_QUEUED:
-    //         return makeJobCanceledQueued(job, username);
-    //     case JobStatus.CANCELED_RUNNING:
-    //         return makeJobCanceledRunning(job, username);
-    //     default:
-    //         throw new Error('Invalid job status: ' + job.status);
-    // }
 }
 
 export function calcAverage(total: number, count: number) {

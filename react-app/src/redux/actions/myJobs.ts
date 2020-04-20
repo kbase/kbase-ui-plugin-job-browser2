@@ -8,7 +8,7 @@ import { AppError } from '@kbase/ui-components';
 import { serviceJobToUIJob, extractTimeRange } from './utils';
 import { ThunkDispatch } from 'redux-thunk';
 import CancelableRequest, { Task } from '../../lib/CancelableRequest';
-import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
+import JobBrowserBFFClient, { QueryJobsParams, FilterSpec } from '../../lib/JobBrowserBFFClient';
 import { EpochTime } from '../types/base';
 import { ComponentLoadingState } from '../store/base';
 import { UIError } from '../types/error';
@@ -131,6 +131,20 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
+        const filter: FilterSpec = {
+            status: searchExpression.jobStatus
+        };
+
+        // TODO: better parsing of search, or do it before here...
+        const searchTerms = searchExpression.query.split(/\s+/);
+        // TODO: remove - experiment with passing a search
+        // as a filter.
+        // if (searchTerms.length > 0) {
+        //     if (!(searchTerms.length === 1 && searchTerms[0] === '')) {
+        //         filter.user = searchTerms;
+        //     }
+        // }
+
         const queryParams: QueryJobsParams = {
             time_span: {
                 from: timeRangeStart,
@@ -139,9 +153,10 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
             offset: searchExpression.offset,
             limit: searchExpression.limit,
             timeout: 10000,
-            filter: {
-                status: searchExpression.jobStatus
-            }
+            search: {
+                terms: searchTerms
+            },
+            filter
         };
 
         if (searchExpression.sort) {
@@ -213,7 +228,7 @@ export function myJobsLoad() {
             },
             timeRange: {
                 kind: 'preset',
-                preset: 'lastMonth'
+                preset: 'lastWeek'
             }
         };
         const initialData: MyJobsViewData = {

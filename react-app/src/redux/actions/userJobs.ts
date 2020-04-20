@@ -7,7 +7,7 @@ import { ActionType } from '.';
 import { AppError } from '@kbase/ui-components';
 import { ThunkDispatch } from 'redux-thunk';
 import CancelableRequest, { Task } from '../../lib/CancelableRequest';
-import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
+import JobBrowserBFFClient, { QueryJobsParams, FilterSpec } from '../../lib/JobBrowserBFFClient';
 import { EpochTime } from '../types/base';
 import { ComponentLoadingState } from '../store/base';
 import { UIError } from '../types/error';
@@ -124,6 +124,19 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
+        const filter: FilterSpec = {
+            status: searchExpression.jobStatus
+        };
+
+        // TODO: better parsing of search, or do it before here...
+        const searchTerms = searchExpression.query.split(/\s+/);
+        // if (searchTerms.length > 0) {
+        //     if (!(searchTerms.length === 1 && searchTerms[0] === '')) {
+        //         filter.user = searchTerms;
+        //     }
+        // }
+
+
         const queryParams: QueryJobsParams = {
             time_span: {
                 from: timeRangeStart,
@@ -132,11 +145,14 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
             offset: searchExpression.offset,
             limit: searchExpression.limit,
             timeout: 10000,
-            admin: 1,
-            filter: {
-                status: searchExpression.jobStatus
-            }
+            admin: true,
+            search: {
+                terms: searchTerms
+            },
+            filter
         };
+
+        console.log('query params', queryParams);
 
         if (searchExpression.sort) {
             switch (searchExpression.sort.field) {
@@ -209,7 +225,7 @@ export function userJobsLoad() {
             },
             timeRange: {
                 kind: 'preset',
-                preset: 'lastMonth'
+                preset: 'lastWeek'
             }
         };
         const initialData: UserJobsViewData = {
