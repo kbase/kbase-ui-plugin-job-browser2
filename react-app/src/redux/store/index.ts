@@ -75,6 +75,7 @@ export interface App {
 export interface JobRequest {
     context: JobContext;
     app: App | null;
+    clientGroup: ClientGroup;
     // TODO: should be User structure
     owner: {
         username: string;

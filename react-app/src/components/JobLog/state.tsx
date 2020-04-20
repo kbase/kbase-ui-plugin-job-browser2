@@ -76,7 +76,6 @@ type JobLogsStateState = JobLogView;
 export default class JobLogsState extends React.Component<JobLogsStateProps, JobLogsStateState> {
     constructor(props: JobLogsStateProps) {
         super(props);
-
         this.state = {
             status: JobLogState.NONE
         };
@@ -91,7 +90,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const jobs = await jobBrowserBFF.get_jobs({
             job_ids: [this.props.jobID],
             // TODO: admin??
-            admin: 0,
+            admin: this.props.admin,
             // TODO: from config
             timeout: 10000
         });
@@ -100,6 +99,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     }
 
     async getJobLog(offset: number, limit: number, timeout: number, admin: boolean): Promise<Array<JobLogEntry>> {
+        console.log('in OTHER get job log!', admin);
+
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,
@@ -108,8 +109,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
 
         const jobLog = await jobBrowserBFF.get_job_log({
             job_id: this.props.jobID,
-            offset, limit, timeout,
-            admin: admin ? 1 : 0
+            offset, limit, timeout, admin
         });
 
         return jobLog.log.map((entry) => {
@@ -185,7 +185,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const limit = 1000;
         // TODO: get from somewhere else... 
         const timeout = 10000;
-        // TODO: get from somewhere else...
 
         const poller = async () => {
             const job = await this.getJob();
@@ -233,7 +232,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         // TODO: get from somewhere else... 
         const timeout = 10000;
         // TODO: get from somewhere else...
-        const admin = false;
 
         let log;
         switch (this.currentJobState(job).type) {
@@ -246,7 +244,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 this.startQueuedPolling();
                 return;
             case JobStateType.RUN:
-                log = await this.getJobLog(0, limit, timeout, admin);
+                log = await this.getJobLog(0, limit, timeout, this.props.admin);
                 this.setState({
                     status: JobLogState.ACTIVE_LOADED,
                     log,
@@ -254,7 +252,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 });
                 return;
             default:
-                log = await this.getJobLog(0, limit, timeout, admin);
+                log = await this.getJobLog(0, limit, timeout, this.props.admin);
                 this.setState({
                     status: JobLogState.FINISHED_LOADED,
                     log,

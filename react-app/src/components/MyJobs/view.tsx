@@ -66,6 +66,10 @@ interface JobStatusFilterOption {
  */
 const jobStatusFilterOptions: Array<JobStatusFilterOption> = [
     {
+        label: 'Created',
+        value: 'create'
+    },
+    {
         label: 'Queued',
         value: 'queue'
     },
@@ -209,7 +213,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
         this.state = {
             showDates: false,
-            currentJobStatusFilter: ['queue', 'run', 'terminate', 'complete', 'error'],
+            currentJobStatusFilter: ['create', 'queue', 'run', 'terminate', 'complete', 'error'],
             timeRange: { kind: 'preset', preset: MyJobs.defaultTimeRangePreset },
             isFilterOpen: false,
             selectedJob: null,
@@ -498,7 +502,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         if (event.target.checked) {
             this.setState(
                 {
-                    currentJobStatusFilter: ['queue', 'run', 'terminate', 'complete', 'error']
+                    currentJobStatusFilter: ['create', 'queue', 'run', 'terminate', 'complete', 'error']
                 },
                 () => {
                     this.doSearch(false);
@@ -510,7 +514,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     onClickAny() {
         this.setState(
             {
-                currentJobStatusFilter: ['queue', 'run', 'terminate', 'complete', 'error']
+                currentJobStatusFilter: ['create', 'queue', 'run', 'terminate', 'complete', 'error']
             },
             () => {
                 this.doSearch(false);
@@ -532,7 +536,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     onClickActive() {
         this.setState(
             {
-                currentJobStatusFilter: ['queue', 'run']
+                currentJobStatusFilter: ['create', 'queue', 'run']
             },
             () => {
                 this.doSearch(false);
@@ -866,13 +870,10 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                 />
                 <Table.Column
                     title="Server"
-                    key="clientGroups"
+                    key="clientGroup"
                     width="8%"
                     render={(_, job: Job) => {
-                        if (job.request.app === null) {
-                            return 'n/a';
-                        }
-                        return job.request.app.clientGroups.join(',');
+                        return job.request.clientGroup;
                     }}
                 />
                 <Table.Column

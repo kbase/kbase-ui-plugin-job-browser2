@@ -6,7 +6,7 @@ export interface PollerParams {
     // callback to trigger a polling action, whatever that is.
     onPoll: () => void,
     // callback for progress
-    onProgress: (progress: number) => void,
+    onProgress?: (progress: number) => void,
     pubsub: PubSub,
     progressSteps: number,
     pollInterval: number,
@@ -203,7 +203,9 @@ export class Poller {
     }
 
     updateOnProgress() {
-        this.params.onProgress(100 * this.statusCount / this.params.progressSteps);
+        if (this.params.onProgress) {
+            this.params.onProgress(100 * this.statusCount / this.params.progressSteps);
+        }
     }
 
     stopPolling() {

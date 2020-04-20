@@ -79,7 +79,7 @@ export interface SearchSpec {
 export interface FilterSpec {
     workspace_id?: Array<number>;
     status?: Array<string>;
-    username?: Array<string>;
+    user?: Array<string>;
     // client_group?: Array<string>;
     app_id?: Array<string>;
     job_id?: Array<string>;
@@ -109,7 +109,7 @@ export type ClientGroup = string;
 
 export interface JobStateBase {
     status: JobStatus;
-    clientGroup: ClientGroup;
+    client_group: ClientGroup;
 }
 
 export interface JobStateCreate extends JobStateBase {
@@ -297,7 +297,7 @@ type JobID = string;
 
 interface ParamsBase {
     timeout: number;
-    admin?: number;
+    admin?: boolean;
 }
 
 interface ParamsCollectionBase {
