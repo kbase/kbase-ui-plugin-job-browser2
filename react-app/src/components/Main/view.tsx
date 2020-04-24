@@ -8,6 +8,7 @@ import { MainParams } from './state';
 import { Tab } from '../FlexTabs';
 import { Icon } from 'antd';
 import Tabs from '../AutoFlexTabs';
+import AdminJobs from '../AdminJobs';
 
 export interface MainProps {
     isAdmin: boolean;
@@ -28,18 +29,7 @@ export default class Main extends React.Component<MainProps, MainState> {
         super(props);
         this.defaultTabKey = 'myJobs';
 
-
-        // const tabs: Map<string, Tab> = new Map();
-        // let tabOrder: Array<string>;
-        // const selectedTab = 'myjobs';
-
         const tabs: Array<Tab> = [];
-
-        // if (this.props.isAdmin) {
-        //     tabOrder = ['myjobs', 'userjobs', 'appstats', 'userrunsummary']
-        // } else {
-        //     tabOrder = ['myjobs', 'appstats',]
-        // }
 
         tabs.push({
             tab: 'myjobs',
@@ -50,16 +40,13 @@ export default class Main extends React.Component<MainProps, MainState> {
         });
 
         if (this.props.isAdmin) {
-            const userJobsTabLabel = (
-                <span>
-                    User Jobs <Icon type="unlock" />
-                </span>
-            );
             tabs.push({
-                tab: 'userjobs',
-                title: userJobsTabLabel,
+                tab: 'adminjobs',
+                title: <span>
+                    User Jobs <Icon type="unlock" />
+                </span>,
                 renderBody: () => {
-                    return <UserJobs />;
+                    return <AdminJobs />;
                 }
             });
         }

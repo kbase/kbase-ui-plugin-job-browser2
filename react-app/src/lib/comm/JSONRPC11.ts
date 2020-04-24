@@ -4,7 +4,7 @@ import {
 } from './HTTPClient';
 
 import { v4 as uuid } from 'uuid';
-import { JSONValue } from '../json';
+import { JSONValue } from '../../redux/types/json';
 
 export interface JSONRPCRequestOptions {
     func: string,

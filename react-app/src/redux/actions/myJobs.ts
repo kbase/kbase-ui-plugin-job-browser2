@@ -131,19 +131,16 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
-        const filter: FilterSpec = {
-            status: searchExpression.jobStatus
-        };
+        // let filter: FilterSpec;
+        // let s: JobsSearchExpression;
+        // if (searchExpression.
+
+        // const filter: FilterSpec = {
+        //     status: searchExpression.jobStatus
+        // };
 
         // TODO: better parsing of search, or do it before here...
-        const searchTerms = searchExpression.query.split(/\s+/);
-        // TODO: remove - experiment with passing a search
-        // as a filter.
-        // if (searchTerms.length > 0) {
-        //     if (!(searchTerms.length === 1 && searchTerms[0] === '')) {
-        //         filter.user = searchTerms;
-        //     }
-        // }
+        // const searchTerms = searchExpression.query.split(/\s+/);
 
         const queryParams: QueryJobsParams = {
             time_span: {
@@ -153,10 +150,10 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
             offset: searchExpression.offset,
             limit: searchExpression.limit,
             timeout: 10000,
-            search: {
-                terms: searchTerms
-            },
-            filter
+            // search: {
+            //     terms: searchTerms
+            // },
+            filter: searchExpression.filter
         };
 
         if (searchExpression.sort) {
@@ -216,44 +213,47 @@ export function myJobsLoad() {
             return;
         }
 
-        const searchExpression: JobsSearchExpression = {
-            forceSearch: true,
-            jobStatus: ["create", "queue", "run", "complete", "error", "terminate"],
-            offset: 0,
-            limit: 10,
-            query: '',
-            sort: {
-                field: 'created',
-                direction: 'descending'
-            },
-            timeRange: {
-                kind: 'preset',
-                preset: 'lastWeek'
-            }
-        };
+        // const searchExpression: JobsSearchExpression = {
+        //     forceSearch: true,
+        //     jobStatus: ["create", "queue", "run", "complete", "error", "terminate"],
+        //     offset: 0,
+        //     limit: 1,
+        //     query: '',
+        //     sort: {
+        //         field: 'created',
+        //         direction: 'descending'
+        //     },
+        //     timeRange: {
+        //         kind: 'preset',
+        //         preset: 'lastWeek'
+        //     }
+        // };
+        // const initialData: MyJobsViewData = {
+        //     searchState: JobSearchState.NONE,
+        //     searchExpression
+        // };
         const initialData: MyJobsViewData = {
-            searchState: JobSearchState.INITIAL_SEARCHING,
-            searchExpression
+            searchState: JobSearchState.NONE
         };
         dispatch(myJobsLoadSuccess(initialData));
 
-        const task = myJobsSearchRequests.spawn({
-            token: userAuthorization.token,
-            username: userAuthorization.username,
-            serviceWizardURL,
-            searchExpression
-        });
+        // const task = myJobsSearchRequests.spawn({
+        //     token: userAuthorization.token,
+        //     username: userAuthorization.username,
+        //     serviceWizardURL,
+        //     searchExpression
+        // });
 
-        const { jobs, foundCount, totalCount } = await task.promise;
+        // const { jobs, foundCount, totalCount } = await task.promise;
 
-        if (task.isCanceled) {
-            // just do nothing
-            return;
-        }
-        const jobsFetchedAt = new Date().getTime();
-        myJobsSearchRequests.done(task);
+        // if (task.isCanceled) {
+        //     // just do nothing
+        //     return;
+        // }
+        // const jobsFetchedAt = new Date().getTime();
+        // myJobsSearchRequests.done(task);
 
-        dispatch(myJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
+        // dispatch(myJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
     };
 }
 
@@ -261,78 +261,80 @@ const myJobsSearchRequests = new MyJobsRequests();
 
 export function myJobsSearch(searchExpression: JobsSearchExpression) {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
-        dispatch(myJobsSearchStart());
+        // dispatch(myJobsSearchStart());
 
-        const {
-            auth: { userAuthorization }
-        } = getState();
+        // const {
+        //     auth: { userAuthorization }
+        // } = getState();
 
-        if (!userAuthorization) {
-            dispatch(
-                myJobsSearchError({
-                    message: "Not authorized",
-                    code: "unauthorized"
-                })
-            );
-            return;
-        }
-
-        let {
-            app: {
-                config: {
-                    services: {
-                        ServiceWizard: { url: serviceWizardURL }
-                    }
-                }
-            },
-            views: {
-                myJobsView
-            }
-        } = getState();
-
-        // Narrow the view
-        if (myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
-            myJobsSearchError({
-                code: 'search-error',
-                message: 'My Jobs Component not in correct state (SUCCESS)'
-            });
-            return;
-        }
-
-        // const searchTerms = searchExpression.query.split(/\s+/).map((term) => {
-        //     return new RegExp(term, 'i');
-        // });
-
-        // Umm, there must be other conditions which make a real search happen, or is
-        // forceSearch now the way to do this? ...
-
-        const task = myJobsSearchRequests.spawn({
-            token: userAuthorization.token,
-            username: userAuthorization.username,
-            serviceWizardURL,
-            searchExpression
-        });
-
-        const { jobs, foundCount, totalCount } = await task.promise;
-        if (task.isCanceled) {
-            // just do nothing
-            return;
-        }
-        const jobsFetchedAt = new Date().getTime();
-        myJobsSearchRequests.done(task);
-
-
-        // const newJobs = rawJobs.filter((job) => {
-        //     return (
-        //         searchTerms.every((term) => {
-        //             return term.test(job.request.app.title) || term.test(job.request.narrative.title);
-        //         }) &&
-        //         compareTimeRange(job, timeRangeStart, timeRangeEnd) &&
-        //         compareStatus(job, searchExpression.jobStatus)
+        // if (!userAuthorization) {
+        //     dispatch(
+        //         myJobsSearchError({
+        //             message: "Not authorized",
+        //             code: "unauthorized"
+        //         })
         //     );
+        //     return;
+        // }
+
+        // let {
+        //     app: {
+        //         config: {
+        //             services: {
+        //                 ServiceWizard: { url: serviceWizardURL }
+        //             }
+        //         }
+        //     },
+        //     views: {
+        //         myJobsView
+        //     }
+        // } = getState();
+
+        // // Narrow the view
+        // if (myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
+        //     myJobsSearchError({
+        //         code: 'search-error',
+        //         message: 'My Jobs Component not in correct state (SUCCESS)'
+        //     });
+        //     return;
+        // }
+
+        // // const searchTerms = searchExpression.query.split(/\s+/).map((term) => {
+        // //     return new RegExp(term, 'i');
+        // // });
+
+        // // Umm, there must be other conditions which make a real search happen, or is
+        // // forceSearch now the way to do this? ...
+
+        // console.log('search expr', searchExpression);
+
+        // const task = myJobsSearchRequests.spawn({
+        //     token: userAuthorization.token,
+        //     username: userAuthorization.username,
+        //     serviceWizardURL,
+        //     searchExpression
         // });
 
-        dispatch(myJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
+        // const { jobs, foundCount, totalCount } = await task.promise;
+        // if (task.isCanceled) {
+        //     // just do nothing
+        //     return;
+        // }
+        // const jobsFetchedAt = new Date().getTime();
+        // myJobsSearchRequests.done(task);
+
+
+        // // const newJobs = rawJobs.filter((job) => {
+        // //     return (
+        // //         searchTerms.every((term) => {
+        // //             return term.test(job.request.app.title) || term.test(job.request.narrative.title);
+        // //         }) &&
+        // //         compareTimeRange(job, timeRangeStart, timeRangeEnd) &&
+        // //         compareStatus(job, searchExpression.jobStatus)
+        // //     );
+        // // });
+
+        // dispatch(myJobsSearchSuccess(jobs, foundCount, totalCount, jobsFetchedAt, searchExpression));
     };
 }
 
@@ -342,75 +344,75 @@ export function myJobsRefreshSearch() {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
 
 
-        const {
-            auth: { userAuthorization }
-        } = getState();
+        // const {
+        //     auth: { userAuthorization }
+        // } = getState();
 
-        if (!userAuthorization) {
-            dispatch(
-                myJobsSearchError({
-                    message: "Not authorized",
-                    code: "unauthorized"
-                })
-            );
-            return;
-        }
+        // if (!userAuthorization) {
+        //     dispatch(
+        //         myJobsSearchError({
+        //             message: "Not authorized",
+        //             code: "unauthorized"
+        //         })
+        //     );
+        //     return;
+        // }
 
-        const {
-            app: {
-                config: {
-                    services: {
-                        ServiceWizard: { url: serviceWizardURL }
-                    }
-                }
-            },
-            views: {
-                myJobsView
-            }
-        } = getState();
+        // const {
+        //     app: {
+        //         config: {
+        //             services: {
+        //                 ServiceWizard: { url: serviceWizardURL }
+        //             }
+        //         }
+        //     },
+        //     views: {
+        //         myJobsView
+        //     }
+        // } = getState();
 
-        if (myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
-            myJobsSearchError({
-                code: 'search-error',
-                message: 'My Jobs Component not in correct state (SUCCESS)'
-            });
-            return;
-        }
-
-
-        if (myJobsView.data.searchState === JobSearchState.ERROR) {
-            return;
-        }
-
-        dispatch(myJobsSearchStart());
+        // if (myJobsView.loadingState !== ComponentLoadingState.SUCCESS) {
+        //     myJobsSearchError({
+        //         code: 'search-error',
+        //         message: 'My Jobs Component not in correct state (SUCCESS)'
+        //     });
+        //     return;
+        // }
 
 
-        const searchExpression = myJobsView.data.searchExpression;
+        // if (myJobsView.data.searchState === JobSearchState.ERROR) {
+        //     return;
+        // }
 
-        if (!searchExpression) {
-            myJobsSearchError({
-                message: "No search expression",
-                code: "nosearchexpression"
-            });
-            return;
-        }
+        // dispatch(myJobsSearchStart());
 
-        const task = myJobsSearchRequests.spawn({
-            token: userAuthorization.token,
-            username: userAuthorization.username,
-            serviceWizardURL,
-            searchExpression
-        });
 
-        const { jobs, foundCount, totalCount } = await task.promise;
-        if (task.isCanceled) {
-            // just do nothing
-            return;
-        }
-        // jobsFetchedAt = new Date().getTime();
-        myJobsSearchRequests.done(task);
+        // const searchExpression = myJobsView.data.searchExpression;
 
-        dispatch(myJobsSearchSuccess(jobs, foundCount, totalCount, Date.now(), searchExpression));
+        // if (!searchExpression) {
+        //     myJobsSearchError({
+        //         message: "No search expression",
+        //         code: "nosearchexpression"
+        //     });
+        //     return;
+        // }
+
+        // const task = myJobsSearchRequests.spawn({
+        //     token: userAuthorization.token,
+        //     username: userAuthorization.username,
+        //     serviceWizardURL,
+        //     searchExpression
+        // });
+
+        // const { jobs, foundCount, totalCount } = await task.promise;
+        // if (task.isCanceled) {
+        //     // just do nothing
+        //     return;
+        // }
+        // // jobsFetchedAt = new Date().getTime();
+        // myJobsSearchRequests.done(task);
+
+        // dispatch(myJobsSearchSuccess(jobs, foundCount, totalCount, Date.now(), searchExpression));
     };
 }
 

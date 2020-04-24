@@ -82,6 +82,8 @@ export interface FilterSpec {
     user?: Array<string>;
     // client_group?: Array<string>;
     app_id?: Array<string>;
+    app_module?: Array<string>;
+    app_function?: Array<string>;
     job_id?: Array<string>;
     error_code?: Array<number>;
     terminated_code?: Array<number>;

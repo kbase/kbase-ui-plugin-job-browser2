@@ -7,19 +7,16 @@
 // 3rd party imports
 import React from "react";
 import {
-    Table, Form, Input, Button, Checkbox, Select, DatePicker, Popconfirm, Tooltip,
-    Modal, Switch, Alert, Spin
+    Form, Button, Select, DatePicker, Popconfirm, Tooltip,
+    Modal, Switch
 } from 'antd';
-import { CheckboxValueType } from 'antd/lib/checkbox/Group';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+
 import moment, { Moment } from 'moment';
 
 // project imports
 import {
     Job, JobsSearchExpression, TimeRangePresets,
-    TimeRange, SortSpec, JobContextType, JobSearchStatus, MyJobsViewData,
-    JobSearchState, MyJobsViewDataError, MyJobsViewDataSearching, MyJobsViewDataInitialSearching,
-    MyJobsViewDataReady
+    TimeRange, SortSpec, JobContextType
 } from '../../redux/store';
 import JobDetail from '../JobDetail';
 
@@ -32,10 +29,11 @@ import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
 import { JobEvent, JobStateType } from '../../redux/types/jobState';
-import { PaginationConfig, SorterResult } from 'antd/lib/table';
 import NarrativeLink from '../NarrativeLink';
 import { JobContextNarrative } from '../../lib/JobBrowserBFFClient';
 import UILink from '../UILink';
+import Table2, { Column, AsyncProcessState, DataSource, TableConfig } from "../Table";
+import FilterEditor, { JobFilter } from "../FilterEditor";
 
 const CANCEL_TIMEOUT = 10000;
 
@@ -46,50 +44,7 @@ const CANCEL_TIMEOUT = 10000;
  */
 type JobStatusFilterKey = "queued" | "running" | "canceled" | "success" | "error";
 
-/**
- * This interface describes a single option for the available job status filter options.
- *
- * Job status filter options are used to populate the checkboxgroup.
- * Note that the value of each option is a job status filter key.
- */
-interface JobStatusFilterOption {
-    label: string;
-    value: JobSearchStatus;
-}
 
-/**
- * A set of job status filter options used to populate and control a set of checkboxes provided
- * for the user to be able to filter jobs according to their job status.
- *
- * Note that this is a set of options because the antd checkboxgroup simplifies a set of checkboxes
- * through sets of options.
- */
-const jobStatusFilterOptions: Array<JobStatusFilterOption> = [
-    {
-        label: 'Created',
-        value: 'create'
-    },
-    {
-        label: 'Queued',
-        value: 'queue'
-    },
-    {
-        label: 'Running',
-        value: 'run'
-    },
-    {
-        label: 'Completed',
-        value: 'complete'
-    },
-    {
-        label: 'Error',
-        value: 'error'
-    },
-    {
-        label: 'Canceled',
-        value: 'terminate'
-    }
-];
 
 /**
  * Translates an array of job status filter keys, as provided by the ui job status
@@ -139,7 +94,8 @@ const jobStatusFilterOptions: Array<JobStatusFilterOption> = [
  * Props for the MyJobs component
  */
 export interface MyJobsProps {
-    view: MyJobsViewData;
+    dataSource: DataSource<Job>;
+    // view: MyJobsView;
     /** The list of jobs to display */
 
     // jobs: Array<Job>;
@@ -171,7 +127,7 @@ interface MyJobsState {
     /** Flag to show the date controls */
     showDates: boolean;
     /** Contains the current selection of job statuses in the checkbox control */
-    currentJobStatusFilter: Array<JobSearchStatus>;
+    // currentJobStatusFilter: Array<JobSearchStatus>;
     /** Contains the initial timestamp (ms epoch time) for time range */
     timeRange: TimeRange;
 
@@ -179,6 +135,9 @@ interface MyJobsState {
 
     selectedJob: Job | null;
     currentSort: SortSpec | null;
+    // rowsPerPage: number;
+
+    filter: JobFilter;
 }
 
 /**
@@ -194,6 +153,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     offset: number;
     limit: number;
     sorting: SortSpec;
+    currentPage: number;
+    // rowsPerPage: number;
 
     static defaultTimeRangePreset: TimeRangePresets = "lastWeek";
 
@@ -205,7 +166,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.currentQuery = "";
         this.pubsub = new PubSub();
         this.offset = 0;
-        this.limit = 10;
+        this.limit = 1;
+        this.currentPage = 0;
         this.sorting = {
             field: 'created',
             direction: 'descending'
@@ -213,19 +175,46 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
         this.state = {
             showDates: false,
-            currentJobStatusFilter: ['create', 'queue', 'run', 'terminate', 'complete', 'error'],
+            filter: {
+                status: ['create', 'queue', 'run', 'terminate', 'complete', 'error']
+            },
             timeRange: { kind: 'preset', preset: MyJobs.defaultTimeRangePreset },
             isFilterOpen: false,
             selectedJob: null,
             currentSort: null
+            // rowsPerPage: 1
         };
     }
 
+    async componentDidMount() {
+
+    }
+
+    // onResize(rowsPerPage: number) {
+    //     // It would be nice to rely upon the table component to trigger a 
+    //     // change even if we change the rows per page ... but we change the 
+    //     // rows per page via the table props, not by a trigger.
+    //     // Perhaps by wrapping the table or subclassing it?
+
+    //     this.limit = rowsPerPage;
+    //     this.offset = this.currentPage * rowsPerPage;
+
+    //     // This causes the table to rerender, but without triggering a
+    //     // re-search;
+    //     // this.setState({
+    //     //     rowsPerPage
+    //     // });
+
+    //     // This triggers a fresh search.
+    //     this.doSearch(false);
+    // }
+
     componentDidUpdate() {
-        if (this.props.view.searchState === JobSearchState.SEARCHING) {
+        if (this.props.dataSource.status === AsyncProcessState.PROCESSING) {
             this.pubsub.send('searching', { is: true });
         } else {
             this.pubsub.send("searching", { is: false });
+            // this.tableResizer.setRowsPerPage();
         }
     }
 
@@ -263,39 +252,112 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.doSearch(true);
     }
 
-    onTableChanged(pagination: PaginationConfig, filters: any, sorter: SorterResult<Job>) {
-        // Calculate offset and limit based on current pagination
-        const currentPage = (pagination.current || 1) - 1;
-        const currentPageSize = pagination.pageSize || 10;
+    // onTableChanged(pagination: PaginationConfig, filters: any, sorter: SorterResult<Job>) {
+    //     console.log('table changed??', pagination);
+    //     // Calculate offset and limit based on current pagination
+    //     const currentPage = (pagination.current || 1) - 1;
+    //     const currentPageSize = pagination.pageSize || 5;
 
-        this.offset = currentPage * currentPageSize;
-        this.limit = currentPageSize;
+    //     this.currentPage = pagination.current || 0;
+    //     this.offset = currentPage * currentPageSize;
+    //     this.limit = currentPageSize;
 
-        // Calculate the sort spec 
-        // Only create at sort order is supported.
-        switch (sorter.columnKey) {
-            case 'createAt':
-                switch (sorter.order) {
-                    case 'ascend':
-                        this.sorting = {
-                            field: 'created',
-                            direction: 'ascending'
-                        };
-                        break;
-                    case 'descend':
-                    default:
-                        this.sorting = {
-                            field: 'created',
-                            direction: 'descending'
-                        };
-                }
-                break;
-            default:
-                this.sorting = {
-                    field: 'created',
-                    direction: 'descending'
-                };
+    //     // Calculate the sort spec 
+    //     // Only create at sort order is supported.
+    //     switch (sorter.columnKey) {
+    //         case 'createAt':
+    //             switch (sorter.order) {
+    //                 case 'ascend':
+    //                     this.sorting = {
+    //                         field: 'created',
+    //                         direction: 'ascending'
+    //                     };
+    //                     break;
+    //                 case 'descend':
+    //                 default:
+    //                     this.sorting = {
+    //                         field: 'created',
+    //                         direction: 'descending'
+    //                     };
+    //             }
+    //             break;
+    //         default:
+    //             this.sorting = {
+    //                 field: 'created',
+    //                 direction: 'descending'
+    //             };
+    //     }
+
+    //     this.doSearch(false);
+    // }
+    onFirstPage() {
+        console.log('on first');
+        if (this.props.dataSource.status !== AsyncProcessState.SUCCESS) {
+            return;
         }
+
+        const dataSource = this.props.dataSource;
+
+        if (dataSource.page <= 1) {
+            return;
+        }
+
+        // here we do it.
+        this.offset = 0;
+
+        this.doSearch(false);
+    }
+
+    onPreviousPage() {
+        if (this.props.dataSource.status !== AsyncProcessState.SUCCESS) {
+            return;
+        }
+
+        const dataSource = this.props.dataSource;
+
+        if (dataSource.page <= 1) {
+            return;
+        }
+
+        // here we do it.
+        this.offset = (dataSource.page - 2) * dataSource.limit;
+        this.limit = dataSource.limit;
+
+        this.doSearch(false);
+    }
+
+    onNextPage() {
+        if (this.props.dataSource.status !== AsyncProcessState.SUCCESS) {
+            return;
+        }
+
+        const dataSource = this.props.dataSource;
+
+        if (dataSource.page >= dataSource.pageCount) {
+            return;
+        }
+
+        // here we do it.
+        this.offset = dataSource.page * dataSource.limit;
+        this.limit = dataSource.limit;
+
+        this.doSearch(false);
+    }
+
+    onLastPage() {
+        if (this.props.dataSource.status !== AsyncProcessState.SUCCESS) {
+            return;
+        }
+
+        const dataSource = this.props.dataSource;
+
+        if (dataSource.page >= dataSource.pageCount) {
+            return;
+        }
+
+        // here we do it.
+        this.offset = (dataSource.pageCount - 1) * dataSource.limit;
+        this.limit = dataSource.limit;
 
         this.doSearch(false);
     }
@@ -308,12 +370,14 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         const searchExpression: JobsSearchExpression = {
             query: this.currentQuery,
             timeRange: this.state.timeRange,
-            jobStatus: this.state.currentJobStatusFilter,
+            filter: this.state.filter,
             forceSearch,
             sort: this.sorting,
             offset: this.offset,
             limit: this.limit
         };
+
+        console.log('searching with', searchExpression);
 
         // TODO: document wth is happening here.
         this.pubsub.send("search", {});
@@ -430,15 +494,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         }
         return (
             <Form layout="inline" onSubmit={this.onSubmit.bind(this)}>
-                <Form.Item>
-                    <Input
-                        defaultValue={this.currentQuery}
-                        placeholder="Search jobs"
-                        style={{ width: "15em" }}
-                        onChange={this.onChangeQuery.bind(this)}
-                    />
-                </Form.Item>
-
                 <Form.Item label="Time Range">
                     <Select
                         defaultValue={MyJobs.defaultTimeRangePreset}
@@ -450,6 +505,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         <Select.Option value="last48Hours">Previous 48 Hours</Select.Option>
                         <Select.Option value="lastWeek">Previous Week</Select.Option>
                         <Select.Option value="lastMonth">Previous Month</Select.Option>
+                        <Select.Option value="lastYear">Previous Year</Select.Option>
+                        <Select.Option value="allTime">All Time</Select.Option>
                         <Select.Option value="customRange">Custom Range</Select.Option>
                     </Select>
                 </Form.Item>
@@ -486,103 +543,33 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.setState({ isFilterOpen });
     }
 
-    onFilterChange(filters: Array<CheckboxValueType>) {
-        const filter = filters as Array<JobSearchStatus>;
-        this.setState(
-            {
-                currentJobStatusFilter: filter
-            },
-            () => {
-                this.doSearch(false);
-            }
-        );
-    }
+    onFilterChange(filter: JobFilter) {
+        this.setState({
+            filter
+        }, () => {
+            this.doSearch(false);
+        });
 
-    onChangeJobStatusAny(event: CheckboxChangeEvent) {
-        if (event.target.checked) {
-            this.setState(
-                {
-                    currentJobStatusFilter: ['create', 'queue', 'run', 'terminate', 'complete', 'error']
-                },
-                () => {
-                    this.doSearch(false);
-                }
-            );
-        }
-    }
-
-    onClickAny() {
-        this.setState(
-            {
-                currentJobStatusFilter: ['create', 'queue', 'run', 'terminate', 'complete', 'error']
-            },
-            () => {
-                this.doSearch(false);
-            }
-        );
-    }
-
-    onClickFinished() {
-        this.setState(
-            {
-                currentJobStatusFilter: ['terminate', 'complete', 'error']
-            },
-            () => {
-                this.doSearch(false);
-            }
-        );
-    }
-
-    onClickActive() {
-        this.setState(
-            {
-                currentJobStatusFilter: ['create', 'queue', 'run']
-            },
-            () => {
-                this.doSearch(false);
-            }
-        );
-    }
-
-    renderFilterInput() {
-        const options = jobStatusFilterOptions;
-        return (
-            <div className="MyJobs-filterArea">
-                <span style={{ color: "gray", fontWeight: "bold", marginRight: "10px" }}>Filter by Job Status</span>
-                <Button size="small" type="link" onClick={this.onClickAny.bind(this)} data-k-b-testhook-button="any">
-                    <i>Any</i>
-                </Button>{" "}
-                <Button size="small" type="link" onClick={this.onClickActive.bind(this)} data-k-b-testhook-button="active">
-                    <i>Active</i>
-                </Button>{" "}
-                <Button
-                    size="small"
-                    type="link"
-                    onClick={this.onClickFinished.bind(this)}
-                    style={{ marginRight: "10px" }}
-                    data-k-b-testhook-button="finished"
-                >
-                    <i>Finished</i>
-                </Button>
-                <Checkbox.Group
-                    options={options}
-                    onChange={this.onFilterChange.bind(this)}
-                    value={this.state.currentJobStatusFilter}
-                />
-            </div>
-        );
     }
 
     renderControlBar() {
-        let filterRowStyle: React.CSSProperties = { margin: "10px 10px 10px 0" };
+        let filterRowStyle: React.CSSProperties = {
+            position: 'relative'
+        };
         if (!this.state.isFilterOpen) {
             filterRowStyle.display = "none";
         }
         let filterRow;
         if (this.state.isFilterOpen) {
             filterRow = (
-                <div className="Row" style={filterRowStyle}>
-                    {this.renderFilterInput()}
+                <div style={filterRowStyle}>
+                    <div className="MyJobs-filterPanel">
+                        <div className="MyJobs-filterArea">
+                            <FilterEditor
+                                filter={this.state.filter}
+                                onChange={this.onFilterChange.bind(this)} />
+                        </div>
+                    </div>
                 </div>
             );
         }
@@ -688,206 +675,384 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return;
     }
 
-    renderJobsTable(view: MyJobsViewDataSearching | MyJobsViewDataReady) {
-        const loading = view.searchState === JobSearchState.SEARCHING;
-        return (
-            <Table<Job>
-                size="small"
-                className="MyJobs-table xScrollingFlexTable"
-                dataSource={view.searchResult.jobs}
-                loading={loading}
-                rowKey={(job: Job) => {
-                    return job.id;
-                }}
-                pagination={{
-                    position: 'bottom',
-                    showSizeChanger: true,
-                    pageSizeOptions: ['10', '20', '50', '100'],
-                    defaultPageSize: 10,
-                    total: view.searchResult.foundCount,
-                    showTotal: (total: number, [from, to]: [number, number]) => {
-                        return <span>
-                            {from} to {to} of {total}
-                        </span>;
+    renderJobsTable() {
+        // const loading = view.searchState === JobSearchState.SEARCHING;
+        const columns: Array<Column<Job>> = [
+            {
+                id: 'jobid',
+                label: 'Job Id',
+                render: (job: Job) => {
+                    const title = <div>
+                        <p><span style={{ color: 'silver' }}>Job ID</span>{' '}{job.id}</p>
+                        <p>Click to view job log and detail</p>
+                    </div>;
+                    return (
+                        <Tooltip title={title}>
+                            <Button
+                                type="link"
+                                onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+                                    e.preventDefault();
+                                    this.onClickDetail(job);
+                                }}
+                                icon="info-circle"
+                            />
+                        </Tooltip>
+                    );
+                }
+            },
+            {
+                id: 'narrative',
+                label: 'Narrative',
+                render: (job: Job) => {
+                    switch (job.request.context.type) {
+                        case JobContextType.NARRATIVE:
+                            const title = job.request.context.title;
+                            if (job.request.context.isTemporary) {
+                                return (
+                                    <Tooltip title={'A temporary, unsaved narrative'}>
+                                        <NarrativeLink narrativeID={job.request.context.workspace.id}>
+                                            Unsaved Narrative
+                                        </NarrativeLink>
+                                    </Tooltip>
+                                );
+                            } else {
+                                return (
+                                    <Tooltip title={title || 'n/a'}>
+                                        <NarrativeLink narrativeID={job.request.context.workspace.id}>
+                                            {title || 'n/a'}
+                                        </NarrativeLink>
+                                    </Tooltip>
+                                );
+                            }
+
+
+                        case JobContextType.WORKSPACE:
+                            if (job.request.context.workspace.isAccessible) {
+                                return job.request.context.workspace.name;
+                            } else {
+                                return 'inaccessible workspace';
+                            }
+                        case JobContextType.EXPORT:
+                            return 'export job';
+                        case JobContextType.UNKNOWN:
+                            return 'subjob';
                     }
-                }}
-                onChange={this.onTableChanged.bind(this)}
-            // pagination={false}
-            // scroll={{ y: '100%' }}
-            >
-                <Table.Column
-                    title="Job"
-                    dataIndex="id"
-                    key="id"
-                    width="5%"
-                    render={(jobID: string, job: Job): any => {
-                        const title = <div>
-                            <p><span style={{ color: 'silver' }}>Job ID</span>{' '}{jobID}</p>
-                            <p>Click to view job log and detail</p>
-                        </div>;
-                        return (
-                            <Tooltip title={title}>
-                                <Button
-                                    type="link"
-                                    onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-                                        e.preventDefault();
-                                        this.onClickDetail(job);
-                                    }}
-                                    icon="info-circle"
-                                />
-                            </Tooltip>
-                        );
-                    }}
-                />
-                <Table.Column
-                    title="Narrative"
-                    key="narrativeTitle"
-                    width="17%"
-                    render={(_: any, job: Job): any => {
-                        switch (job.request.context.type) {
-                            case JobContextType.NARRATIVE:
-                                const title = job.request.context.title;
-                                if (job.request.context.isTemporary) {
-                                    return (
-                                        <Tooltip title={'A temporary, unsaved narrative'}>
-                                            <NarrativeLink narrativeID={job.request.context.workspace.id}>
-                                                Unsaved Narrative
-                                            </NarrativeLink>
-                                        </Tooltip>
-                                    );
-                                } else {
-                                    return (
-                                        <Tooltip title={title || 'n/a'}>
-                                            <NarrativeLink narrativeID={job.request.context.workspace.id}>
-                                                {title || 'n/a'}
-                                            </NarrativeLink>
-                                        </Tooltip>
-                                    );
-                                }
-
-
-                            case JobContextType.WORKSPACE:
-                                if (job.request.context.workspace.isAccessible) {
-                                    return job.request.context.workspace.name;
-                                } else {
-                                    return 'inaccessible workspace';
-                                }
-                            case JobContextType.EXPORT:
-                                return 'export job';
-                            case JobContextType.UNKNOWN:
-                                return 'subjob';
-                        }
-                    }}
-                />
-                <Table.Column
-                    title="App"
-                    key="appTitle"
-                    width="20%"
-                    render={(_, job: Job): any => {
-                        if (job.request.app === null) {
-                            return 'n/a';
-                        }
-                        const appTitle = job.request.app.title;
-                        if (!appTitle) {
-                            return 'n/a';
-                        }
-                        return (
-                            <Tooltip title={appTitle}>
-                                <UILink path={`catalog/apps/${job.request.app.id}`}
-                                    openIn='new-tab'>
-                                    {appTitle}
-                                </UILink>
-                            </Tooltip>
-                        );
-                    }}
-                />
-                <Table.Column
-                    title="Submitted"
-                    key="createAt"
-                    width="10%"
-                    render={(_, job: Job) => {
-                        return <NiceRelativeTime time={this.getCreateAt(job)} />;
-                    }}
-                    defaultSortOrder="descend"
-                    sorter={true}
-                    sortDirections={['ascend', 'descend']}
-                />
-                <Table.Column
-                    title="Queued"
-                    key="queuedElapsed"
-                    width="10%"
-                    render={(_, job: Job) => {
-                        var [queueState, nextState] = this.lastEventLike(job, JobStateType.QUEUE);
-                        if (queueState) {
-                            if (nextState) {
-                                return <NiceElapsedTime
-                                    from={queueState.at}
-                                    to={nextState.at}
-                                    precision={2}
-                                    useClock={false} />;
-                            } else {
-                                return <NiceElapsedTime
-                                    from={queueState.at}
-                                    precision={2}
-                                    useClock={true} />;
-                            }
+                }
+            },
+            {
+                id: 'app',
+                label: 'App',
+                render: (job: Job) => {
+                    if (job.request.app === null) {
+                        return 'n/a';
+                    }
+                    const appTitle = job.request.app.title;
+                    if (!appTitle) {
+                        return 'n/a';
+                    }
+                    return (
+                        <Tooltip title={appTitle}>
+                            <UILink path={`catalog/apps/${job.request.app.id}`}
+                                openIn='new-tab'>
+                                {appTitle}
+                            </UILink>
+                        </Tooltip>
+                    );
+                }
+            },
+            {
+                id: 'submitted',
+                label: 'Submitted',
+                render: (job: Job) => {
+                    return <NiceRelativeTime time={this.getCreateAt(job)} />;
+                }
+            },
+            {
+                id: 'queued',
+                label: 'Queued',
+                render: (job: Job) => {
+                    var [queueState, nextState] = this.lastEventLike(job, JobStateType.QUEUE);
+                    if (queueState) {
+                        if (nextState) {
+                            return <NiceElapsedTime
+                                from={queueState.at}
+                                to={nextState.at}
+                                precision={2}
+                                useClock={false} />;
                         } else {
-                            return <span>-</span>;
+                            return <NiceElapsedTime
+                                from={queueState.at}
+                                precision={2}
+                                useClock={true} />;
                         }
-                    }}
-                />
-                <Table.Column
-                    title="Run"
-                    key="runElapsed"
-                    width="10%"
-                    render={(_, job: Job) => {
-                        var [runState, nextState] = this.lastEventLike(job, JobStateType.RUN);
-                        if (runState) {
-                            if (nextState) {
-                                return <NiceElapsedTime
-                                    from={runState.at}
-                                    to={nextState.at}
-                                    precision={2}
-                                    useClock={false} />;
-                            } else {
-                                return <NiceElapsedTime
-                                    from={runState.at}
-                                    precision={2}
-                                    useClock={true} />;
-                            }
+                    } else {
+                        return <span>-</span>;
+                    }
+                }
+            },
+            {
+                id: 'run',
+                label: 'Run',
+                render: (job: Job) => {
+                    var [runState, nextState] = this.lastEventLike(job, JobStateType.RUN);
+                    if (runState) {
+                        if (nextState) {
+                            return <NiceElapsedTime
+                                from={runState.at}
+                                to={nextState.at}
+                                precision={2}
+                                useClock={false} />;
                         } else {
-                            return <span>-</span>;
+                            return <NiceElapsedTime
+                                from={runState.at}
+                                precision={2}
+                                useClock={true} />;
                         }
-                    }}
-                />
-                <Table.Column
-                    title="Status"
-                    key="status"
-                    width="10%"
-                    render={(_, job: Job) => {
-                        return <JobStatusBadge job={job} />;
-                    }}
-                />
-                <Table.Column
-                    title="Server"
-                    key="clientGroup"
-                    width="8%"
-                    render={(_, job: Job) => {
-                        return job.request.clientGroup;
-                    }}
-                />
-                <Table.Column
-                    title="Cancel"
-                    dataIndex="action"
-                    key="action"
-                    width="5%"
-                    render={(_, job: Job) => {
-                        return this.renderJobAction(job);
-                    }}
-                />
-            </Table>
-        );
+                    } else {
+                        return <span>-</span>;
+                    }
+                }
+            },
+            {
+                id: 'status',
+                label: 'Status',
+                render: (job: Job) => {
+                    return <JobStatusBadge job={job} />;
+                }
+            },
+            {
+                id: 'server',
+                label: 'Server',
+                render: (job: Job) => {
+                    return job.request.clientGroup;
+                }
+            },
+            {
+                id: 'cancel',
+                label: 'Cancel',
+                render: (job: Job) => {
+                    return this.renderJobAction(job);
+                }
+            }
+        ];
+        return <Table2<Job>
+            dataSource={this.props.dataSource}
+            firstPage={this.onFirstPage.bind(this)}
+            previousPage={this.onPreviousPage.bind(this)}
+            nextPage={this.onNextPage.bind(this)}
+            lastPage={this.onLastPage.bind(this)}
+            columns={columns}
+            config={this.updateTableConfig.bind(this)} />;
     }
+
+    updateTableConfig(config: TableConfig) {
+        console.log('table config?', config);
+        this.limit = config.rowsPerPage;
+        this.doSearch(false);
+    }
+
+
+    // renderJobsTablex(view: MyJobsViewDataSearching | MyJobsViewDataReady) {
+    //     const loading = view.searchState === JobSearchState.SEARCHING;
+    //     return (
+    //         <Table<Job>
+    //             size="small"
+    //             className="MyJobs-table"
+    //             dataSource={view.searchResult.jobs}
+    //             loading={loading}
+    //             rowKey={(job: Job) => {
+    //                 return job.id;
+    //             }}
+    //             pagination={{
+    //                 position: 'bottom',
+    //                 showSizeChanger: true,
+    //                 // pageSizeOptions: ['5', '10', '20', '50', '100'],
+    //                 defaultPageSize: this.state.rowsPerPage,
+    //                 pageSize: this.state.rowsPerPage,
+    //                 total: view.searchResult.foundCount,
+    //                 showTotal: (total: number, [from, to]: [number, number]) => {
+    //                     return <span>
+    //                         {from} to {to} of {total}
+    //                     </span>;
+    //                 }
+    //             }}
+    //             onChange={this.onTableChanged.bind(this)}
+    //         // pagination={false}
+    //         // scroll={{ y: '100%' }}
+    //         >
+    //             <Table.Column
+    //                 title="Job"
+    //                 dataIndex="id"
+    //                 key="id"
+    //                 width="5%"
+    //                 render={(jobID: string, job: Job): any => {
+    //                     const title = <div>
+    //                         <p><span style={{ color: 'silver' }}>Job ID</span>{' '}{jobID}</p>
+    //                         <p>Click to view job log and detail</p>
+    //                     </div>;
+    //                     return (
+    //                         <Tooltip title={title}>
+    //                             <Button
+    //                                 type="link"
+    //                                 onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    //                                     e.preventDefault();
+    //                                     this.onClickDetail(job);
+    //                                 }}
+    //                                 icon="info-circle"
+    //                             />
+    //                         </Tooltip>
+    //                     );
+    //                 }}
+    //             />
+    //             <Table.Column
+    //                 title="Narrative"
+    //                 key="narrativeTitle"
+    //                 width="17%"
+    //                 render={(_: any, job: Job): any => {
+    //                     switch (job.request.context.type) {
+    //                         case JobContextType.NARRATIVE:
+    //                             const title = job.request.context.title;
+    //                             if (job.request.context.isTemporary) {
+    //                                 return (
+    //                                     <Tooltip title={'A temporary, unsaved narrative'}>
+    //                                         <NarrativeLink narrativeID={job.request.context.workspace.id}>
+    //                                             Unsaved Narrative
+    //                                         </NarrativeLink>
+    //                                     </Tooltip>
+    //                                 );
+    //                             } else {
+    //                                 return (
+    //                                     <Tooltip title={title || 'n/a'}>
+    //                                         <NarrativeLink narrativeID={job.request.context.workspace.id}>
+    //                                             {title || 'n/a'}
+    //                                         </NarrativeLink>
+    //                                     </Tooltip>
+    //                                 );
+    //                             }
+
+
+    //                         case JobContextType.WORKSPACE:
+    //                             if (job.request.context.workspace.isAccessible) {
+    //                                 return job.request.context.workspace.name;
+    //                             } else {
+    //                                 return 'inaccessible workspace';
+    //                             }
+    //                         case JobContextType.EXPORT:
+    //                             return 'export job';
+    //                         case JobContextType.UNKNOWN:
+    //                             return 'subjob';
+    //                     }
+    //                 }}
+    //             />
+    //             <Table.Column
+    //                 title="App"
+    //                 key="appTitle"
+    //                 width="20%"
+    //                 render={(_, job: Job): any => {
+    //                     if (job.request.app === null) {
+    //                         return 'n/a';
+    //                     }
+    //                     const appTitle = job.request.app.title;
+    //                     if (!appTitle) {
+    //                         return 'n/a';
+    //                     }
+    //                     return (
+    //                         <Tooltip title={appTitle}>
+    //                             <UILink path={`catalog/apps/${job.request.app.id}`}
+    //                                 openIn='new-tab'>
+    //                                 {appTitle}
+    //                             </UILink>
+    //                         </Tooltip>
+    //                     );
+    //                 }}
+    //             />
+    //             <Table.Column
+    //                 title="Submitted"
+    //                 key="createAt"
+    //                 width="10%"
+    //                 render={(_, job: Job) => {
+    //                     return <NiceRelativeTime time={this.getCreateAt(job)} />;
+    //                 }}
+    //                 defaultSortOrder="descend"
+    //                 sorter={true}
+    //                 sortDirections={['ascend', 'descend']}
+    //             />
+    //             <Table.Column
+    //                 title="Queued"
+    //                 key="queuedElapsed"
+    //                 width="10%"
+    //                 render={(_, job: Job) => {
+    //                     var [queueState, nextState] = this.lastEventLike(job, JobStateType.QUEUE);
+    //                     if (queueState) {
+    //                         if (nextState) {
+    //                             return <NiceElapsedTime
+    //                                 from={queueState.at}
+    //                                 to={nextState.at}
+    //                                 precision={2}
+    //                                 useClock={false} />;
+    //                         } else {
+    //                             return <NiceElapsedTime
+    //                                 from={queueState.at}
+    //                                 precision={2}
+    //                                 useClock={true} />;
+    //                         }
+    //                     } else {
+    //                         return <span>-</span>;
+    //                     }
+    //                 }}
+    //             />
+    //             <Table.Column
+    //                 title="Run"
+    //                 key="runElapsed"
+    //                 width="10%"
+    //                 render={(_, job: Job) => {
+    //                     var [runState, nextState] = this.lastEventLike(job, JobStateType.RUN);
+    //                     if (runState) {
+    //                         if (nextState) {
+    //                             return <NiceElapsedTime
+    //                                 from={runState.at}
+    //                                 to={nextState.at}
+    //                                 precision={2}
+    //                                 useClock={false} />;
+    //                         } else {
+    //                             return <NiceElapsedTime
+    //                                 from={runState.at}
+    //                                 precision={2}
+    //                                 useClock={true} />;
+    //                         }
+    //                     } else {
+    //                         return <span>-</span>;
+    //                     }
+    //                 }}
+    //             />
+    //             <Table.Column
+    //                 title="Status"
+    //                 key="status"
+    //                 width="10%"
+    //                 render={(_, job: Job) => {
+    //                     return <JobStatusBadge job={job} />;
+    //                 }}
+    //             />
+    //             <Table.Column
+    //                 title="Server"
+    //                 key="clientGroup"
+    //                 width="8%"
+    //                 render={(_, job: Job) => {
+    //                     return job.request.clientGroup;
+    //                 }}
+    //             />
+    //             <Table.Column
+    //                 title="Cancel"
+    //                 dataIndex="action"
+    //                 key="action"
+    //                 width="5%"
+    //                 render={(_, job: Job) => {
+    //                     return this.renderJobAction(job);
+    //                 }}
+    //             />
+    //         </Table>
+    //     );
+    // }
 
     renderJobDetail() {
         if (!this.state.selectedJob) {
@@ -917,50 +1082,59 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         );
     }
 
-    renderError(view: MyJobsViewDataError) {
-        return (
-            <Alert type="error" message={view.error.message} />
-        );
-    }
+    // renderError(view: MyJobsViewDataError) {
+    //     return (
+    //         <Alert type="error" message={view.error.message} />
+    //     );
+    // }
 
-    renderSearching(view: MyJobsViewDataSearching) {
-        return <React.Fragment>
-            <div>{this.renderControlBar()}</div>
-            {this.renderJobsTable(view)}
-            {this.renderJobDetail()}
-        </React.Fragment>;
-    }
+    // renderSearching(view: MyJobsViewDataSearching) {
+    //     return <React.Fragment>
+    //         <div>{this.renderControlBar()}</div>
+    //         {this.renderJobsTable(view)}
+    //         {this.renderJobDetail()}
+    //     </React.Fragment>;
+    // }
 
-    renderReady(view: MyJobsViewDataReady) {
-        return <React.Fragment>
-            <div>{this.renderControlBar()}</div>
-            {this.renderJobsTable(view)}
-            {this.renderJobDetail()}
-        </React.Fragment>;
-    }
+    // renderReady(view: MyJobsViewDataReady) {
+    //     return <React.Fragment>
+    //         <div>{this.renderControlBar()}</div>
+    //         {this.renderJobsTable(view)}
+    //         {this.renderJobDetail()}
+    //     </React.Fragment>;
+    // }
 
-    renderInitialSearch(view: MyJobsViewDataInitialSearching) {
-        return <React.Fragment>
-            <div>{this.renderControlBar()}</div>
-            <div><Spin tip="Loading...">
-                <Alert type="info" message="Loading Initial Data"
-                    description="Loading initial jobs..."></Alert></Spin> </div>
-        </React.Fragment>;
-    }
+    // renderInitialSearch(view: MyJobsViewDataInitialSearching) {
+    //     return <React.Fragment>
+    //         <div>{this.renderControlBar()}</div>
+    //         <div><Spin tip="Loading...">
+    //             <Alert type="info" message="Loading Initial Data"
+    //                 description="Loading initial jobs..."></Alert></Spin> </div>
+    //     </React.Fragment>;
+    // }
 
     renderView() {
-        switch (this.props.view.searchState) {
-            case JobSearchState.ERROR:
-                return this.renderError(this.props.view);
-            case JobSearchState.SEARCHING:
-                return this.renderSearching(this.props.view);
-            case JobSearchState.READY:
-                return this.renderReady(this.props.view);
-            case JobSearchState.INITIAL_SEARCHING:
-                return this.renderInitialSearch(this.props.view);
-            default:
-                return '';
-        }
+        // this.render
+        // switch (this.props.view.loadingState) {
+        //     case ComponentLoadingState.NONE:
+        // }
+        // switch (this.props.view.searchState) {
+        //     case JobSearchState.ERROR:
+        //         return this.renderError(this.props.view);
+        //     case JobSearchState.SEARCHING:
+        //         return this.renderSearching(this.props.view);
+        //     case JobSearchState.READY:
+        //         return this.renderReady(this.props.view);
+        //     case JobSearchState.INITIAL_SEARCHING:
+        //         return this.renderInitialSearch(this.props.view);
+        //     default:
+        //         return '';
+        // }
+        return <React.Fragment>
+            <div>{this.renderControlBar()}</div>
+            {this.renderJobsTable()}
+            {this.renderJobDetail()}
+        </React.Fragment>;
     }
 
     render() {

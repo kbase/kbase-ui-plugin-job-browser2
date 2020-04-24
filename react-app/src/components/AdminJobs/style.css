@@ -1,0 +1,144 @@
+.MyJobs {
+    min-height: 0;
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table {
+    table-layout: fixed;
+}
+
+.MyJobs-tableCell,
+.MyJobs-table td,
+.MyJobs-table th {
+    max-width: 0;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.MyJobs-table .ant-table-header-column {
+    /* max-width: 0; */
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.MyJobs-filterArea {
+    padding: 6px;
+    margin: 0 20px 0 20px;
+    border: 1px solid rgba(150, 150, 150, 0.3);
+    box-shadow: 4px 4px 4px;
+    border-radius: 4px;
+    background-color: rgba(200, 200, 200, 0.95);
+}
+
+.MyJobs-filterPanel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.ant-modal-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table.ant-table-wrapper {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table>.ant-table-content {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table>.ant-table-content>.ant-table-body {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table-pagination.ant-pagination {
+    flex: 0 0 auto;
+}
+
+.MyJobs-table.ant-table-wrapper>.ant-spin-nested-loading>.ant-spin-container>.ant-table .ant-table-row {
+    height: 30px;
+}
+
+
+.MyJobs .Table-row>.Table-cell:nth-child(1) {
+    flex: 0 0 4em;
+    align-items: center;
+}
+
+.MyJobs .Table-row>.Table-cell:nth-child(2) {
+    flex: 1 1 0px;
+}
+
+
+.MyJobs .Table-row>.Table-cell:nth-child(3) {}
+
+.MyJobs .Table-row>.Table-cell:nth-child(4) {
+    flex: 0 0 8em;
+}
+
+.MyJobs .Table-row>.Table-cell:nth-child(5) {
+    flex: 0 0 8em;
+}
+
+.MyJobs .Table-row>.Table-cell:nth-child(6) {
+    flex: 0 0 8em;
+}
+
+.MyJobs .Table-row>.Table-cell:nth-child(7) {
+    flex: 0 0 8em;
+}
+
+.MyJobs .Table-row>.Table-cell:nth-child(8) {
+    flex: 0 0 8em;
+}
+
+.MyJobs .Table-row>.Table-cell:nth-child(9) {
+    flex: 0 0 8em;
+    align-items: center;
+}
+
+.MyJobs .Table-row>.Table-cell:nth-child(10) {
+    flex: 0 0 4em;
+    align-items: center;
+
+}
