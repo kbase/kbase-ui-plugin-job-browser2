@@ -258,6 +258,10 @@ export function getTimeRange(preset: TimeRangePresets): [EpochTime, EpochTime] {
             return [endDate - hourInMilliseconds * 24 * 7, endDate];
         case 'lastMonth':
             return [endDate - hourInMilliseconds * 24 * 30, endDate];
+        case 'lastYear':
+            return [endDate - hourInMilliseconds * 24 * 365, endDate];
+        case 'allTime':
+            return [0, endDate];
     }
 }
 

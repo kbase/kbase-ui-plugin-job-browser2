@@ -1,4 +1,4 @@
-import { JSONObject } from "./json";
+import { JSONObject, JSONValue } from "./json";
 
 export enum UIErrorCode {
 

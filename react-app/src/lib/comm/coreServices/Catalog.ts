@@ -1,4 +1,5 @@
 import { ServiceClient } from '../ServiceClient';
+import { SDKBoolean } from '../JSONRPC11/types';
 
 // interface IsAdminParam {
 //     username?: string;
@@ -37,10 +38,37 @@ interface GetExecAggrStatsResult {
     total_exec_time: number;
 }
 
+export interface VersionCommitInfo {
+    git_commit_hash: string;
+}
+
+export interface BasicModuleInfo {
+    module_name: string;
+    git_url: string;
+    language: string;
+    dynamic_service: SDKBoolean;
+    owners: Array<string>;
+    dev: VersionCommitInfo;
+    beta: VersionCommitInfo;
+    release: VersionCommitInfo;
+    released_version_list: Array<VersionCommitInfo>;
+}
+
+
+export interface ListBasicModuleInfoParams {
+    owners?: Array<string>;
+    include_released?: SDKBoolean;
+    include_unreleased?: SDKBoolean;
+    include_disabled?: SDKBoolean;
+    include_modules_with_no_name_set?: SDKBoolean;
+}
+
+export type ListBasicModuleInfoResult = Array<BasicModuleInfo>;
+
 export default class CatalogClient extends ServiceClient {
     module: string = 'Catalog';
 
-    async isAdmin(): Promise<IsAdminResult> {
+    async is_admin(): Promise<IsAdminResult> {
         try {
             return await this.callFunc<IsAdminParam, IsAdminResult>('is_admin', null);
         } catch (ex) {
@@ -49,11 +77,15 @@ export default class CatalogClient extends ServiceClient {
         }
     }
 
-    async getExecAggrTable(param: GetExecAggrTableParam): Promise<Array<GetExecAggrTableResult>> {
-        return await this.callFunc<GetExecAggrTableParam, Array<GetExecAggrTableResult>>('get_exec_aggr_table', param);
+    get_exec_aggr_table(param: GetExecAggrTableParam): Promise<Array<GetExecAggrTableResult>> {
+        return this.callFunc<GetExecAggrTableParam, Array<GetExecAggrTableResult>>('get_exec_aggr_table', param);
     }
 
-    async getExecAggrStats(param: GetExecAggrStatsParam): Promise<Array<GetExecAggrStatsResult>> {
-        return await this.callFunc<GetExecAggrStatsParam, Array<GetExecAggrStatsResult>>('get_exec_aggr_stats', param);
+    get_exec_aggr_stats(param: GetExecAggrStatsParam): Promise<Array<GetExecAggrStatsResult>> {
+        return this.callFunc<GetExecAggrStatsParam, Array<GetExecAggrStatsResult>>('get_exec_aggr_stats', param);
+    }
+
+    list_basic_module_info(param: ListBasicModuleInfoParams): Promise<ListBasicModuleInfoResult> {
+        return this.callFunc<ListBasicModuleInfoParams, ListBasicModuleInfoResult>('list_basic_module_info', param);
     }
 }

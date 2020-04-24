@@ -91,7 +91,7 @@ export interface Account {
 export default class AuthClient {
     url: string;
 
-    constructor({ url }: { url: string }) {
+    constructor({ url }: { url: string; }) {
         this.url = url;
     }
 
@@ -107,9 +107,9 @@ export default class AuthClient {
             headers: {
                 Accept: 'application/json'
             }
-        })
+        });
 
-        return response.data as RootInfo
+        return response.data as RootInfo;
     }
 
     async getTokenInfo(token: string): Promise<TokenInfo> {
@@ -118,9 +118,9 @@ export default class AuthClient {
                 Accept: 'application/json',
                 Authorization: token
             }
-        })
+        });
 
-        return data as TokenInfo
+        return data as TokenInfo;
     }
 
     async getMe(token: string): Promise<Account> {

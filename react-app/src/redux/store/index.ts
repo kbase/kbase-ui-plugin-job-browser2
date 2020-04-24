@@ -9,11 +9,12 @@ import { EpochTime } from '../types/base';
 import { JobEventHistory } from '../types/jobState';
 import reducer from '../reducers';
 import {
-    ComponentLoadingState, ViewSuccess, ViewNone, ViewLoading, ViewError
+    ComponentLoadingState, ViewSuccess, ViewNone, ViewLoading, ViewError, SimpleView
 } from './base';
 import { UserRunSummaryView } from './UserRunSummary';
 import { PublicAppStatsView } from './PublicAppStats';
 import { UIError } from '../types/error';
+import { FilterSpec } from '../../lib/JobBrowserBFFClient';
 
 export type ClientGroup = string;
 export type JobID = string;
@@ -263,7 +264,7 @@ interface JobsState {
     jobs: Array<Job>;
 }
 
-export type TimeRangePresets = 'lastHour' | 'last48Hours' | 'lastWeek' | 'lastMonth';
+export type TimeRangePresets = 'lastHour' | 'last48Hours' | 'lastWeek' | 'lastMonth' | 'lastYear' | 'allTime';
 
 export interface TimeRangePreset {
     kind: 'preset';
@@ -292,19 +293,17 @@ export interface SortSpec {
 // TODO: unify with the same definition in JobBrowserBFFClient.ts
 export type JobSearchStatus = 'create' | 'queue' | 'run' | 'complete' | 'error' | 'terminate';
 
+
 export interface JobsSearchExpression {
-    query: string;
+    query?: string;
+    filter?: FilterSpec;
     timeRange: TimeRange;
     sort: SortSpec | null;
-    jobStatus: Array<JobSearchStatus>;
+    jobStatus?: Array<JobSearchStatus>;
     forceSearch: boolean;
     offset: number;
     limit: number;
 }
-
-
-
-
 
 // The Store!
 
@@ -323,9 +322,6 @@ export enum ViewType {
     USER_SUMMARY
 }
 
-
-
-
 // Jobs
 
 export interface JobSearchResult {
@@ -336,6 +332,7 @@ export interface JobSearchResult {
 }
 
 export enum JobSearchState {
+    NONE,
     INITIAL_SEARCHING,
     SEARCHING,
     READY,
@@ -352,6 +349,10 @@ export type MyJobsViewError = ViewError;
 
 export interface MyJobsViewDataBase {
     searchState: JobSearchState;
+}
+
+export interface MyJobsViewDataNone extends MyJobsViewDataBase {
+    searchState: JobSearchState.NONE;
 }
 
 // When the "my jobs" viewer has been loaded, the first thing to
@@ -382,6 +383,7 @@ export interface MyJobsViewDataError extends MyJobsViewDataBase {
 }
 
 export type MyJobsViewData =
+    MyJobsViewDataNone |
     MyJobsViewDataInitialSearching |
     MyJobsViewDataSearching |
     MyJobsViewDataReady |
@@ -402,11 +404,13 @@ export interface MyJobsViewSuccess extends ViewSuccess {
     data: MyJobsViewData;
 }
 
-export type MyJobsView =
-    MyJobsViewNone |
-    MyJobsViewLoading |
-    MyJobsViewError |
-    MyJobsViewSuccess;
+// export type MyJobsView =
+//     MyJobsViewNone |
+//     MyJobsViewLoading |
+//     MyJobsViewError |
+//     MyJobsViewSuccess;
+
+export type MyJobsView = SimpleView;
 
 // export interface MyJobsView extends TabViewBase {
 //     type: ViewType.MY_JOBS;

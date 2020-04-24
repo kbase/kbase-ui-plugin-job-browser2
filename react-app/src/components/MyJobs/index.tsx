@@ -1,83 +1,56 @@
-import React from 'react';
+import { Dispatch, Action } from 'redux';
 import { connect } from 'react-redux';
-import { Spin, Alert } from 'antd';
+import Data from './data';
 
-import { StoreState } from '../../redux/store';
-import ReduxInterface from './redux';
-import { myJobsLoad } from '../../redux/actions/myJobs';
-import { ComponentLoadingState } from '../../redux/store/base';
-import { Action, Dispatch } from 'redux';
+import {
+    StoreState
+} from '../../redux/store';
 
-export interface GateProps {
-    loadingState: ComponentLoadingState;
-    onLoad: () => void;
-}
-
-export interface GateState {
-}
-
-export class Gate extends React.Component<GateProps, GateState> {
-
-    componentDidMount() {
-        this.props.onLoad();
-    }
-
-    renderLoading() {
-        return <Spin />;
-    }
-
-    renderSuccess() {
-        return <ReduxInterface />;
-    }
-
-    renderError() {
-        return <Alert type="error" message="Error!" />;
-    }
-
-    render() {
-        switch (this.props.loadingState) {
-            case ComponentLoadingState.NONE:
-            case ComponentLoadingState.LOADING:
-                return this.renderLoading();
-            case ComponentLoadingState.SUCCESS:
-                return this.renderSuccess();
-            case ComponentLoadingState.ERROR:
-                return this.renderError();
-        }
-    }
-}
-
-// Store interface
-
-interface OwnProps {
+export interface OwnProps {
 }
 
 interface StateProps {
-    loadingState: ComponentLoadingState;
+    // view: MyJobsView;
+    token: string;
+    username: string;
+    serviceWizardURL: string;
 }
 
 interface DispatchProps {
-    onLoad: () => void;
+    // search: (searchExpression: JobsSearchExpression) => void;
+    // cancelJob: (jobID: string, timeout: number) => void;
+    // refreshSearch: () => void;
 }
 
 function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
-    const { views: {
-        myJobsView: {
-            loadingState
+    const {
+        auth: { userAuthorization },
+        app: {
+            config: {
+                services: {
+                    ServiceWizard: { url: serviceWizardURL }
+                }
+            }
         }
-    } } = state;
-    return { loadingState };
+    } = state;
+
+    if (!userAuthorization) {
+        throw new Error('Not authorized!');
+    }
+
+    const { token, username } = userAuthorization;
+
+    return {
+        token, username,
+        serviceWizardURL
+    };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {
-    return {
-        onLoad: () => {
-            dispatch(myJobsLoad() as any);
-        }
-    };
+    return {};
 }
 
 export default connect<StateProps, DispatchProps, OwnProps, StoreState>(
     mapStateToProps,
     mapDispatchToProps
-)(Gate);
+)(Data);

@@ -34,6 +34,8 @@ import { PaginationConfig } from 'antd/lib/table';
 import UILink from '../UILink';
 import NarrativeLink from '../NarrativeLink';
 
+import TableResizer from '../../lib/TableResizer';
+
 
 const CANCEL_TIMEOUT = 10000;
 
@@ -129,6 +131,7 @@ interface UserJobsState {
 
     selectedJob: Job | null;
     currentSort: SortSpec | null;
+    rowsPerPage: number;
 }
 
 /**
@@ -144,10 +147,12 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
     offset: number;
     limit: number;
     sorting: SortSpec;
+    currentPage: number;
 
     static defaultTimeRangePreset: TimeRangePresets = 'lastWeek';
 
     pubsub: PubSub;
+    tableResizer: TableResizer;
 
     constructor(props: UserJobsProps) {
         super(props);
@@ -155,11 +160,17 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         this.currentQuery = '';
         this.pubsub = new PubSub();
         this.offset = 0;
-        this.limit = 10;
+        this.limit = 1;
+        this.currentPage = 0;
         this.sorting = {
             field: 'created',
             direction: 'descending'
         };
+
+        this.tableResizer = new TableResizer({
+            onResize: this.onResize.bind(this),
+            wrapperClass: 'UserJobs-table'
+        });
 
         this.state = {
             showDates: false,
@@ -167,7 +178,8 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
             timeRange: { kind: 'preset', preset: UserJobs.defaultTimeRangePreset },
             isFilterOpen: false,
             selectedJob: null,
-            currentSort: null
+            currentSort: null,
+            rowsPerPage: 1
         };
     }
 
@@ -198,8 +210,23 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         return job.eventHistory[index];
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.doSearch(true);
+        this.tableResizer.setRowsPerPage();
+    }
+
+    onResize(rowsPerPage: number) {
+        this.limit = rowsPerPage;
+        this.offset = this.currentPage * rowsPerPage;
+
+        // This causes the table to rerender, but without triggering a
+        // re-search;
+        this.setState({
+            rowsPerPage
+        });
+
+        // This triggers a fresh search.
+        this.doSearch(false);
     }
 
     componentDidUpdate() {
@@ -253,6 +280,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         const currentPage = (pagination.current || 1) - 1;
         const currentPageSize = pagination.pageSize || 10;
 
+        this.currentPage = pagination.current || 0;
         this.offset = currentPage * currentPageSize;
         this.limit = currentPageSize;
 
@@ -436,6 +464,8 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                         <Select.Option value="last48Hours">Previous 48 Hours</Select.Option>
                         <Select.Option value="lastWeek">Previous Week</Select.Option>
                         <Select.Option value="lastMonth">Previous Month</Select.Option>
+                        <Select.Option value="lastYear">Previous Year</Select.Option>
+                        <Select.Option value="allTime">All Time</Select.Option>
                         <Select.Option value="customRange">Custom Range</Select.Option>
                     </Select>
                 </Form.Item>
@@ -615,7 +645,7 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
         return (
             <Table<Job>
                 size="small"
-                className="UserJobs-table xScrollingFlexTable"
+                className="UserJobs-table"
                 dataSource={view.searchResult.jobs}
                 loading={loading}
                 rowKey={(job: Job) => {
@@ -623,9 +653,10 @@ export default class UserJobs extends React.Component<UserJobsProps, UserJobsSta
                 }}
                 pagination={{
                     position: 'bottom',
-                    showSizeChanger: true,
-                    pageSizeOptions: ['10', '20', '50', '100'],
-                    defaultPageSize: 10,
+                    showSizeChanger: false,
+                    // pageSizeOptions: ['5', '10', '20', '50', '100'],
+                    defaultPageSize: this.state.rowsPerPage,
+                    pageSize: this.state.rowsPerPage,
                     total: view.searchResult.foundCount,
                     showTotal: (total: number, [from, to]: [number, number]) => {
                         return <span>

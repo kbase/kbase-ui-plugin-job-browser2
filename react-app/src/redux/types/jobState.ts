@@ -68,16 +68,16 @@ export type JobEvent =
     JobEventTerminate;
 
 
-// export type JobEventHistory = Array<JobEvent>;
+export type JobEventHistory = Array<JobEvent>;
 
-export type JobEventHistory =
-    [JobEventCreate] |
-    [JobEventCreate, JobEventQueue] |
-    [JobEventCreate, JobEventQueue, JobEventRun] |
-    [JobEventCreate, JobEventQueue, JobEventRun, JobEventComplete] |
-    [JobEventCreate, JobEventError] |
-    [JobEventCreate, JobEventQueue, JobEventError] |
-    [JobEventCreate, JobEventQueue, JobEventRun, JobEventError] |
-    [JobEventCreate, JobEventTerminate] |
-    [JobEventCreate, JobEventQueue, JobEventTerminate] |
-    [JobEventCreate, JobEventQueue, JobEventRun, JobEventTerminate];
+// export type JobEventHistory =
+//     [JobEventCreate] |
+//     [JobEventCreate, JobEventQueue] |
+//     [JobEventCreate, JobEventQueue, JobEventRun] |
+//     [JobEventCreate, JobEventQueue, JobEventRun, JobEventComplete] |
+//     [JobEventCreate, JobEventError] |
+//     [JobEventCreate, JobEventQueue, JobEventError] |
+//     [JobEventCreate, JobEventQueue, JobEventRun, JobEventError] |
+//     [JobEventCreate, JobEventTerminate] |
+//     [JobEventCreate, JobEventQueue, JobEventTerminate] |
+//     [JobEventCreate, JobEventQueue, JobEventRun, JobEventTerminate];

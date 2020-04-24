@@ -28,6 +28,8 @@ export interface ViewSuccess extends ViewBase {
     loadingState: ComponentLoadingState.SUCCESS;
 }
 
+export interface SimpleView { }
+
 // Search
 
 export enum SearchState {

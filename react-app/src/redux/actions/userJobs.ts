@@ -129,7 +129,7 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
         };
 
         // TODO: better parsing of search, or do it before here...
-        const searchTerms = searchExpression.query.split(/\s+/);
+        // const searchTerms = searchExpression.query.split(/\s+/);
         // if (searchTerms.length > 0) {
         //     if (!(searchTerms.length === 1 && searchTerms[0] === '')) {
         //         filter.user = searchTerms;
@@ -146,13 +146,13 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
             limit: searchExpression.limit,
             timeout: 10000,
             admin: true,
-            search: {
-                terms: searchTerms
-            },
+            // search: {
+            //     terms: searchTerms
+            // },
             filter
         };
 
-        console.log('query params', queryParams);
+        // console.log('query params', queryParams);
 
         if (searchExpression.sort) {
             switch (searchExpression.sort.field) {
@@ -217,7 +217,7 @@ export function userJobsLoad() {
             forceSearch: true,
             jobStatus: ["create", "queue", "run", "complete", "error", "terminate"],
             offset: 0,
-            limit: 10,
+            limit: 1,
             query: '',
             sort: {
                 field: 'created',
