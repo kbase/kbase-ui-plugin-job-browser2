@@ -20,6 +20,7 @@ export type JobLog = Array<JobLogEntry>;
 
 export enum JobLogState {
     NONE,
+    JOB_CREATED,
     JOB_QUEUED,
     INITIAL_LOADING,
     ACTIVE_LOADED,
@@ -31,6 +32,11 @@ export enum JobLogState {
 // TODO: rename this and other things to JobDetailView...
 export interface JobLogViewNone {
     status: JobLogState.NONE;
+}
+
+export interface JobLogViewCreated {
+    status: JobLogState.JOB_CREATED;
+    job: Job;
 }
 
 export interface JobLogViewQueued {
@@ -67,6 +73,7 @@ export interface JobLogViewError {
 
 export type JobLogView =
     JobLogViewNone |
+    JobLogViewCreated |
     JobLogViewQueued |
     JobLogViewInitialLoading |
     JobLogViewActiveLoaded |
@@ -277,6 +284,13 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         let log;
         switch (this.currentJobState(job).type) {
             case JobStateType.CREATE:
+                this.setState({
+                    status: JobLogState.JOB_CREATED,
+                    job
+                });
+                this.poller.onPoll(this.queueingPollFunc.bind(this));
+                this.poller.start();
+                return;
             case JobStateType.QUEUE:
                 this.setState({
                     status: JobLogState.JOB_QUEUED,

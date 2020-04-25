@@ -1,46 +1,15 @@
 import React from 'react';
-import { Tag, Icon } from 'antd';
+import { Tag, Icon, Tooltip } from 'antd';
 import { Job } from '../redux/store';
-import { NiceElapsedTime, NiceRelativeTime } from '@kbase/ui-components';
+import { NiceElapsedTime, NiceRelativeTime, NiceTimeDuration } from '@kbase/ui-components';
 import { JobStateType, JobEvent } from '../redux/types/jobState';
+
+const STALE_AFTER = 300000;
 
 function currentEvent(job: Job): JobEvent {
     return job.eventHistory[job.eventHistory.length - 1];
 }
 
-/**
-* Translates a job status value to a label, with optional icon, suitable for
-* display as the child of the job status tag.
-*
-* @param status - the status of the job
-*
-* @note Since the switch is over an enum, we don't have to worry about the default case
-*/
-function jobStatusLabel(job: Job): JSX.Element | string {
-    switch (currentEvent(job).type) {
-        case JobStateType.CREATE:
-        case JobStateType.QUEUE:
-            return (
-                <span>
-                    <Icon type="loading" spin /> Queued
-                </span>
-            );
-        case JobStateType.RUN:
-            return (
-                <span>
-                    <Icon type="loading-3-quarters" spin /> Running
-                </span>
-            );
-        case JobStateType.COMPLETE:
-            return 'Completed';
-        case JobStateType.ERROR:
-            return 'Errored';
-        case JobStateType.TERMINATE:
-            return 'Canceled';
-        default:
-            throw new Error('Invalid job status');
-    }
-}
 
 /**
  * Translates a job status value to a color value acceptable for the color
@@ -51,6 +20,7 @@ function jobStatusLabel(job: Job): JSX.Element | string {
 export function jobColor(job: Job): string {
     switch (currentEvent(job).type) {
         case JobStateType.CREATE:
+            return 'purple';
         case JobStateType.QUEUE:
             return 'orange';
         case JobStateType.RUN:
@@ -67,8 +37,8 @@ export function jobColor(job: Job): string {
 }
 
 export interface JobStatusProps {
-    job: Job
-    showTiming?: boolean
+    job: Job;
+    showTiming?: boolean;
 }
 
 interface JobStatusState {
@@ -77,9 +47,128 @@ interface JobStatusState {
 
 export default class JobStatusBadge extends React.Component<JobStatusProps, JobStatusState> {
     renderTag() {
-        const label = jobStatusLabel(this.props.job);
+        const label = this.renderJobStatusLabel();
         const color = jobColor(this.props.job);
-        return <Tag color={color}>{label}</Tag>
+        return <Tooltip title={this.renderJobStatusTooltip()}>
+            <Tag color={color}>{label}</Tag>
+        </Tooltip>;
+    }
+    /**
+* Translates a job status value to a label, with optional icon, suitable for
+* display as the child of the job status tag.
+*
+* @param status - the status of the job
+*
+* @note Since the switch is over an enum, we don't have to worry about the default case
+*/
+    renderJobStatusLabel() {
+        switch (currentEvent(this.props.job).type) {
+            case JobStateType.CREATE:
+                return 'Created';
+            case JobStateType.QUEUE:
+                return (
+                    <span>
+                        <Icon type="loading" spin /> Queued
+                    </span>
+                );
+            case JobStateType.RUN:
+                return (
+                    <span>
+                        <Icon type="loading-3-quarters" spin /> Running
+                    </span>
+                );
+            case JobStateType.COMPLETE:
+                return 'Completed';
+            case JobStateType.ERROR:
+                return 'Errored';
+            case JobStateType.TERMINATE:
+                return 'Canceled';
+            default:
+                throw new Error('Invalid job status');
+        }
+    }
+
+    renderJobStatusTooltip() {
+        const event = currentEvent(this.props.job);
+        switch (event.type) {
+            case JobStateType.CREATE:
+                // A created job is stale if over 5 minutes old
+                const stale = () => {
+                    const now = new Date().getTime();
+                    const elapsed = now - event.at;
+                    if (elapsed > STALE_AFTER) {
+                        return <p>
+                            This job is considered <b>orphaned</b>, since it was created
+                             <NiceElapsedTime from={event.at} to={now} showTooltip /> ago.
+                            A job should move into a queue within {<NiceTimeDuration duration={STALE_AFTER} />}.
+                        </p>;
+                    }
+                };
+                return (
+                    <div>
+                        <p>This job has been received by the execution engine, but not yet queued for running.</p>
+                        {stale()}
+                    </div>
+                );
+            case JobStateType.QUEUE:
+                return (
+                    <div>
+                        <p>
+                            This job has been <b>queued</b> for running
+                        </p>
+                        <p>
+                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                        </p>
+                    </div>
+                );
+            case JobStateType.RUN:
+                return (
+                    <div>
+
+                        <p>
+                            This job is currently <b>running</b>.
+                        </p>
+                        <p>
+                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                        </p>
+                    </div>
+                );
+            case JobStateType.COMPLETE:
+                return (
+                    <div>
+                        <p>
+                            This job has <b>completed successfully</b>.
+                        </p>
+                        <p>
+                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                        </p>
+                    </div>
+                );
+            case JobStateType.ERROR:
+                return (
+                    <div>
+                        <p>
+                            This job experienced an <b>error</b>.
+                        </p>
+                        <p>
+                            You may inspect the error and job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                        </p>
+                    </div>
+                );
+            case JobStateType.TERMINATE:
+                return (
+                    <div>
+                        <p>
+                            This job has been <b>canceled</b>.
+                        </p>
+                        <p>
+                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                        </p>
+                    </div>
+                );
+            default:
+                throw new Error('Invalid job status');
+        }
     }
 
     renderTiming() {
@@ -96,7 +185,7 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
             default:
                 return <span>
                     <NiceRelativeTime time={new Date(event.at)} />
-                </span>
+                </span>;
         }
     }
 
@@ -107,6 +196,6 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
                 {this.renderTag()}
                 {timing}
             </span>
-        )
+        );
     }
 }

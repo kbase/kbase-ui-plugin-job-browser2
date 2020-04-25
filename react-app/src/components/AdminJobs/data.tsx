@@ -52,30 +52,39 @@ export default class Data extends React.Component<DataProps, DataState> {
             searchExpression
         });
 
-        const { jobs, foundCount, totalCount } = await task.promise;
-        if (task.isCanceled) {
-            // just do nothing
-            return;
-        }
-        // const jobsFetchedAt = new Date().getTime();
-        myJobsSearchRequests.done(task);
-
-        const { limit, offset } = searchExpression;
-        const page = Math.ceil((offset + limit) / limit);
-        const pageCount = Math.ceil(totalCount / limit);
-
-        this.setState({
-            dataSource: {
-                status: AsyncProcessState.SUCCESS,
-                data: jobs,
-                count: foundCount,
-                total: totalCount,
-                limit,
-                offset,
-                page,
-                pageCount
+        try {
+            const { jobs, foundCount, totalCount } = await task.promise;
+            if (task.isCanceled) {
+                // just do nothing
+                return;
             }
-        });
+            // const jobsFetchedAt = new Date().getTime();
+            myJobsSearchRequests.done(task);
+
+            const { limit, offset } = searchExpression;
+            const page = Math.ceil((offset + limit) / limit);
+            const pageCount = Math.ceil(totalCount / limit);
+
+            this.setState({
+                dataSource: {
+                    status: AsyncProcessState.SUCCESS,
+                    data: jobs,
+                    count: foundCount,
+                    total: totalCount,
+                    limit,
+                    offset,
+                    page,
+                    pageCount
+                }
+            });
+        } catch (ex) {
+            this.setState({
+                dataSource: {
+                    status: AsyncProcessState.ERROR,
+                    error: ex
+                }
+            });
+        }
     }
 
     search(searchExpression: JobsSearchExpression) {

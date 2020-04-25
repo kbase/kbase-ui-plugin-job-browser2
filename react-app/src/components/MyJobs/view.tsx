@@ -842,6 +842,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             nextPage={this.onNextPage.bind(this)}
             lastPage={this.onLastPage.bind(this)}
             columns={columns}
+            noun={{ singular: 'job', plural: 'jobs' }}
             config={this.updateTableConfig.bind(this)} />;
     }
 

@@ -9,6 +9,11 @@ export interface NavStateNone extends NavStateBase {
     enabled: false;
 }
 
+export interface Term {
+    singular: string;
+    plural: string;
+}
+
 export interface NavStateOk extends NavStateBase {
     enabled: true;
     page: number;
@@ -24,6 +29,7 @@ export type NavState = NavStateNone | NavStateOk;
 
 export interface TableNavProps {
     state: NavState;
+    noun: Term;
 }
 
 interface TableNavState {
@@ -84,15 +90,19 @@ export default class TableNav extends React.Component<TableNavProps, TableNavSta
         </Button.Group>;
     }
 
+    renderNumber(num: number) {
+        return Intl.NumberFormat('en-US', { useGrouping: true, maximumFractionDigits: 0 }).format(num);
+    }
+
     renderPageInfo(state: NavStateOk) {
         return <span>
-            page {state.page} of {state.pageCount}
+            page {this.renderNumber(state.page)} of {this.renderNumber(state.pageCount)}
         </span>;
     }
 
     renderTotal(state: NavStateOk) {
         return <span>
-            ({state.total} entries)
+            ({this.renderNumber(state.total)} {state.total === 1 ? this.props.noun.singular : this.props.noun.plural})
         </span>;
     }
 
