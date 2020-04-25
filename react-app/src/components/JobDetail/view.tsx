@@ -32,6 +32,16 @@ class JobLogGate extends React.Component<JobLogGateProps, JobLogGateState> {
         );
     }
 
+    renderCreated() {
+        return (
+            <div className="FullyCenteredBox">
+                <span>
+                    The job has been <i>created</i>, but not yet <i>queued</i> or <i>running</i>. The log will be displayed when the job starts running ... <Spin />
+                </span>
+            </div >
+        );
+    }
+
     renderQueued() {
         return (
             <div className="FullyCenteredBox">
@@ -51,6 +61,8 @@ class JobLogGate extends React.Component<JobLogGateProps, JobLogGateState> {
         switch (this.props.view.status) {
             case JobLogState.NONE:
                 return this.renderNone();
+            case JobLogState.JOB_CREATED:
+                return this.renderCreated();
             case JobLogState.JOB_QUEUED:
                 return this.renderQueued();
             case JobLogState.INITIAL_LOADING:
@@ -91,6 +103,8 @@ class JobInfoGate extends React.Component<JobInfoGateProps, JobInfoGateState> {
         switch (this.props.view.status) {
             case JobLogState.NONE:
                 return this.renderLoading();
+            case JobLogState.JOB_CREATED:
+                return <JobInfo job={this.props.view.job} />;
             case JobLogState.JOB_QUEUED:
                 return <JobInfo job={this.props.view.job} />;
             case JobLogState.INITIAL_LOADING:
