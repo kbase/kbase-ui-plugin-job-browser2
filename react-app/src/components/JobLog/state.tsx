@@ -18,6 +18,7 @@ export interface JobLogEntry {
 }
 export enum JobLogState {
     NONE,
+    JOB_CREATED,
     JOB_QUEUED,
     INITIAL_LOADING,
     ACTIVE_LOADED,
@@ -28,6 +29,10 @@ export enum JobLogState {
 
 export interface JobLogViewNone {
     status: JobLogState.NONE;
+}
+
+export interface JobLogViewCreated {
+    status: JobLogState.JOB_CREATED;
 }
 
 export interface JobLogViewQueued {
@@ -61,7 +66,7 @@ export interface JobLogViewError {
     error: string;
 }
 
-export type JobLogView = JobLogViewNone | JobLogViewQueued | JobLogViewInitialLoading | JobLogViewActiveLoaded | JobLogViewActiveLoading | JobLogViewFinishedLoaded | JobLogViewError;
+export type JobLogView = JobLogViewNone | JobLogViewCreated | JobLogViewQueued | JobLogViewInitialLoading | JobLogViewActiveLoaded | JobLogViewActiveLoading | JobLogViewFinishedLoaded | JobLogViewError;
 
 export interface JobLogsStateProps {
     jobID: JobID;
@@ -236,6 +241,12 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         let log;
         switch (this.currentJobState(job).type) {
             case JobStateType.CREATE:
+                // still queued, eh?
+                this.setState({
+                    status: JobLogState.JOB_CREATED
+                });
+                this.startQueuedPolling();
+                return;
             case JobStateType.QUEUE:
                 // still queued, eh?
                 this.setState({
