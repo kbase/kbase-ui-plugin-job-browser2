@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import './Table.css';
 import { Alert, Spin, Empty } from 'antd';
-import TableNav from './TableNav';
+import TableNav, { Term } from './TableNav';
 
 const ROW_HEIGHT = 50;
 // const HEADER_HEIGHT = 50;
@@ -79,6 +79,7 @@ export interface TableConfig {
 export interface TableProps<D> {
     dataSource: DataSource<D>;
     columns: Array<Column<D>>;
+    noun: Term;
     config: (tableConfig: TableConfig) => void;
     firstPage: () => void;
     previousPage: () => void;
@@ -305,9 +306,9 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
         if (this.state.status === TableStatus.OK) {
             switch (this.props.dataSource.status) {
                 case AsyncProcessState.NONE:
-                    return <TableNav state={{ enabled: false }} />;
+                    return <TableNav state={{ enabled: false }} noun={this.props.noun} />;
                 case AsyncProcessState.PROCESSING:
-                    return <TableNav state={{ enabled: false }} />;
+                    return <TableNav state={{ enabled: false }} noun={this.props.noun} />;
                 case AsyncProcessState.SUCCESS:
                     return <TableNav
                         state={{
@@ -320,12 +321,13 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
                             nextPage: this.props.nextPage,
                             lastPage: this.props.lastPage
                         }}
+                        noun={this.props.noun}
                     />;
                 case AsyncProcessState.ERROR:
                     return this.renderError(this.props.dataSource);
             }
         } else {
-            return <TableNav state={{ enabled: false }} />;
+            return <TableNav state={{ enabled: false }} noun={this.props.noun} />;
         }
     }
 

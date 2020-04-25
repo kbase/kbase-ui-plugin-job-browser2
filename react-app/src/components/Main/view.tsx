@@ -1,6 +1,5 @@
 import React from 'react';
 import './style.css';
-import UserJobs from '../UserJobs';
 import MyJobs from '../MyJobs';
 import PublicAppStats from '../PublicAppStats';
 import UserRunSummary from '../UserRunSummary';
@@ -102,10 +101,6 @@ export default class Main extends React.Component<MainProps, MainState> {
 
     renderMyJobsTab() {
         return <MyJobs />;
-    }
-
-    renderUserJobsTab() {
-        return <UserJobs />;
     }
 
     renderPublicAppStatsTab() {

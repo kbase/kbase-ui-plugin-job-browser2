@@ -587,7 +587,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     renderJobAction(job: Job) {
         const currentState = this.currentJobState(job);
-        if ([JobStateType.CREATE, JobStateType.QUEUE, JobStateType.RUN].includes(currentState.type)) {
+        if ([JobStateType.QUEUE, JobStateType.RUN].includes(currentState.type)) {
             return (
                 <Popconfirm
                     title="Cancel this job?"
@@ -854,6 +854,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             nextPage={this.onNextPage.bind(this)}
             lastPage={this.onLastPage.bind(this)}
             columns={columns}
+            noun={{ singular: 'job', plural: 'jobs' }}
             config={this.updateTableConfig.bind(this)} />;
     }
 

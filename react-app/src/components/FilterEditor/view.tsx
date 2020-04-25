@@ -1,10 +1,10 @@
 import React from 'react';
 import { Form, Button, Select, Checkbox } from 'antd';
-import { JobSearchStatus } from '../../../redux/store';
+import { JobSearchStatus } from '../../redux/store';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
-import { OptionValue } from '../../../lib/types';
-import { JobStatus, FilterSpec } from '../../../lib/JobBrowserBFFClient';
+import { OptionValue } from '../../lib/types';
+import { JobStatus, FilterSpec } from '../../lib/JobBrowserBFFClient';
 import NarrativeSelect from './NarrativeSelect';
 import AppSelect from './AppSelect';
 import AppFunctionSelect from './AppFunctionSelect';
