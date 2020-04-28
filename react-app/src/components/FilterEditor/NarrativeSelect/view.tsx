@@ -19,7 +19,6 @@ export default class NarrativeSelect extends React.Component<NarrativeSelectProp
         // to undefined :(
         // TODO: either file a bug report w/ ant design, or switch to antd 4 and
         // see if it is fixed.
-        console.log('changed!!', value);
         if (typeof value === 'undefined') {
             this.props.onChange([]);
         } else {

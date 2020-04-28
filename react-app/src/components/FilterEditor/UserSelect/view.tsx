@@ -31,7 +31,6 @@ export default class UserSelect extends React.Component<UserSelectProps, UserSel
     }
 
     onSearch(value: string) {
-        console.log('search for', value);
         this.props.search(value);
     }
 

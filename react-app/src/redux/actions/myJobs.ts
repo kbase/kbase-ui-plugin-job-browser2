@@ -8,9 +8,8 @@ import { AppError } from '@kbase/ui-components';
 import { serviceJobToUIJob, extractTimeRange } from './utils';
 import { ThunkDispatch } from 'redux-thunk';
 import CancelableRequest, { Task } from '../../lib/CancelableRequest';
-import JobBrowserBFFClient, { QueryJobsParams, FilterSpec } from '../../lib/JobBrowserBFFClient';
+import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
 import { EpochTime } from '../types/base';
-import { ComponentLoadingState } from '../store/base';
 import { UIError } from '../types/error';
 
 // MY JOBS TAB

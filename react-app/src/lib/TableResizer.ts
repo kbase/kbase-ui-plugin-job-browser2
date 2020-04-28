@@ -87,36 +87,24 @@ export default class TableResizer {
                     return;
                 }
                 const rows = document.querySelectorAll(`.${this.wrapperClass} .ant-table-body .ant-table-row`);
-                // console.log('rows??', rows);
                 if (rows.length === 0) {
                     console.warn('cannot calculate row height -- no rows!');
                     this.onNoRows(body as HTMLElement);
                     return;
                 }
-                // this.onHasRows(body as HTMLElement);
+
                 const rowHeight = (rows.item(0) as HTMLElement).offsetHeight;
 
                 const height = (body as HTMLElement).clientHeight - (header as HTMLElement).offsetHeight;
                 const rowsPerPage = Math.floor(height / rowHeight);
-                // console.log('dynamic rows', body, header, height, rowHeight, rowsPerPage);
                 return rowsPerPage;
-                // return body as HTMLElement;
             };
             loop();
         });
     }
 
     async setRowsPerPage() {
-        // a hack for now... 
-        // loop until table is rendered the first time... 
         const rowsPerPage = await this.getRowsPerPage();
-        // if (!rowsPerPage) {
-        //     return;
-        // }
-        // const height = (body as HTMLElement).offsetHeight;
-
-        // const rowsPerPage = Math.floor(height / ROW_HEIGHT);
-        console.log('dynamic rows', rowsPerPage);
         this.onResize(rowsPerPage);
     }
 }

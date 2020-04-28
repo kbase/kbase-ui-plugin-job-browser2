@@ -21,3 +21,5 @@ _trash
 _attic
 
 /dist/
+
+.idea

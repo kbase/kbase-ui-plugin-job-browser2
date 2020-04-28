@@ -210,11 +210,11 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     // }
 
     componentDidUpdate() {
-        if (this.props.dataSource.status === AsyncProcessState.PROCESSING) {
+        if (this.props.dataSource.status === AsyncProcessState.PROCESSING ||
+            this.props.dataSource.status === AsyncProcessState.REPROCESSING) {
             this.pubsub.send('searching', { is: true });
         } else {
             this.pubsub.send("searching", { is: false });
-            // this.tableResizer.setRowsPerPage();
         }
     }
 
@@ -291,7 +291,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     //     this.doSearch(false);
     // }
     onFirstPage() {
-        console.log('on first');
         if (this.props.dataSource.status !== AsyncProcessState.SUCCESS) {
             return;
         }
@@ -377,10 +376,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             limit: this.limit
         };
 
-        console.log('searching with', searchExpression);
 
         // TODO: document wth is happening here.
-        this.pubsub.send("search", {});
+        this.pubsub.send("search", { is: true });
 
         this.props.search(searchExpression);
         return false;
@@ -859,7 +857,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
     updateTableConfig(config: TableConfig) {
-        console.log('table config?', config);
         this.limit = config.rowsPerPage;
         this.doSearch(false);
     }

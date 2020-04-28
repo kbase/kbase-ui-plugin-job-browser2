@@ -104,8 +104,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     }
 
     async getJobLog(offset: number, limit: number, timeout: number, admin: boolean): Promise<Array<JobLogEntry>> {
-        console.log('in OTHER get job log!', admin);
-
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,

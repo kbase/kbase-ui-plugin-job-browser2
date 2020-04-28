@@ -9,11 +9,11 @@ const ROW_HEIGHT = 50;
 const RESIZE_WAIT = 1000;
 
 export enum AsyncProcessState {
-    NONE,
-    PROCESSING,
-    REPROCESSING,
-    SUCCESS,
-    ERROR
+    NONE = "NONE",
+    PROCESSING = "PROCESSING",
+    REPROCESSING = "REPROCESSING",
+    SUCCESS = "SUCCESS",
+    ERROR = "ERROR"
 }
 
 export interface DataSourceBase {
@@ -309,6 +309,7 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
                     return <TableNav state={{ enabled: false }} noun={this.props.noun} />;
                 case AsyncProcessState.PROCESSING:
                     return <TableNav state={{ enabled: false }} noun={this.props.noun} />;
+                case AsyncProcessState.REPROCESSING:
                 case AsyncProcessState.SUCCESS:
                     return <TableNav
                         state={{

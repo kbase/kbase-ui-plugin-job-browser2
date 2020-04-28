@@ -39,7 +39,6 @@ export default class Data extends React.Component<TheProps, DataState> {
             url: authURL,
             authorization: token
         });
-        console.log('term2', term);
         const users = await client.searchUsers(term);
         const options = Array.from(Object.entries(users))
             .map(([username, realname]) => {
