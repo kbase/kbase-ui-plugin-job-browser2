@@ -146,13 +146,8 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
             limit: searchExpression.limit,
             timeout: 10000,
             admin: true,
-            // search: {
-            //     terms: searchTerms
-            // },
             filter
         };
-
-        // console.log('query params', queryParams);
 
         if (searchExpression.sort) {
             switch (searchExpression.sort.field) {

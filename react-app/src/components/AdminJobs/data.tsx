@@ -88,7 +88,6 @@ export default class Data extends React.Component<DataProps, DataState> {
     }
 
     search(searchExpression: JobsSearchExpression) {
-        console.log('search', searchExpression);
         this.doSearch(searchExpression);
     }
     cancelJob(jobId: string, timeout: number) {

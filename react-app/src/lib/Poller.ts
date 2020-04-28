@@ -1,6 +1,6 @@
 import PubSub, { PubSubProxy } from "./PubSub";
 
-const POLLING_TIMEOUT = 10000;
+const POLLING_TIMEOUT = 60000;
 
 export interface PollerParams {
     // callback to trigger a polling action, whatever that is.
@@ -70,6 +70,10 @@ export class Poller {
         this.startWaiting();
     }
 
+    /*
+    This...
+    watches the state of the poller to ensure that the poll doesn't exceed a timeout.
+    */
     startWatching() {
         this.watchStartAt = Date.now();
         this.status = PollerState.STARTED;
@@ -78,7 +82,8 @@ export class Poller {
             const elapsed = Date.now() - this.watchStartAt;
             if (elapsed > POLLING_TIMEOUT) {
                 this.status = PollerState.ERROR;
-                this.error = `Polling took too long (${elapsed}ms)`;
+                this.error = `polling timeout (${POLLING_TIMEOUT}) exceeded after ${elapsed}ms`;
+                console.warn(this.error);
                 this.stopPolling();
                 return;
             }
@@ -148,6 +153,19 @@ export class Poller {
         this.startWatching();
     }
 
+    /*
+        This provides a hook for an external event which should be the same
+        logical even as this poller is polling for. So if the event happens
+        outside of this poller, we want to control the polling. 
+        Specifically, if we currently running the poll, we just continue doing
+        that since it is equivalent to the event we received.
+        If, on the other hand, we are waiting for the next polling event, we should
+        pause polling.
+        Upon the even finishing (signaled by the event with is=false), we resume
+        polling if it were previously polled.
+        TODO: this is not quite correct; rather, the previous state, whether waiting, 
+        stopped, or paused, should be resumed.
+    */
     startListeningForPollingEvent() {
         this.pubsubProxy.on('searching', ({ is }) => {
             if (is) {
