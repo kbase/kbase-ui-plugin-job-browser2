@@ -34,7 +34,7 @@
         "redux": "4.0.5",
         "redux-thunk": "2.3.0",
         "typescript": "3.8.3",
-        "uuid": "7.0.3"
+        "uuid": "8.0.0"
     },
     "scripts": {
         "start": "nodemon -w ./craco.config.js -w ./node_modules/@kbase/ui-lib/lib/custom/antd/theme.less --exec 'craco start'",
@@ -70,6 +70,6 @@
         "http-proxy-middleware": "1.0.3",
         "morgan": "1.10.0",
         "nodemon": "2.0.3",
-        "typedoc": "0.17.4"
+        "typedoc": "0.17.6"
     }
 }
