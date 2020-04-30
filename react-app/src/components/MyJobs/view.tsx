@@ -732,7 +732,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         case JobContextType.EXPORT:
                             return 'export job';
                         case JobContextType.UNKNOWN:
-                            return 'subjob';
+                            return 'unknown';
                     }
                 }
             },
@@ -747,14 +747,22 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     if (!appTitle) {
                         return 'n/a';
                     }
-                    return (
-                        <Tooltip title={appTitle}>
-                            <UILink path={`catalog/apps/${job.request.app.id}`}
-                                openIn='new-tab'>
+                    if (job.request.app.type === 'narrative') {
+                        return (
+                            <Tooltip title={appTitle}>
+                                <UILink path={`catalog/apps/${job.request.app.id}`}
+                                    openIn='new-tab'>
+                                    {appTitle}
+                                </UILink>
+                            </Tooltip>
+                        );
+                    } else {
+                        return (
+                            <Tooltip title={appTitle}>
                                 {appTitle}
-                            </UILink>
-                        </Tooltip>
-                    );
+                            </Tooltip>
+                        );
+                    }
                 }
             },
             {

@@ -64,12 +64,15 @@ export type JobContext =
     JobContextExport |
     JobContextUnknown;
 
+export type AppType = "narrative" | "unknown";
+
 export interface App {
     id: string;
     moduleName: string;
     functionName: string;
     title: string;
     clientGroups: Array<ClientGroup>;
+    type: AppType;
 }
 
 // TODO: this needs to represent narrative / workspace / export job / unknown
