@@ -3,10 +3,13 @@ import { AuthorizedGenericClient } from './GenericClient';
 import Cache from '../Cache';
 
 var moduleCache = new Cache<any>({
-    itemLifetime: 1800000,
-    monitoringFrequency: 60000,
-    waiterTimeout: 30000,
-    waiterFrequency: 100
+    itemLifetime: 1800000,      // how long a url will be cached for
+    monitoringFrequency: 60000, // how frequently to wake up and check the cache
+    // for expired urls.
+    waiterTimeout: 30000,       // how long to wait for another process to finish a 
+    // request to populate a service's cache entry
+    waiterFrequency: 100        // how frequently to check if a cache entry is ready
+
 });
 
 /*
@@ -17,7 +20,6 @@ var moduleCache = new Cache<any>({
  * auth - auth structure
  *   token - auth token
  *   username - username
- * rpcContext
  */
 
 export interface DynamicServiceClientParams {
@@ -25,30 +27,26 @@ export interface DynamicServiceClientParams {
     url: string;
     version?: string;
     timeout?: number;
-    rpcContext?: any;
     urlBaseOverride?: string;
     urlBase?: string;
 }
 
-const DEFAULT_TIMEOUT = 10000;
-
-
+// Default timeout of 1 minute.
+const DEFAULT_TIMEOUT = 60000;
 
 export class DynamicServiceClient {
     token: string;
     timeout: number;
-    rpcContext: any;
     url: string;
     version: string | null;
     urlBaseOverride: string | null;
 
     static module: string;
 
-    constructor({ token, url, version, timeout, rpcContext, urlBaseOverride }: DynamicServiceClientParams) {
+    constructor({ token, url, version, timeout, urlBaseOverride }: DynamicServiceClientParams) {
         // Establish an auth object which has properties token and user_id.
         this.token = token;
         this.timeout = timeout || DEFAULT_TIMEOUT;
-        this.rpcContext = rpcContext || null;
         this.urlBaseOverride = urlBaseOverride || null;
 
         if (!url) {
@@ -66,7 +64,6 @@ export class DynamicServiceClient {
         return {
             timeout: this.timeout,
             authorization: this.token,
-            rpcContext: this.rpcContext
         };
     }
 
@@ -91,11 +88,6 @@ export class DynamicServiceClient {
         });
     }
 
-    // setCached(value: any) {
-    //     moduleCache.setItem(this.moduleId(), value);
-    // }
-
-    // TODO: Promise<any> -> Promise<ServiceStatusResult>
     private async lookupModule(): Promise<GetServiceStatusResult> {
         return this.getCached(
             (): Promise<GetServiceStatusResult> => {

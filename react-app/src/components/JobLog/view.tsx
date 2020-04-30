@@ -391,9 +391,11 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         );
         return (
             <div key="toolbar">
-                <Dropdown overlay={menu}>
-                    <Button icon="download"></Button>
-                </Dropdown>
+                <ButtonGroup >
+                    <Dropdown overlay={menu}>
+                        <Button icon="download"></Button>
+                    </Dropdown>
+                </ButtonGroup>
                 {' '}
                 {this.renderPlayPause()}
             </div>

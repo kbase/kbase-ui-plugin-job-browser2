@@ -29,7 +29,7 @@ class Loader extends React.Component<LoaderProps, LoaderState> {
     renderLoading() {
         const message = (
             <div>
-                Loading Main ... <Spin />
+                Loading Job Browser ... <Spin />
             </div>
         );
         return (
@@ -66,7 +66,6 @@ class Loader extends React.Component<LoaderProps, LoaderState> {
     }
 
     componentDidMount() {
-        // this.props.onLoad();
         switch (this.props.view.loadingState) {
             case ComponentLoadingState.NONE:
                 // should only appear briefly as the LOAD event is processed.

@@ -53,18 +53,18 @@ export default class Cache<T> {
         this.cache = new Map<string, CacheItem<T>>();
 
         // 10 minute cache lifetime
-        this.cacheLifetime = itemLifetime || 1800000;
+        this.cacheLifetime = itemLifetime;
 
         // Frequency with which to monitor the cache for expired items
         // or refreshing them.
-        this.monitoringFrequency = monitoringFrequency || 60000;
+        this.monitoringFrequency = monitoringFrequency;
 
         // The waiter waits for a cache item to become available if it has
         // been reserved. These settings determine how long to wait
         // for a waiter to wait, and how often to check the cache item to see if it has
         // yet been fulfilled.
-        this.waiterTimeout = waiterTimeout || 30000;
-        this.waiterFrequency = waiterFrequency || 100;
+        this.waiterTimeout = waiterTimeout;
+        this.waiterFrequency = waiterFrequency;
 
         this.isMonitoring = false;
     }

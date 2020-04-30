@@ -34,7 +34,7 @@ export default class Main extends React.Component<MainProps, MainState> {
             tab: 'myjobs',
             title: 'My Jobs',
             renderBody: () => {
-                return this.renderMyJobsTab();
+                return <MyJobs />;
             }
         });
 
@@ -54,7 +54,7 @@ export default class Main extends React.Component<MainProps, MainState> {
             tab: 'appstats',
             title: 'Public AppStats',
             renderBody: () => {
-                return this.renderPublicAppStatsTab();
+                return <PublicAppStats />;
             }
         });
 
@@ -82,62 +82,7 @@ export default class Main extends React.Component<MainProps, MainState> {
         this.props.setTitle('Job Browser');
     }
 
-    componentWillUnmount() {
-        // this.setState({
-        //     activeTabKey: null
-        //     // defaultActiveTabKey: null
-        // });
-    }
-
-    onTabsChange(activeKey: string) {
-        // console.log('tabs changed', activeKey, this.activeTabKey);
-        // this.setState({ activeTabKey: activeKey });
-        // this.state.activeTabKey = activeKey;
-    }
-
-    renderJobsTab() { }
-
-    renderAdminJobsTab() { }
-
-    renderMyJobsTab() {
-        return <MyJobs />;
-    }
-
-    renderPublicAppStatsTab() {
-        return <PublicAppStats />;
-    }
-
-    renderUserRunSummaryTab() {
-        return <UserRunSummary />;
-    }
-
     renderTabs() {
-        // FIXME: The animated flag is set to false below because for some reason antd (on safari at least) is not
-        // correctly rendering any tab other than the first one with animation enabled (which is default).
-        // Please investigate and either find what we have done wrong or antd has.
-        // return (
-        //     <Tabs
-        //         animated={false}
-        //         // defaultActiveKey={this.state.activeTabKey || undefined}
-        //         activeKey={this.props.params.tab || this.state.activeTabKey || undefined}
-        //         // className="FlexTabs"
-        //         onChange={this.onTabsChange.bind(this)}
-        //         destroyInactiveTabPane={true}
-        //     >
-        //         <Tabs.TabPane tab="My Jobs" key="myJobs">
-        //             <MyJobs />
-        //         </Tabs.TabPane>
-
-        //         <Tabs.TabPane tab="Public App Stats" key="publicAppStats">
-        //             <PublicAppStats />
-        //         </Tabs.TabPane>
-
-        //         {userJobsTab}
-        //         {userRunTab}
-        //     </Tabs>
-        // );
-
-
         return (
             <Tabs
                 tabs={this.state.tabs}
