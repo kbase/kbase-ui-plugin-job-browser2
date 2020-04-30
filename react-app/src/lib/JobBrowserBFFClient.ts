@@ -1,63 +1,12 @@
-import { DynamicServiceClient, DynamicServiceClientParams } from '../lib/comm/JSONRPC20/DynamicServiceClient';
-// import { JobStatus } from '../redux/store';
-// import { JobState } from './MetricsServiceClient';
+import {
+    DynamicServiceClient, DynamicServiceClientParams
+} from '../lib/comm/JSONRPC20/DynamicServiceClient';
 
 // Metrics client --
 // TODO: move
 // TODO: use a more dynamic dynamic service client??
 
 interface JobBrowserBFFParams extends DynamicServiceClientParams { }
-
-
-// export interface JobState {
-//     app_id: string;
-//     client_groups: Array<string>;
-//     user?: string;
-
-//     complete: boolean;
-//     error: boolean;
-//     status: string;
-//     state: string;
-
-//     creation_time: number;
-//     exec_start_time?: number;
-//     modification_time?: number;
-//     finish_time?: number;
-
-//     job_id: string;
-//     method: string;
-
-//     wsid: string;
-//     narrative_objNo: number;
-
-//     narrative_name: string;
-//     workspace_name: string;
-// }
-
-
-// interface GetAppMetricsParam {
-//     epoch_range: [number, number];
-//     user_ids: Array<string>;
-// }
-// interface GetAppMetricsResult {
-//     job_states: Array<JobState>;
-// }
-
-// interface GetJobsParam {
-//     epoch_range: [number, number];
-//     user_ids: Array<string>;
-// }
-// interface GetJobsResult {
-//     job_states: Array<JobState>;
-//     total_count: number;
-// }
-
-// interface GetJobParam {
-//     job_id: string;
-// }
-// interface GetJobResult {
-//     job_state: JobState;
-// }
 
 export interface IsAdminResult {
     is_admin: boolean;
@@ -93,7 +42,6 @@ export interface TimeSpanSpec {
     from: number;
     to: number;
 }
-
 
 export interface User {
     username: string;
@@ -207,7 +155,6 @@ export interface AppInfo {
 }
 
 export interface Context {
-
 }
 
 export interface JobContextBase {
