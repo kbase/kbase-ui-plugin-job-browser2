@@ -195,12 +195,15 @@ export type JobState =
     JobStateError |
     JobStateTerminate;
 
+export type AppType = "narrative" | "unknown";
+
 export interface AppInfo {
     id: string;
     module_name: string;
     function_name: string;
     title: string;
     client_groups: Array<ClientGroup>;
+    type: AppType;
 }
 
 export interface Context {
