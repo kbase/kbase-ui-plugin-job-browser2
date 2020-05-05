@@ -19,18 +19,26 @@ interface DataState {
 }
 
 export default class Data extends React.Component<TheProps, DataState> {
+    stopped: boolean;
     constructor(props: TheProps) {
         super(props);
         this.state = {
             options: null
         };
+        this.stopped = false;
+    }
+
+    componentWillUnmount() {
+        this.stopped = true;
     }
 
     async componentDidMount() {
         // const options = await this.fetchOptions();
-        this.setState({
-            options: []
-        });
+        if (!this.stopped) {
+            this.setState({
+                options: []
+            });
+        }
     }
 
     async search(term: string) {

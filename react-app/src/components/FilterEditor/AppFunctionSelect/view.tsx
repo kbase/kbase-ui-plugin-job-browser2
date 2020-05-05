@@ -9,16 +9,9 @@ export interface AppFunctionSelectProps {
 }
 
 interface AppFunctionSelectState {
-
 }
 
 export default class AppFunctionSelect extends React.Component<AppFunctionSelectProps, AppFunctionSelectState> {
-    componentDidUpdate() {
-        console.log('props', this.props);
-    }
-    componentDidMount() {
-        console.log('props', this.props);
-    }
     onChange(value: string) {
         // oddly enough, clearing a field will set value
         // to undefined :(

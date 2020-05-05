@@ -853,6 +853,16 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     updateTableConfig(config: TableConfig) {
         this.limit = config.rowsPerPage;
+        if (this.props.dataSource.status === AsyncProcessState.SUCCESS ||
+            this.props.dataSource.status === AsyncProcessState.REPROCESSING) {
+            const newPageCount = Math.ceil(this.props.dataSource.total / config.rowsPerPage);
+            console.log('update table config', config, this.currentPage, newPageCount);
+            if (this.currentPage !== null) {
+                if (this.currentPage > newPageCount) {
+                    this.currentPage = newPageCount;
+                }
+            }
+        }
         this.doSearch(false);
     }
 

@@ -20,18 +20,26 @@ interface DataState {
 }
 
 export default class Data extends React.Component<TheProps, DataState> {
+    stopped: boolean;
     constructor(props: TheProps) {
         super(props);
         this.state = {
             narratives: null
         };
+        this.stopped = false;
+    }
+
+    componentWillUnmount() {
+        this.stopped = true;
     }
 
     async componentDidMount() {
         const narratives = await this.fetchNarratives();
-        this.setState({
-            narratives
-        });
+        if (!this.stopped) {
+            this.setState({
+                narratives
+            });
+        }
     }
 
     async fetchNarratives(): Promise<Array<OptionValue<number>>> {
