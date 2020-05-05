@@ -143,9 +143,6 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
 
     setRowsPerPage() {
         const rowsPerPage = this.calcRowsPerPage();
-        // if (this.props.dataSource.status === syncProcessState.SUCCESS) {
-
-        // }
         const config: TableConfig = (() => {
             switch (this.props.dataSource.status) {
                 case AsyncProcessState.NONE:
@@ -161,11 +158,23 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
                         pageCount: null
                     };
                 case AsyncProcessState.REPROCESSING:
-                    return {
-                        rowsPerPage,
-                        currentPage: null,
-                        pageCount: null
-                    };
+                    return (() => {
+                        const newPageCount = Math.ceil(this.props.dataSource.total / rowsPerPage);
+                        if (this.props.dataSource.page > newPageCount) {
+                            return {
+                                rowsPerPage,
+                                currentPage: newPageCount,
+                                pageCount: newPageCount
+                            };
+                        } else {
+                            return {
+                                rowsPerPage,
+                                currentPage: null,
+                                pageCount: newPageCount
+                            };
+                        }
+                    })();
+
                 case AsyncProcessState.ERROR:
                     return {
                         rowsPerPage,
@@ -173,26 +182,71 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
                         pageCount: null
                     };
                 case AsyncProcessState.SUCCESS:
-                    return {
-                        rowsPerPage,
-                        currentPage: null,
-                        pageCount: null
-                    };
+                    return (() => {
+                        const newPageCount = Math.ceil(this.props.dataSource.total / rowsPerPage);
+                        if (this.props.dataSource.page > newPageCount) {
+                            return {
+                                rowsPerPage,
+                                currentPage: newPageCount,
+                                pageCount: newPageCount
+                            };
+                        } else {
+                            return {
+                                rowsPerPage,
+                                currentPage: null,
+                                pageCount: newPageCount
+                            };
+                        }
+                    })();
             }
         })();
         this.props.config(config);
     }
 
-    calcRowsPerPage() {
+    // calcRowsPerPage(): Promise<number> {
+    //     return new Promise<number>((resolve, reject) => {
+    //         let tries = 20;
+    //         const start = new Date().getTime();
+    //         const loop = () => {
+    //             window.setTimeout(() => {
+    //                 const body = this.bodyRef.current;
+    //                 const elapsed = new Date().getTime() - start;
+    //                 if (body === null) {
+    //                     // throw new Error('No table body!');
+    //                     if (tries === 0) {
+    //                         console.log('body???', this.bodyRef);
+    //                         reject(new Error(`Table body not found after ${elapsed}ms`));
+    //                     }
+    //                     tries -= 1;
+    //                     loop();
+    //                 } else {
+    //                     const height = body.offsetHeight;
+    //                     resolve(Math.floor(height / ROW_HEIGHT));
+    //                 }
+    //             }, 100);
+    //         };
+    //         loop();
+    //     });
+
+    // }
+
+    calcRowsPerPage(): number {
         const body = this.bodyRef.current;
         if (body === null) {
-            throw new Error('No table body!');
+            throw new Error('Table body not found');
+        } else {
+            const height = body.offsetHeight;
+            return Math.floor(height / ROW_HEIGHT);
         }
-        const height = body.offsetHeight;
-        return Math.floor(height / ROW_HEIGHT);
     }
 
+    // mouseHeldListener() {
+    //     console.log('mouse held down?');
+    //     window.removeEventListener('mouseup', this.mouseHeldListener);
+    // }
+
     resizeListener() {
+        // window.addEventListener('mouseup', this.mouseHeldListener.bind(this));
         if (this.resizing) {
             return;
         }
@@ -204,8 +258,11 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
 
         window.setTimeout(() => {
             this.resizing = false;
-
-            this.setRowsPerPage();
+            try {
+                this.setRowsPerPage();
+            } catch (ex) {
+                console.warn('Error setting rows per page...', ex);
+            }
         }, RESIZE_WAIT);
     }
 
