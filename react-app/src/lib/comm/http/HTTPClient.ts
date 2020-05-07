@@ -1,5 +1,7 @@
 import { HTTPQuery, QueryMap } from './HTTPUtils';
 
+const DEFAULT_TIMEOUT = 10000;
+
 // import * as Bluebird from 'bluebird';
 
 // Bluebird.config({
@@ -176,29 +178,53 @@ export interface RequestOptions {
     onCancel?: (callback: () => void) => void;
 }
 
-export interface Response {
+export type ResponseType = string;
+
+
+export interface Response<T extends ResponseType> {
     status: number,
-    response: string,
-    responseType: string,
+    response: ResponseType,
+    responseType: XMLHttpRequestResponseType,
     header: HTTPHeader;
 }
 
-export class HTTPClient {
-    async request(options: RequestOptions): Promise<Response> {
+export interface StringResponse extends Response<string> {
+    responseType: 'text',
+    response: string;
+}
+
+export interface HTTPClientOptions {
+    timeout?: number;
+}
+
+export default class HTTPClient {
+    options?: HTTPClientOptions;
+    constructor(options?: HTTPClientOptions) {
+        this.options = options;
+    }
+    async request<T extends ResponseType>(options: RequestOptions): Promise<Response<T>> {
         let startTime = new Date().getTime();
+        const timeout = options.timeout || this.options?.timeout || DEFAULT_TIMEOUT;
         return new Promise((resolve, reject) => {
             const xhr: XMLHttpRequest = new XMLHttpRequest();
             xhr.onload = () => {
-                resolve({
-                    status: xhr.status,
-                    response: xhr.response,
-                    responseType: xhr.responseType,
-                    header: new HTTPHeader(xhr)
-                });
+                // TODO: if support multiple return types, handle that here.
+                switch (xhr.responseType) {
+                    case 'text':
+                        resolve({
+                            status: xhr.status,
+                            response: (xhr.response as unknown) as string,
+                            responseType: xhr.responseType,
+                            header: new HTTPHeader(xhr)
+                        });
+                        return;
+                    default:
+                        throw new Error(`Unsupported response type ${xhr.responseType}`);
+                }
             };
             xhr.ontimeout = () => {
                 var elapsed = (new Date().getTime()) - startTime;
-                reject(new TimeoutError(options.timeout, elapsed, 'Request timeout', xhr));
+                reject(new TimeoutError(timeout, elapsed, 'Request timeout', xhr));
             };
             xhr.onerror = () => {
                 reject(new GeneralError('General request error ' + options.url, xhr));
@@ -222,9 +248,7 @@ export class HTTPClient {
                 return;
             }
 
-            if (options.timeout) {
-                xhr.timeout = options.timeout;
-            }
+            xhr.timeout = timeout;
 
             xhr.withCredentials = options.withCredentials || false;
 

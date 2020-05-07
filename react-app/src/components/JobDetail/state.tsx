@@ -6,6 +6,7 @@ import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
 import { JobLogEntry } from '../JobLog/state';
 import { JobStateType, JobEvent } from '../../redux/types/jobState';
 import { Poll } from '../../lib/Poll';
+import { SERVICE_TIMEOUT } from '../../constants';
 
 const POLLING_INTERVAL = 5000;
 const POLLING_PROGRESS_STEPS = 100;
@@ -119,6 +120,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
         const jobs = await jobBrowserBFF.get_jobs({
@@ -136,6 +138,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
         const jobLog = await jobBrowserBFF.get_job_log({

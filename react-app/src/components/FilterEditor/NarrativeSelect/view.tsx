@@ -42,6 +42,9 @@ export default class NarrativeSelect extends React.Component<NarrativeSelectProp
             defaultValue={defaultValue}
             onChange={this.onChange.bind(this)}
             filterOption={(filterTerm, option) => {
+                if (!option) {
+                    return true;
+                }
                 if (!option.props.children) {
                     return true;
                 }

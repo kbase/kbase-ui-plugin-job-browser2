@@ -43,6 +43,9 @@ export default class AppFunctionSelect extends React.Component<AppFunctionSelect
             defaultValue={defaultValue}
             onChange={this.onChange.bind(this)}
             filterOption={(filterTerm, option) => {
+                if (!option) {
+                    return true;
+                }
                 if (!option.props.children) {
                     return true;
                 }

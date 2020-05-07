@@ -1,5 +1,8 @@
 import React from 'react';
 import { Button } from 'antd';
+import {
+    StepBackwardOutlined, StepForwardOutlined, CaretRightFilled, CaretLeftFilled
+} from '@ant-design/icons';
 
 export interface NavStateBase {
     enabled: boolean;
@@ -54,22 +57,22 @@ export default class TableNav extends React.Component<TableNavProps, TableNavSta
 
     renderFirstButton(state: NavStateOk) {
         const disabled = (state.page === 1);
-        return <Button icon="step-backward" onClick={() => { this.gotoFirstPage(state); }} disabled={disabled} />;
+        return <Button icon={<StepBackwardOutlined />} onClick={() => { this.gotoFirstPage(state); }} disabled={disabled} />;
     }
 
     renderPreviousButton(state: NavStateOk) {
         const disabled = (state.page === 1);
-        return <Button icon="left" onClick={() => { this.gotoPreviousPage(state); }} disabled={disabled} />;
+        return <Button icon={<CaretLeftFilled />} onClick={() => { this.gotoPreviousPage(state); }} disabled={disabled} />;
     }
 
     renderNextButton(state: NavStateOk) {
         const disabled = (state.page === state.pageCount);
-        return <Button icon="right" onClick={() => { this.gotoNextPage(state); }} disabled={disabled} />;
+        return <Button icon={<CaretRightFilled />} onClick={() => { this.gotoNextPage(state); }} disabled={disabled} />;
     }
 
     renderLastButton(state: NavStateOk) {
         const disabled = (state.page === state.pageCount);
-        return <Button icon="step-forward" onClick={() => { this.gotoLastPage(state); }} disabled={disabled} />;
+        return <Button icon={<StepForwardOutlined />} onClick={() => { this.gotoLastPage(state); }} disabled={disabled} />;
     }
 
     renderButtons(state: NavStateOk) {
@@ -83,10 +86,10 @@ export default class TableNav extends React.Component<TableNavProps, TableNavSta
 
     renderButtonsDisabled() {
         return <Button.Group>
-            <Button icon="step-backward" disabled />
-            <Button icon="left" disabled />
-            <Button icon="right" disabled />
-            <Button icon="step-forward" disabled />
+            <Button icon={<StepBackwardOutlined />} disabled />
+            <Button icon={<CaretLeftFilled />} disabled />
+            <Button icon={<CaretRightFilled />} disabled />
+            <Button icon={<StepForwardOutlined />} disabled />
         </Button.Group>;
     }
 

@@ -2,6 +2,7 @@ import { Job, JobsSearchExpression } from "../../redux/store";
 import CancelableRequest, { Task } from "../../lib/CancelableRequest";
 import JobBrowserBFFClient, { QueryJobsParams } from "../../lib/JobBrowserBFFClient";
 import { extractTimeRange, serviceJobToUIJob } from "../../redux/actions/utils";
+import { SERVICE_TIMEOUT } from "../../constants";
 
 
 
@@ -23,6 +24,7 @@ export default class UserJobsRequest extends CancelableRequest<UserJobsParam, Us
         const jobBrowserBFF = new JobBrowserBFFClient({
             token,
             url: serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);

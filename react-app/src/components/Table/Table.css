@@ -86,3 +86,36 @@
     align-items: center;
     padding: 4px;
 }
+
+.JSON .JSONObject {}
+
+.JSON .JSONObject td,
+.JSON .JSONObject th {
+    border: 1px silver solid;
+    padding: 4px;
+}
+
+.JSON .JSONArray {}
+
+.JSON .JSONArray>div {
+    border: 1px silver solid;
+    padding: 4px;
+}
+
+.JSON .JSONBoolean {
+    font-family: monospace;
+}
+
+.JSON .JSONString {}
+
+.JSON .JSONNumber {}
+
+.JSON .JSONNull {
+    font-family: monospace;
+}
+
+.FullHeightModal .ant-modal-content {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}

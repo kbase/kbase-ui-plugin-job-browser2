@@ -1,15 +1,26 @@
-import { ServiceWizardClient, GetServiceStatusResult } from '../coreServices/ServiceWizard';
-import { AuthorizedGenericClient } from './GenericClient';
+import { ServiceWizardClient, GetServiceStatusResult, ServiceStatus } from '../coreServices/ServiceWizard';
+import { ServiceClient, ServiceClientParams } from './ServiceClient';
 import Cache from '../Cache';
 
-var moduleCache = new Cache<any>({
-    itemLifetime: 1800000,      // how long a url will be cached for
-    monitoringFrequency: 60000, // how frequently to wake up and check the cache
-    // for expired urls.
-    waiterTimeout: 30000,       // how long to wait for another process to finish a 
-    // request to populate a service's cache entry
-    waiterFrequency: 100        // how frequently to check if a cache entry is ready
+const ITEM_LIFETIME = 1800000;
+const MONITORING_FREQUENCY = 60000;
+const WAITER_TIMEOUT = 30000;
+const WAITER_FREQUENCY = 100;
 
+// now import the service wizard, and one auth generic client
+
+// type Promise<T> = Promise<T>
+
+interface ModuleInfo {
+
+    module_name: string;
+}
+
+var moduleCache = new Cache<ServiceStatus>({
+    itemLifetime: ITEM_LIFETIME,
+    monitoringFrequency: MONITORING_FREQUENCY,
+    waiterTimeout: WAITER_TIMEOUT,
+    waiterFrequency: WAITER_FREQUENCY
 });
 
 /*
@@ -20,63 +31,43 @@ var moduleCache = new Cache<any>({
  * auth - auth structure
  *   token - auth token
  *   username - username
+ * rpcContext
  */
 
-export interface DynamicServiceClientParams {
-    token: string;
-    url: string;
+export interface DynamicServiceClientParams extends ServiceClientParams {
     version?: string;
-    timeout?: number;
-    urlBaseOverride?: string;
-    urlBase?: string;
+    // module: string;
 }
 
-// Default timeout of 1 minute.
-const DEFAULT_TIMEOUT = 60000;
 
-export class DynamicServiceClient {
-    token: string;
-    timeout: number;
-    url: string;
+export abstract class DynamicServiceClient extends ServiceClient {
     version: string | null;
-    urlBaseOverride: string | null;
 
-    static module: string;
+    abstract module: string;
 
-    constructor({ token, url, version, timeout, urlBaseOverride }: DynamicServiceClientParams) {
-        // Establish an auth object which has properties token and user_id.
-        this.token = token;
-        this.timeout = timeout || DEFAULT_TIMEOUT;
-        this.urlBaseOverride = urlBaseOverride || null;
+    serviceDiscoveryURL: string;
+    serviceDiscoveryModule: string = 'ServiceWizard';
 
-        if (!url) {
-            throw new Error('The service discovery url was not provided');
-        }
-        this.url = url;
+    constructor(params: DynamicServiceClientParams) {
+        super(params);
+        const { version } = params;
+
 
         this.version = version || null;
-        if (version === 'auto') {
+        if (this.version === 'auto') {
             this.version = null;
         }
-    }
 
-    private options() {
-        return {
-            timeout: this.timeout,
-            authorization: this.token,
-        };
-    }
-
-    private getModule() {
-        return (this.constructor as typeof DynamicServiceClient).module;
+        this.serviceDiscoveryURL = params.url;
+        // this.module = module;
     }
 
     private moduleId() {
         let moduleId;
         if (!this.version) {
-            moduleId = this.getModule() + ':auto';
+            moduleId = this.module + ':auto';
         } else {
-            moduleId = this.getModule() + ':' + this.version;
+            moduleId = this.module + ':' + this.version;
         }
         return moduleId;
     }
@@ -88,11 +79,16 @@ export class DynamicServiceClient {
         });
     }
 
+    // setCached(value: any) {
+    //     moduleCache.setItem(this.moduleId(), value);
+    // }
+
+    // TODO: Promise<any> -> Promise<ServiceStatusResult>
     private async lookupModule(): Promise<GetServiceStatusResult> {
-        return this.getCached(
+        const moduleInfo = await this.getCached(
             (): Promise<GetServiceStatusResult> => {
                 const client = new ServiceWizardClient({
-                    url: this.url,
+                    url: this.serviceDiscoveryURL!,
                     authorization: this.token,
                     timeout: this.timeout
                 });
@@ -100,24 +96,28 @@ export class DynamicServiceClient {
                 // here is bluebird, which supports cancellation, which we need.
                 return Promise.resolve(
                     client.getServiceStatus({
-                        module_name: this.getModule(),
+                        module_name: this.module,
                         version: this.version
                     })
                 );
             }
         );
+        this.module = moduleInfo.module_name;
+        this.url = moduleInfo.url;
+        return moduleInfo;
     }
 
-    protected async callFunc<P, T>(funcName: string, params: P): Promise<T> {
-        const { url, module_name } = await this.lookupModule();
-
-        const client = new AuthorizedGenericClient({
-            module: module_name,
-            url,
-            token: this.token,
-            timeout: this.timeout
-        });
-
-        return await client.callFunc<P, T, any>(funcName, params);
+    async callFunc<ParamType, ReturnType>(funcName: string, params: ParamType): Promise<ReturnType> {
+        await this.lookupModule();
+        return super.callFunc(funcName, params);
+    }
+    async callFuncNoParams<ReturnType>(funcName: string): Promise<ReturnType> {
+        await this.lookupModule();
+        return super.callFuncNoParams(funcName);
+    }
+    async callFuncNoResult<ParamType, ReturnType>(funcName: string, params: ParamType): Promise<void> {
+        await this.lookupModule();
+        return super.callFuncNoResult(funcName, params);
     }
 }
+

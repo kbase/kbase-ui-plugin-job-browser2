@@ -5,9 +5,9 @@ import PublicAppStats from '../PublicAppStats';
 import UserRunSummary from '../UserRunSummary';
 import { MainParams } from './state';
 import { Tab } from '../FlexTabs';
-import { Icon } from 'antd';
 import Tabs from '../AutoFlexTabs';
 import AdminJobs from '../AdminJobs';
+import { UnlockOutlined } from '@ant-design/icons';
 
 export interface MainProps {
     isAdmin: boolean;
@@ -42,7 +42,7 @@ export default class Main extends React.Component<MainProps, MainState> {
             tabs.push({
                 tab: 'adminjobs',
                 title: <span>
-                    User Jobs <Icon type="unlock" />
+                    User Jobs <UnlockOutlined />
                 </span>,
                 renderBody: () => {
                     return <AdminJobs />;
@@ -61,7 +61,7 @@ export default class Main extends React.Component<MainProps, MainState> {
         if (this.props.isAdmin) {
             const tabLabel = (
                 <span>
-                    User Run Summary <Icon type="unlock" />
+                    User Run Summary <UnlockOutlined />
                 </span>
             );
             tabs.push({
