@@ -5,6 +5,7 @@ import { AppError } from '@kbase/ui-components';
 import { ThunkDispatch } from 'redux-thunk';
 import { StoreState } from '../store';
 import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
+import { SERVICE_TIMEOUT } from '../../constants';
 
 // MAIN Loading
 
@@ -77,6 +78,7 @@ export function mainLoad() {
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: userAuthorization.token,
             url: serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
         try {

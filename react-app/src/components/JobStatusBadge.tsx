@@ -1,8 +1,9 @@
 import React from 'react';
-import { Tag, Icon, Tooltip } from 'antd';
+import { Tag, Tooltip } from 'antd';
 import { Job } from '../redux/store';
 import { NiceElapsedTime, NiceRelativeTime, NiceTimeDuration } from '@kbase/ui-components';
 import { JobStateType, JobEvent } from '../redux/types/jobState';
+import { LoadingOutlined, Loading3QuartersOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const STALE_AFTER = 300000;
 
@@ -68,13 +69,13 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
             case JobStateType.QUEUE:
                 return (
                     <span>
-                        <Icon type="loading" spin /> Queued
+                        <LoadingOutlined /> Queued
                     </span>
                 );
             case JobStateType.RUN:
                 return (
                     <span>
-                        <Icon type="loading-3-quarters" spin /> Running
+                        <Loading3QuartersOutlined /> Running
                     </span>
                 );
             case JobStateType.COMPLETE:
@@ -117,7 +118,7 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
                             This job has been <b>queued</b> for running
                         </p>
                         <p>
-                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                            You may inspect the job log by clicking the <InfoCircleOutlined /> button in the leftmost column.
                         </p>
                     </div>
                 );
@@ -129,7 +130,7 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
                             This job is currently <b>running</b>.
                         </p>
                         <p>
-                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                            You may inspect the job log by clicking the <InfoCircleOutlined /> button in the leftmost column.
                         </p>
                     </div>
                 );
@@ -140,7 +141,7 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
                             This job has <b>completed successfully</b>.
                         </p>
                         <p>
-                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                            You may inspect the job log by clicking the <InfoCircleOutlined /> button in the leftmost column.
                         </p>
                     </div>
                 );
@@ -151,7 +152,7 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
                             This job experienced an <b>error</b>.
                         </p>
                         <p>
-                            You may inspect the error and job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                            You may inspect the error and job log by clicking the <InfoCircleOutlined /> button in the leftmost column.
                         </p>
                     </div>
                 );
@@ -162,7 +163,7 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
                             This job has been <b>canceled</b>.
                         </p>
                         <p>
-                            You may inspect the job log by clicking the <Icon type="info-circle" /> button in the leftmost column.
+                            You may inspect the job log by clicking the <InfoCircleOutlined /> button in the leftmost column.
                         </p>
                     </div>
                 );

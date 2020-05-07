@@ -7,6 +7,7 @@ import { ClickParam } from 'antd/lib/menu';
 import Papa from 'papaparse';
 import ButtonGroup from 'antd/lib/button/button-group';
 import { JobStateType } from '../../redux/types/jobState';
+import { CaretRightOutlined, DownloadOutlined, PauseOutlined } from '@ant-design/icons';
 
 enum PlayState {
     NONE,
@@ -371,10 +372,10 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         return (
             <ButtonGroup >
                 <Tooltip title={playTooltip}>
-                    <Button icon="caret-right" disabled={irrelevant || !this.state.isPaused} onClick={this.onPlayLog.bind(this)} />
+                    <Button icon={<CaretRightOutlined />} disabled={irrelevant || !this.state.isPaused} onClick={this.onPlayLog.bind(this)} />
                 </Tooltip>
                 <Tooltip title={pauseTooltip}>
-                    <Button icon="pause" disabled={irrelevant || this.state.isPaused} onClick={this.onPauseLog.bind(this)} />
+                    <Button icon={<PauseOutlined />} disabled={irrelevant || this.state.isPaused} onClick={this.onPauseLog.bind(this)} />
                 </Tooltip>
             </ButtonGroup>
         );
@@ -393,7 +394,7 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             <div key="toolbar">
                 <ButtonGroup >
                     <Dropdown overlay={menu}>
-                        <Button icon="download"></Button>
+                        <Button icon={<DownloadOutlined />}></Button>
                     </Dropdown>
                 </ButtonGroup>
                 {' '}

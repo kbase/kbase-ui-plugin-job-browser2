@@ -11,6 +11,7 @@ import CancelableRequest, { Task } from '../../lib/CancelableRequest';
 import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
 import { EpochTime } from '../types/base';
 import { UIError } from '../types/error';
+import { SERVICE_TIMEOUT } from '../../constants';
 
 // MY JOBS TAB
 
@@ -126,6 +127,7 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
         const jobBrowserBFF = new JobBrowserBFFClient({
             token,
             url: serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
@@ -485,7 +487,8 @@ export function myJobsCancelJob(jobID: string, timeout: number) {
         // do it
         const client = new JobBrowserBFFClient({
             url: serviceWizardURL,
-            token: userAuthorization.token
+            token: userAuthorization.token,
+            timeout: SERVICE_TIMEOUT
         });
         client
             .cancel_job({

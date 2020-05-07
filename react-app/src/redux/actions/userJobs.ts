@@ -11,6 +11,7 @@ import JobBrowserBFFClient, { QueryJobsParams, FilterSpec } from '../../lib/JobB
 import { EpochTime } from '../types/base';
 import { ComponentLoadingState } from '../store/base';
 import { UIError } from '../types/error';
+import { SERVICE_TIMEOUT } from '../../constants';
 
 // Loading
 export interface UserJobsLoadLoading extends Action<ActionType.USER_JOBS_LOAD_LOADING> {
@@ -120,6 +121,7 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
         const jobBrowserBFF = new JobBrowserBFFClient({
             token,
             url: serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
@@ -456,7 +458,8 @@ export function userJobsCancelJob(jobID: string, timeout: number) {
         // do it
         const client = new JobBrowserBFFClient({
             url: serviceWizardURL,
-            token: userAuthorization.token
+            token: userAuthorization.token,
+            timeout: SERVICE_TIMEOUT
         });
         client
             .cancel_job({

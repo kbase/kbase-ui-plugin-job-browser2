@@ -34,6 +34,7 @@ import { JobContextNarrative } from '../../lib/JobBrowserBFFClient';
 import UILink from '../UILink';
 import Table2, { Column, AsyncProcessState, DataSource, TableConfig } from "../Table";
 import FilterEditor, { JobFilter } from "../FilterEditor";
+import { SearchOutlined, InfoCircleOutlined, CloseOutlined } from "@ant-design/icons";
 
 const CANCEL_TIMEOUT = 10000;
 
@@ -247,8 +248,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.currentQuery = event.target.value;
     }
 
-    onSubmit(event: React.FormEvent) {
-        event.preventDefault();
+    onSubmit(fields: any) {
+        // event.preventDefault();
         this.doSearch(true);
     }
 
@@ -361,11 +362,12 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.doSearch(false);
     }
 
-    doSearch(forceSearch: boolean) {
-        if (typeof this.currentQuery === "undefined") {
-            return;
-        }
+    onReset() {
+        this.offset = 0;
+        this.doSearch(true);
+    }
 
+    doSearch(forceSearch: boolean) {
         const searchExpression: JobsSearchExpression = {
             query: this.currentQuery,
             timeRange: this.state.timeRange,
@@ -490,7 +492,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             }
         }
         return (
-            <Form layout="inline" onSubmit={this.onSubmit.bind(this)}>
+            <Form layout="inline" onFinish={this.onSubmit.bind(this)}>
                 <Form.Item label="Time Range">
                     <Select
                         defaultValue={MyJobs.defaultTimeRangePreset}
@@ -511,14 +513,14 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
                 <Form.Item>
                     <Tooltip title="Clicking this button triggers a search to be run using all of the current search input">
-                        <Button icon="search" type="primary" htmlType="submit" />
+                        <Button icon={<SearchOutlined />} type="primary" htmlType="submit" />
                     </Tooltip>
                 </Form.Item>
 
                 <Form.Item>
                     <Switch
-                        checkedChildren="hide filters"
-                        unCheckedChildren="show filters"
+                        checkedChildren={<span>hide filters</span>}
+                        unCheckedChildren={<span>filters</span>}
                         onChange={this.onToggleFilterArea.bind(this)}
                     />
                 </Form.Item>
@@ -546,7 +548,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         }, () => {
             this.doSearch(false);
         });
-
     }
 
     renderControlBar() {
@@ -595,8 +596,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     cancelText="No"
                 >
                     <Button
-                        icon="close"
-                        type="danger"
+                        icon={<CloseOutlined />}
+                        danger
                         size="small"
                         data-k-b-testhook-button="cancel"
                     />
@@ -620,29 +621,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     currentJobState(job: Job): JobEvent {
         return job.eventHistory[job.eventHistory.length - 1];
     }
-
-    // lastQueueState(job: Job): JobEvent {
-    //     for (let i = job.eventHistory.length - 1; i >= 0; i -= 1) {
-    //         const jobEvent = job.eventHistory[i];
-    //         if (jobEvent.type === JobStateType.QUEUE) {
-    //             return jobEvent;
-    //         }
-    //     }
-    //     // TODO: a better way of ensuring we have the right sequence of events (as defined in types)
-    //     throw new Error('No QUEUE state');
-
-    // }
-
-    // lastRunState(job: Job): JobEvent {
-    //     for (let i = job.eventHistory.length - 1; i >= 0; i -= 1) {
-    //         const jobEvent = job.eventHistory[i];
-    //         if (jobEvent.type === JobStateType.RUN) {
-    //             return jobEvent;
-    //         }
-    //     }
-    //     // TODO: a better way of ensuring we have the right sequence of events (as defined in types)
-    //     throw new Error('No RUN state');
-    // }
 
     lastEventLike(job: Job, type: JobStateType): [JobEvent | null, JobEvent | null] {
         for (let i = job.eventHistory.length - 1; i >= 0; i -= 1) {
@@ -691,7 +669,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                                     e.preventDefault();
                                     this.onClickDetail(job);
                                 }}
-                                icon="info-circle"
+                                icon={<InfoCircleOutlined />}
                             />
                         </Tooltip>
                     );
@@ -759,7 +737,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     } else {
                         return (
                             <Tooltip title={appTitle}>
-                                {appTitle}
+                                <span>{appTitle}</span>
                             </Tooltip>
                         );
                     }
@@ -846,6 +824,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             previousPage={this.onPreviousPage.bind(this)}
             nextPage={this.onNextPage.bind(this)}
             lastPage={this.onLastPage.bind(this)}
+            reset={this.onReset.bind(this)}
             columns={columns}
             noun={{ singular: 'job', plural: 'jobs' }}
             config={this.updateTableConfig.bind(this)} />;
@@ -856,7 +835,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         if (this.props.dataSource.status === AsyncProcessState.SUCCESS ||
             this.props.dataSource.status === AsyncProcessState.REPROCESSING) {
             const newPageCount = Math.ceil(this.props.dataSource.total / config.rowsPerPage);
-            console.log('update table config', config, this.currentPage, newPageCount);
             if (this.currentPage !== null) {
                 if (this.currentPage > newPageCount) {
                     this.currentPage = newPageCount;
@@ -893,37 +871,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             </Modal>
         );
     }
-
-    // renderError(view: MyJobsViewDataError) {
-    //     return (
-    //         <Alert type="error" message={view.error.message} />
-    //     );
-    // }
-
-    // renderSearching(view: MyJobsViewDataSearching) {
-    //     return <React.Fragment>
-    //         <div>{this.renderControlBar()}</div>
-    //         {this.renderJobsTable(view)}
-    //         {this.renderJobDetail()}
-    //     </React.Fragment>;
-    // }
-
-    // renderReady(view: MyJobsViewDataReady) {
-    //     return <React.Fragment>
-    //         <div>{this.renderControlBar()}</div>
-    //         {this.renderJobsTable(view)}
-    //         {this.renderJobDetail()}
-    //     </React.Fragment>;
-    // }
-
-    // renderInitialSearch(view: MyJobsViewDataInitialSearching) {
-    //     return <React.Fragment>
-    //         <div>{this.renderControlBar()}</div>
-    //         <div><Spin tip="Loading...">
-    //             <Alert type="info" message="Loading Initial Data"
-    //                 description="Loading initial jobs..."></Alert></Spin> </div>
-    //     </React.Fragment>;
-    // }
 
     renderView() {
         return <React.Fragment>

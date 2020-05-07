@@ -128,7 +128,7 @@ export default class Monitor extends React.Component<MonitorProps, MonitorState>
             <Switch
                 defaultChecked={this.state.isOpen}
                 checkedChildren="stop polling"
-                unCheckedChildren="poll for updates"
+                unCheckedChildren="poll"
                 onChange={this.onToggleOpen.bind(this)} />
         );
 

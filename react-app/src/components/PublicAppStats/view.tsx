@@ -2,13 +2,15 @@ import React from 'react';
 import { } from '../../redux/store';
 import { Table, Form, Progress, Input, Button, Tooltip, Spin, Alert } from 'antd';
 import { NiceTimeDuration } from '@kbase/ui-components';
-import { PaginationConfig, SorterResult } from 'antd/lib/table';
 import './style.css';
 
-import { PublicAppStatsViewData, PublicAppStatsQuery, PublicAppStatsViewDataSearched, PublicAppStatsViewDataSearching, PublicAppStatsViewDataError } from '../../redux/store/PublicAppStats';
+import {
+    PublicAppStatsViewData, PublicAppStatsQuery, PublicAppStatsViewDataSearched, PublicAppStatsViewDataSearching, PublicAppStatsViewDataError
+} from '../../redux/store/PublicAppStats';
 import { AppStat, SearchState } from '../../redux/store/base';
 
 import UILink from '../UILink';
+import { SearchOutlined } from '@ant-design/icons';
 
 
 export interface PublicAppStatsProps {
@@ -33,8 +35,8 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
             query: this.currentQuery
         });
     }
-    onSubmitSearch(event: React.FormEvent) {
-        event.preventDefault();
+    onSubmitSearch(fields: any) {
+        // event.preventDefault();
         this.props.onSearch({
             query: this.currentQuery
         });
@@ -46,7 +48,7 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
 
     renderControlBar() {
         return (
-            <Form layout="inline" onSubmit={this.onSubmitSearch.bind(this)}>
+            <Form layout="inline" onFinish={this.onSubmitSearch.bind(this)}>
                 <Form.Item>
                     <Input
                         defaultValue={this.currentQuery}
@@ -56,13 +58,13 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                     />
                 </Form.Item>
                 <Form.Item>
-                    <Button icon="search" type="primary" htmlType="submit" />
+                    <Button icon={<SearchOutlined />} type="primary" htmlType="submit" />
                 </Form.Item>
             </Form>
         );
     }
 
-    onTableChange(pagination: PaginationConfig, filters: any, sorter: SorterResult<AppStat>) { }
+    // onTableChange(pagination: PaginationConfig, filters: any, sorter: SorterResult<AppStat>) { }
 
     renderAppStatsTable(view: PublicAppStatsViewDataSearched | PublicAppStatsViewDataSearching) {
         return (
@@ -72,12 +74,12 @@ export default class PublicAppStats extends React.Component<PublicAppStatsProps,
                 rowKey={(stat: AppStat) => {
                     return stat.appId;
                 }}
-                pagination={{ position: 'bottom', showSizeChanger: true }}
+                pagination={{ position: ['bottomCenter'], showSizeChanger: true }}
                 // pagination={false}
                 // scroll={{ y: '100%' }}
                 size="small"
                 className="PreciseTable ScrollingFlexTable"
-                onChange={this.onTableChange}
+            // onChange={this.onTableChange.bind(this)}
             >
                 <Table.Column
                     title="Module"

@@ -10,16 +10,12 @@ export interface OwnProps {
 }
 
 interface StateProps {
-    // view: MyJobsView;
     token: string;
     username: string;
     serviceWizardURL: string;
 }
 
 interface DispatchProps {
-    // search: (searchExpression: JobsSearchExpression) => void;
-    // cancelJob: (jobID: string, timeout: number) => void;
-    // refreshSearch: () => void;
 }
 
 function mapStateToProps(state: StoreState, props: OwnProps): StateProps {

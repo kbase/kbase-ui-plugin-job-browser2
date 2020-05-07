@@ -316,67 +316,25 @@ export interface CancelJobResult {
 }
 
 export default class JobBrowserBFFClient extends DynamicServiceClient {
-    static module: string = 'JobBrowserBFF';
+    module: string = 'JobBrowserBFF';
 
     async is_admin(): Promise<IsAdminResult> {
-        const result = await this.callFunc<[], [IsAdminResult]>('is_admin', []);
-        return result[0];
+        return await this.callFuncNoParams<IsAdminResult>('is_admin');
     }
 
     async query_jobs(params: QueryJobsParams): Promise<QueryJobsResult> {
-        const result = await this.callFunc<[QueryJobsParams], [QueryJobsResult]>('query_jobs', [
-            params
-        ]);
-        return result[0];
+        return this.callFunc<QueryJobsParams, QueryJobsResult>('query_jobs', params);
     }
 
     async get_jobs(params: GetJobsParams): Promise<GetJobsResult> {
-        const result = await this.callFunc<[GetJobsParams], [GetJobsResult]>('get_jobs', [
-            params
-        ]);
-        return result[0];
+        return this.callFunc<GetJobsParams, GetJobsResult>('get_jobs', params);
     }
 
     async get_job_log(params: GetJobLogParams): Promise<GetJobLogResult> {
-        const result = await this.callFunc<[GetJobLogParams], [GetJobLogResult]>('get_job_log', [
-            params
-        ]);
-        return result[0];
+        return await this.callFunc<GetJobLogParams, GetJobLogResult>('get_job_log', params);
     }
 
     async cancel_job(params: CancelJobParams): Promise<CancelJobResult> {
-        const result = await this.callFunc<[CancelJobParams], [CancelJobResult]>('cancel_job', [
-            params
-        ]);
-        return result[0];
+        return await this.callFunc<CancelJobParams, CancelJobResult>('cancel_job', params);
     }
-
-    // async getJobs({ epoch_range, user_ids }: GetJobsParam): Promise<GetJobsResult> {
-    //     const result = await this.callFunc<[GetJobsParam], [GetJobsResult]>('get_jobs', [
-    //         {
-    //             epoch_range,
-    //             user_ids
-    //         }
-    //     ]);
-    //     return result[0];
-    // }
-
-    // async getJob({ job_id }: GetJobParam): Promise<GetJobResult> {
-    //     const result = await this.callFunc<[GetJobParam], [GetJobResult]>('get_job', [
-    //         {
-    //             job_id
-    //         }
-    //     ]);
-    //     return result[0];
-    // }
-
-    // async getAppMetrics({ epoch_range, user_ids }: GetAppMetricsParam): Promise<GetAppMetricsResult> {
-    //     const result = await this.callFunc<[GetAppMetricsParam], [GetAppMetricsResult]>('get_job', [
-    //         {
-    //             epoch_range,
-    //             user_ids
-    //         }
-    //     ]);
-    //     return result[0];
-    // }
 }

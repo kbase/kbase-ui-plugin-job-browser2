@@ -43,6 +43,9 @@ export default class AppSelect extends React.Component<AppSelectProps, AppSelect
             onChange={this.onChange.bind(this)}
             defaultValue={defaultValue}
             filterOption={(filterTerm, option) => {
+                if (!option) {
+                    return true;
+                }
                 if (!option.props.children) {
                     return true;
                 }

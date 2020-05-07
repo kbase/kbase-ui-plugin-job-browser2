@@ -1,11 +1,14 @@
 import React from 'react';
 import View from './view';
+import { message } from 'antd';
+
 import { Job, JobsSearchExpression } from '../../redux/store';
 import { DataSource, AsyncProcessState } from '../Table';
 import MyJobsRequest from './MyJobsRequest';
 import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
 import { JobStateType } from '../../redux/types/jobState';
-import { message } from 'antd';
+import { SERVICE_TIMEOUT } from '../../constants';
+import { JSONRPC20Exception } from '../../lib/comm/JSONRPC20/JSONRPC20';
 
 export interface DataProps {
     token: string;
@@ -53,30 +56,56 @@ export default class Data extends React.Component<DataProps, DataState> {
             searchExpression
         });
 
-        const { jobs, foundCount, totalCount } = await task.promise;
-        if (task.isCanceled) {
-            // just do nothing
-            return;
-        }
-        // const jobsFetchedAt = new Date().getTime();
-        myJobsSearchRequests.done(task);
-
-        const { limit, offset } = searchExpression;
-        const page = Math.ceil((offset + limit) / limit);
-        const pageCount = Math.ceil(totalCount / limit);
-
-        this.setState({
-            dataSource: {
-                status: AsyncProcessState.SUCCESS,
-                data: jobs,
-                count: foundCount,
-                total: totalCount,
-                limit,
-                offset,
-                page,
-                pageCount
+        try {
+            const { jobs, foundCount, totalCount } = await task.promise;
+            if (task.isCanceled) {
+                // just do nothing
+                return;
             }
-        });
+
+            myJobsSearchRequests.done(task);
+
+            const { limit, offset } = searchExpression;
+            const page = Math.ceil((offset + limit) / limit);
+            const pageCount = Math.ceil(totalCount / limit);
+
+            this.setState({
+                dataSource: {
+                    status: AsyncProcessState.SUCCESS,
+                    data: jobs,
+                    count: foundCount,
+                    total: totalCount,
+                    limit,
+                    offset,
+                    page,
+                    pageCount
+                }
+            });
+        } catch (ex) {
+            if (ex instanceof JSONRPC20Exception) {
+                console.error('error', ex.error);
+                this.setState({
+                    dataSource: {
+                        status: AsyncProcessState.ERROR,
+                        error: {
+                            code: ex.error.code,
+                            message: ex.error.message,
+                            data: ex.error.data
+                        }
+                    }
+                });
+            } else {
+                this.setState({
+                    dataSource: {
+                        status: AsyncProcessState.ERROR,
+                        error: {
+                            code: 0,
+                            message: ex.message
+                        }
+                    }
+                });
+            }
+        }
     }
 
     search(searchExpression: JobsSearchExpression) {
@@ -88,7 +117,8 @@ export default class Data extends React.Component<DataProps, DataState> {
         // do it
         const client = new JobBrowserBFFClient({
             url: this.props.serviceWizardURL,
-            token: this.props.token
+            token: this.props.token,
+            timeout: SERVICE_TIMEOUT
         });
         client
             .cancel_job({

@@ -5,6 +5,7 @@ import { Spin, Alert } from 'antd';
 import { serviceJobToUIJob } from '../../redux/actions/utils';
 import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
 import { JobEvent, JobStateType } from '../../redux/types/jobState';
+import { SERVICE_TIMEOUT } from '../../constants';
 
 const POLLING_INTERVAL = 5000;
 
@@ -90,6 +91,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
         const jobs = await jobBrowserBFF.get_jobs({
@@ -107,6 +109,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,
+            timeout: SERVICE_TIMEOUT
         });
 
 

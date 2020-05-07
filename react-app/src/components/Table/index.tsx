@@ -1,7 +1,8 @@
 import React, { ReactNode } from 'react';
 import './Table.css';
-import { Alert, Spin, Empty } from 'antd';
+import { Alert, Spin, Empty, Modal, Button } from 'antd';
 import TableNav, { Term } from './TableNav';
+import { JSONValue, isJSONObject, isJSONArray } from '../../redux/types/json';
 
 const ROW_HEIGHT = 50;
 // const HEADER_HEIGHT = 50;
@@ -52,7 +53,11 @@ export interface DataSourceReprocessing<D> extends DataSourceBase {
 
 export interface DataSourceError extends DataSourceBase {
     status: AsyncProcessState.ERROR,
-    error: DataSourceException;
+    error: {
+        code: number,
+        message: string,
+        data?: JSONValue;
+    };
 }
 
 export type DataSource<D> =
@@ -62,7 +67,7 @@ export type DataSource<D> =
     DataSourceReprocessing<D> |
     DataSourceError;
 
-export class DataSourceException extends Error { }
+// export class DataSourceException extends Error { }
 
 export interface Column<D> {
     id: string;
@@ -81,6 +86,7 @@ export interface TableProps<D> {
     columns: Array<Column<D>>;
     noun: Term;
     config: (tableConfig: TableConfig) => void;
+    reset: () => void;
     firstPage: () => void;
     previousPage: () => void;
     nextPage: () => void;
@@ -113,6 +119,7 @@ export interface TableStateOk {
 
 export interface Table2State {
     status: TableStatus;
+    showError: boolean;
 }
 
 export default class Table2<D> extends React.Component<TableProps<D>, Table2State> {
@@ -124,7 +131,8 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
         this.bodyRef = React.createRef();
         this.resizing = false;
         this.state = {
-            status: TableStatus.NONE
+            status: TableStatus.NONE,
+            showError: false
         };
     }
 
@@ -308,9 +316,176 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
         });
     }
 
-    renderError(dataSource: DataSourceError) {
-        return <Alert type="error" message={dataSource.error.message} />;
+    renderJSON(value: JSONValue) {
+        if (isJSONObject(value)) {
+            const rows = Object.entries(value).map(([key, value]) => {
+                return <tr key={key}>
+                    <th>{key}</th>
+                    <td><div className="JSON">{this.renderJSON(value)}</div></td>
+                </tr>;
+            });
+            return <table className="JSONObject">
+                <tbody>{rows}</tbody>
+            </table>;
+        } else if (isJSONArray(value)) {
+            const rows = value.map((element, index) => {
+                return <div key={index}>{this.renderJSON(element)}</div>;
+            });
+            return <div className="JSONArray">{rows}</div>;
+        } else {
+            switch (typeof value) {
+                case 'string':
+                    return <span className="JSONString">{value}</span>;
+                case 'boolean':
+                    const booleanString = value ? "true" : "false";
+                    return <span className="JSONBoolean">{booleanString}</span>;
+                case 'number':
+                    return <span className="JSONNumber">{String(value)}</span>;
+                case 'object':
+                    if (value === null) {
+                        return <span className="JSONNull">{String(value)}</span>;
+                    } else {
+                        throw new Error('Unsupported json object type: ' + (typeof value));
+                    }
+                default:
+                    throw new Error('Unsupported json value type: ' + (typeof value));
+            }
+        }
     }
+
+    renderError(dataSource: DataSourceError) {
+        // const showDetail = () => {
+        //     let content;
+        //     if (dataSource.error.data) {
+        //         content = <div>
+        //             <div>Code: {dataSource.error.code}</div>
+        //             <div>Message: {dataSource.error.message}</div>
+        //             <div>Data:</div>
+        //             <div
+        //                 className="JSON"
+        //                 style={{
+        //                     maxHeight: '20em',
+        //                     overflow: 'auto'
+        //                 }}>
+        //                 {this.renderJSON(dataSource.error.data)}
+        //             </div>
+        //         </div>;
+        //     } else {
+        //         content = 'n/a';
+        //     }
+        //     Modal.error({
+        //         title: 'Error Details',
+        //         style: {
+        //             maxWidth: '50em',
+        //             top: '20px',
+        //             flex: '1 1 0px'
+        //         },
+        //         bodyStyle: {
+        //             height: '80%'
+        //         },
+        //         width: '50em',
+        //         onOk: () => {
+        //             this.setState({
+        //                 showError: false
+        //             });
+        //         },
+        //         content
+        //     });
+        // };
+        const showDetail = () => {
+            this.setState({
+                showError: true
+            });
+        };
+        return <>
+            <Alert
+                type="error"
+                showIcon
+                message={`${dataSource.error.message} (${dataSource.error.code})`}
+                description={
+                    <div>
+                        <Button onClick={showDetail}>
+                            Detail
+                        </Button>
+                        <Button onClick={this.props.reset}>
+                            Reset
+                        </Button>
+                    </div>
+                }
+            />
+            {this.renderErrorModal(dataSource)}
+        </>;
+    }
+
+    renderErrorModal(dataSource: DataSourceError) {
+        const description = <div style={{
+            flex: '1 1 0px',
+            display: 'flex',
+            flexDirection: 'column'
+        }}>
+            <div>Code: {dataSource.error.code}</div>
+            <div>Message: {dataSource.error.message}</div>
+            <div>Data:</div>
+            <div
+                className="JSON"
+                style={{
+                    overflow: 'auto',
+                    flex: '1 1 0px'
+                }}>
+                {dataSource.error.data && this.renderJSON(dataSource.error.data)}
+            </div>
+        </div>;
+        return <Modal
+            title="Error Details"
+            visible={this.state.showError}
+            className="FullHeightModal"
+            onCancel={() => {
+                this.setState({
+                    showError: false
+                });
+            }}
+            style={{
+                maxWidth: '50em',
+                top: '20px',
+                bottom: '20px',
+                flex: '1 1 0px',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+            width="50em"
+            bodyStyle={{
+                flex: '1 1 0px',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+
+            footer={[
+                <Button key="done"
+                    onClick={() => {
+                        this.setState({
+                            showError: false
+                        });
+                    }}>
+                    Done
+                </Button>,
+                <Button key="reset"
+                    onClick={() => {
+                        this.setState({
+                            showError: false
+                        });
+                        this.props.reset();
+                    }}>
+                    Reset
+                </Button>
+            ]}
+        >
+            {description}
+        </Modal>;
+    }
+
+    /*
+    
+    */
 
     renderLoading() {
         // return <Spin tip="Loading data...">
@@ -382,7 +557,7 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
                         noun={this.props.noun}
                     />;
                 case AsyncProcessState.ERROR:
-                    return this.renderError(this.props.dataSource);
+                    return <TableNav state={{ enabled: false }} noun={this.props.noun} />;
             }
         } else {
             return <TableNav state={{ enabled: false }} noun={this.props.noun} />;

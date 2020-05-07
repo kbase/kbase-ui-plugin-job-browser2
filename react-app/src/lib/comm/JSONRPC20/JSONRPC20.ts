@@ -1,10 +1,10 @@
 import HTTPClient, {
-    GeneralError,
-    RequestOptions, HTTPHeader
-} from './http/HTTPClient';
+    GeneralError, RequestOptions, HTTPHeader
+} from '../http/HTTPClient';
 
 import { v4 as uuid } from 'uuid';
-import { JSONValue } from '../../redux/types/json';
+import { JSONValue, JSONObject, JSONArray } from '../../../redux/types/json';
+
 
 export interface JSONRPCRequestOptions {
     func: string,
@@ -60,23 +60,22 @@ export interface JSONRPCClientParams {
 }
 
 export interface JSONPayload {
-    version: string;
+    jsonrpc: string;
     method: string;
     id: string;
-    params: Array<JSONValue>;
+    params?: JSONObject | JSONArray;
 }
 
-export interface JSONRPC11Error {
-    name: string;
+export interface JSONRPC20Error {
     code: number;
     message: string;
-    error: JSONValue;
+    data: JSONValue;
 }
 
-export type JSONRPCError = JSONRPC11Error;
+export type JSONRPCError = JSONRPC20Error;
 
-export class JSONRPC11Exception extends Error {
-    error: JSONRPC11Error;
+export class JSONRPC20Exception extends Error {
+    error: JSONRPC20Error;
     constructor(error: JSONRPCError) {
         super(error.message);
         this.error = error;
@@ -95,6 +94,11 @@ export interface JSONRPCResponseError {
 
 export type JSONRPCResponse = JSONRPCResponseResult | JSONRPCResponseError;
 
+export interface CallMethodOptions {
+    params?: JSONRPCParam;
+    timeout?: number;
+}
+
 export class JSONRPCClient {
     url: string;
     timeout: number;
@@ -109,25 +113,17 @@ export class JSONRPCClient {
         return (error instanceof GeneralError);
     }
 
-
-    protected makePayload(method: string, params: Array<JSONRPCParam>): JSONPayload {
+    protected makePayload(method: string, params?: JSONRPCParam): JSONPayload {
         return {
-            version: '1.1',
+            jsonrpc: '2.0',
             method,
-            id: uuid(),
-            params: params
+            params,
+            id: uuid()
         };
     }
 
-    async callMethod(method: string, params: Array<JSONRPCParam>, { timeout }: { timeout?: number; } = {}): Promise<Array<JSONValue>> {
+    async callMethod(method: string, { params, timeout }: CallMethodOptions = {}): Promise<JSONValue> {
         const payload = this.makePayload(method, params);
-        // const rpc: JSONRPCRequest = {
-        //     version: '1.1',
-        //     method: method,
-        //     id: uuid.v4(),
-        //     params: [params],
-        // };
-
         const header: HTTPHeader = new HTTPHeader();
         header.setHeader('content-type', 'application/json');
         header.setHeader('accept', 'application/json');
@@ -150,40 +146,27 @@ export class JSONRPCClient {
                 try {
                     result = (JSON.parse(httpResponse.response) as unknown) as JSONRPCResponse;
                 } catch (ex) {
-                    throw new JSONRPC11Exception({
-                        name: 'parse error',
+                    throw new JSONRPC20Exception({
                         code: 100,
                         message: 'The response from the service could not be parsed',
-                        error: {
+                        data: {
                             originalMessage: ex.message,
                             responseText: httpResponse.response
                         }
                     });
                 }
 
-
                 if (result.hasOwnProperty('error')) {
                     const errorResult = (result as unknown) as JSONRPCResponseError;
-                    throw new JSONRPC11Exception({
-                        name: errorResult.error.name,
+                    throw new JSONRPC20Exception({
                         code: errorResult.error.code,
                         message: errorResult.error.message,
-                        error: errorResult.error.error
+                        data: errorResult.error.data
                     });
                 }
 
-                // if (!(result instanceof Array)) {
-                //     throw new JSONRPC11Exception({
-                //         name: 'params not array',
-                //         code: 100,
-                //         message: 'Parameter is not an array',
-                //         error: {}
-                //     });
-                // }
                 const rpcResponse = (result as unknown) as JSONRPCResponseResult;
                 return rpcResponse.result;
-                // let x: T = ({} as unknown) as T;
-                // return x;
             });
         // .then((response) => {
         //     let result: JSONValue;

@@ -44,6 +44,9 @@ export default class AppModuleSelect extends React.Component<AppModuleSelectProp
             allowClear
             defaultValue={defaultValue}
             filterOption={(filterTerm, option) => {
+                if (!option) {
+                    return true;
+                }
                 if (!option.props.children) {
                     return true;
                 }

@@ -7,6 +7,7 @@ import { SearchState } from '../../redux/store/base';
 import { UserRunSummaryStat, UserRunSummaryQuery, UserRunSummaryViewData, UserRunSummaryViewDataError, UserRunSummaryViewDataSearched, UserRunSummaryViewDataSearching } from '../../redux/store/UserRunSummary';
 
 import UILink from '../UILink';
+import { SearchOutlined } from '@ant-design/icons';
 
 
 export interface UserRunSummaryProps {
@@ -29,8 +30,8 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
     componentDidMount() {
         this.props.search(this.currentQuery);
     }
-    onSubmitSearch(event: React.FormEvent) {
-        event.preventDefault();
+    onSubmitSearch(fields: any) {
+        // event.preventDefault();
         this.props.search(this.currentQuery);
     }
     onChangeQuery(event: React.ChangeEvent<HTMLInputElement>) {
@@ -38,7 +39,7 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
     }
     renderControlBar() {
         return (
-            <Form layout="inline" onSubmit={this.onSubmitSearch.bind(this)}>
+            <Form layout="inline" onFinish={this.onSubmitSearch.bind(this)}>
                 <Form.Item>
                     <Input
                         defaultValue={this.currentQuery.query}
@@ -48,7 +49,7 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                     />
                 </Form.Item>
                 <Form.Item>
-                    <Button icon="search" type="primary" htmlType="submit" />
+                    <Button icon={<SearchOutlined />} type="primary" htmlType="submit" />
                 </Form.Item>
             </Form>
         );
@@ -66,7 +67,7 @@ export default class UserRunSummary extends React.Component<UserRunSummaryProps,
                         stat.functionName
                     ].join(':');
                 }}
-                pagination={{ position: 'bottom', showSizeChanger: true }}
+                pagination={{ position: ['bottomCenter'], showSizeChanger: true }}
                 // pagination={false}
                 // scroll={{ y: '100%' }}
                 size="small"
