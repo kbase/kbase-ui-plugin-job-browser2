@@ -7,11 +7,11 @@
 // 3rd party imports
 import React from "react";
 import {
-    Form, Button, Select, DatePicker, Popconfirm, Tooltip,
+    Form, Button, Select, Popconfirm, Tooltip,
     Modal, Switch
 } from 'antd';
 
-import moment, { Moment } from 'moment';
+// import moment, { Moment } from 'moment';
 
 // project imports
 import {
@@ -35,6 +35,9 @@ import UILink from '../UILink';
 import Table2, { Column, AsyncProcessState, DataSource, TableConfig } from "../Table";
 import FilterEditor, { JobFilter } from "../FilterEditor";
 import { SearchOutlined, InfoCircleOutlined, CloseOutlined } from "@ant-design/icons";
+
+import dayjs from 'dayjs';
+import DatePicker from "../DatePicker";
 
 const CANCEL_TIMEOUT = 10000;
 
@@ -94,7 +97,7 @@ type JobStatusFilterKey = "queued" | "running" | "canceled" | "success" | "error
 /**
  * Props for the MyJobs component
  */
-export interface MyJobsProps {
+export interface AdminJobsProps {
     dataSource: DataSource<Job>;
     // view: MyJobsView;
     /** The list of jobs to display */
@@ -124,7 +127,7 @@ export interface MyJobsProps {
 /**
  * State for the MyJobs component
  */
-interface MyJobsState {
+interface AdminJobsState {
     /** Flag to show the date controls */
     showDates: boolean;
     /** Contains the current selection of job statuses in the checkbox control */
@@ -149,7 +152,7 @@ interface MyJobsState {
  * support for free text searching, filtering by job state, and date ranges.
  *
  */
-export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
+export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobsState> {
     currentQuery?: string;
     offset: number;
     limit: number;
@@ -161,7 +164,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     pubsub: PubSub;
 
-    constructor(props: MyJobsProps) {
+    constructor(props: AdminJobsProps) {
         super(props);
 
         this.currentQuery = "";
@@ -179,7 +182,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             filter: {
                 status: ['create', 'queue', 'run', 'terminate', 'complete', 'error']
             },
-            timeRange: { kind: 'preset', preset: MyJobs.defaultTimeRangePreset },
+            timeRange: { kind: 'preset', preset: AdminJobs.defaultTimeRangePreset },
             isFilterOpen: false,
             selectedJob: null,
             currentSort: null
@@ -381,7 +384,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return false;
     }
 
-    onRangeFromChange(date: Moment | null, dateString: string) {
+    onRangeFromChange(date: dayjs.Dayjs | null, dateString: string) {
         // TODO: if the range ends up null (how?), should it default
         // to the previously selected preset? For now, just go back to lastHourl.
         if (date === null) {
@@ -421,7 +424,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         });
     }
 
-    onRangeToChange(date: Moment | null, dateString: string) {
+    onRangeToChange(date: dayjs.Dayjs | null, dateString: string) {
         // TODO: if the range ends up null (how?), should it default
         // to the previously selected preset? For now, just go back to lastHourl.
         if (date === null) {
@@ -471,7 +474,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             <DatePicker
                                 showTime={true}
                                 allowClear={false}
-                                value={moment(timeRange.start)}
+                                value={dayjs(timeRange.start)}
                                 onChange={this.onRangeFromChange.bind(this)}
                             />
                         </Form.Item>
@@ -479,7 +482,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             <DatePicker
                                 showTime={true}
                                 allowClear={false}
-                                value={moment(timeRange.end)}
+                                value={dayjs(timeRange.end)}
                                 onChange={this.onRangeToChange.bind(this)}
                             />
                         </Form.Item>
@@ -491,7 +494,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             <Form layout="inline" onFinish={this.onSubmit.bind(this)}>
                 <Form.Item label="Time Range">
                     <Select
-                        defaultValue={MyJobs.defaultTimeRangePreset}
+                        defaultValue={AdminJobs.defaultTimeRangePreset}
                         onChange={this.onChangeTimeRange.bind(this)}
                         dropdownMatchSelectWidth={true}
                         style={{ width: "11em" }}
@@ -544,7 +547,6 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         }, () => {
             this.doSearch(false);
         });
-
     }
 
     renderControlBar() {
@@ -558,8 +560,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         if (this.state.isFilterOpen) {
             filterRow = (
                 <div style={filterRowStyle}>
-                    <div className="MyJobs-filterPanel">
-                        <div className="MyJobs-filterArea">
+                    <div className="AdminJobs-filterPanel">
+                        <div className="AdminJobs-filterArea">
                             <FilterEditor
                                 filter={this.state.filter}
                                 onChange={this.onFilterChange.bind(this)} />
@@ -935,7 +937,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         //         return '';
         // }
         return <React.Fragment>
-            <div>{this.renderControlBar()}</div>
+            <div className="-controlBar">{this.renderControlBar()}</div>
             {this.renderJobsTable()}
             {this.renderJobDetail()}
         </React.Fragment>;
@@ -943,7 +945,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     render() {
         return (
-            <div data-k-b-testhook-component="MyJobs" className="MyJobs">
+            <div data-k-b-testhook-component="AdminJobs" className="AdminJobs">
                 {this.renderView()}
             </div>
         );
