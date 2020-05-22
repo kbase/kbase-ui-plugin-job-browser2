@@ -14,8 +14,7 @@ const POLLING_WATCH_INTERVAL = 1000;
 
 const LIMIT = 10000;
 // TODO: get from somewhere else... 
-const TIMEOUT = 10000;
-// A simple state wrapper for job logs.
+
 
 export type JobLog = Array<JobLogEntry>;
 
@@ -128,7 +127,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             // TODO: admin??
             admin: this.props.admin,
             // TODO: from config
-            timeout: 10000
+            timeout: SERVICE_TIMEOUT
         });
 
         return serviceJobToUIJob(jobs.jobs[0], 'UNKNOWN');
@@ -143,7 +142,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
 
         const jobLog = await jobBrowserBFF.get_job_log({
             job_id: this.props.jobID,
-            offset, limit, timeout: TIMEOUT,
+            offset, limit, timeout: SERVICE_TIMEOUT,
             admin: this.props.admin
         });
 

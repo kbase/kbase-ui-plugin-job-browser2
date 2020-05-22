@@ -1,1 +1,1 @@
-export const SERVICE_TIMEOUT = 10000;
+export const SERVICE_TIMEOUT = 60000;

@@ -4,8 +4,6 @@ import JobBrowserBFFClient, { QueryJobsParams } from "../../lib/JobBrowserBFFCli
 import { extractTimeRange, serviceJobToUIJob } from "../../redux/actions/utils";
 import { SERVICE_TIMEOUT } from "../../constants";
 
-
-
 interface UserJobsParam {
     token: string,
     searchExpression: JobsSearchExpression;
@@ -36,7 +34,7 @@ export default class UserJobsRequest extends CancelableRequest<UserJobsParam, Us
             }, // TODO: really handle sort
             offset: searchExpression.offset,
             limit: searchExpression.limit,
-            timeout: 10000,
+            timeout: SERVICE_TIMEOUT,
             filter: searchExpression.filter,
             admin: true
         };

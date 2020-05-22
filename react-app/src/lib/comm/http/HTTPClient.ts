@@ -1,7 +1,5 @@
 import { HTTPQuery, QueryMap } from './HTTPUtils';
 
-const DEFAULT_TIMEOUT = 10000;
-
 // import * as Bluebird from 'bluebird';
 
 // Bluebird.config({
@@ -194,7 +192,7 @@ export interface StringResponse extends Response<string> {
 }
 
 export interface HTTPClientOptions {
-    timeout?: number;
+    timeout: number;
 }
 
 export default class HTTPClient {
@@ -204,7 +202,7 @@ export default class HTTPClient {
     }
     async request<T extends ResponseType>(options: RequestOptions): Promise<Response<T>> {
         let startTime = new Date().getTime();
-        const timeout = options.timeout || this.options?.timeout || DEFAULT_TIMEOUT;
+        const timeout = options.timeout;
         return new Promise((resolve, reject) => {
             const xhr: XMLHttpRequest = new XMLHttpRequest();
             xhr.onload = () => {

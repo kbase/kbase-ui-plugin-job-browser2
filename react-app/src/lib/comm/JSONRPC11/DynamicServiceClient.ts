@@ -24,13 +24,11 @@ export interface DynamicServiceClientParams {
     token: string;
     url: string;
     version?: string;
-    timeout?: number;
+    timeout: number;
     rpcContext?: any;
     urlBaseOverride?: string;
     urlBase?: string;
 }
-
-const DEFAULT_TIMEOUT = 10000;
 
 export interface ServiceCallResult<T> {
     version: '1.1',
@@ -51,7 +49,7 @@ export class DynamicServiceClient {
     constructor({ token, url, version, timeout, rpcContext, urlBaseOverride }: DynamicServiceClientParams) {
         // Establish an auth object which has properties token and user_id.
         this.token = token;
-        this.timeout = timeout || DEFAULT_TIMEOUT;
+        this.timeout = timeout;
         this.rpcContext = rpcContext || null;
         this.urlBaseOverride = urlBaseOverride || null;
 

@@ -146,7 +146,7 @@ class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
             }, // TODO: really handle sort
             offset: searchExpression.offset,
             limit: searchExpression.limit,
-            timeout: 10000,
+            timeout: SERVICE_TIMEOUT,
             admin: true,
             filter
         };

@@ -38,8 +38,7 @@ import { SearchOutlined, InfoCircleOutlined, CloseOutlined } from "@ant-design/i
 
 import dayjs from 'dayjs';
 import DatePicker from "../DatePicker";
-
-const CANCEL_TIMEOUT = 10000;
+import { SERVICE_TIMEOUT } from "../../constants";
 
 /**
  * This version of the job status defines the set of strings that may be used
@@ -579,7 +578,7 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
     }
 
     onJobCancel(job: Job) {
-        this.props.cancelJob(job.id, CANCEL_TIMEOUT);
+        this.props.cancelJob(job.id, SERVICE_TIMEOUT);
     }
 
     renderJobAction(job: Job) {

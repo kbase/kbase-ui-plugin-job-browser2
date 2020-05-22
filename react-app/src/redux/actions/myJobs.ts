@@ -150,7 +150,7 @@ class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
             }, // TODO: really handle sort
             offset: searchExpression.offset,
             limit: searchExpression.limit,
-            timeout: 10000,
+            timeout: SERVICE_TIMEOUT,
             // search: {
             //     terms: searchTerms
             // },
