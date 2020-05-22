@@ -3,6 +3,7 @@ import './Table.css';
 import { Alert, Spin, Empty, Modal, Button } from 'antd';
 import TableNav, { Term } from './TableNav';
 import { JSONValue, isJSONObject, isJSONArray } from '../../redux/types/json';
+import { UIError } from '../../redux/types/error';
 
 const ROW_HEIGHT = 50;
 // const HEADER_HEIGHT = 50;
@@ -16,6 +17,40 @@ export enum AsyncProcessState {
     SUCCESS = "SUCCESS",
     ERROR = "ERROR"
 }
+
+// Simpler Data Source - AsyncProcess
+
+export interface AsyncProcessBase {
+    status: AsyncProcessState;
+}
+
+export interface AsyncProcessNone {
+    status: AsyncProcessState.NONE;
+}
+
+export interface AsyncProcessProcessing {
+    status: AsyncProcessState.PROCESSING;
+}
+
+export interface AsyncProcessSuccess<T> {
+    status: AsyncProcessState.SUCCESS;
+    result: T;
+}
+
+export interface AsyncProcessError {
+    status: AsyncProcessState.ERROR;
+    error: UIError;
+}
+
+export interface AsyncProcessReprocessing<T> {
+    status: AsyncProcessState.REPROCESSING;
+    result: T;
+}
+
+export type AsyncProcess<T> = AsyncProcessNone | AsyncProcessProcessing | AsyncProcessSuccess<T> |
+    AsyncProcessError | AsyncProcessReprocessing<T>;
+
+// Data Source
 
 export interface DataSourceBase {
     status: AsyncProcessState;

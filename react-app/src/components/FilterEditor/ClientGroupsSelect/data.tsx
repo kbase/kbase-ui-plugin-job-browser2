@@ -4,6 +4,9 @@ import { OptionValue } from '../../../lib/types';
 import { SERVICE_TIMEOUT } from '../../../constants';
 import { ClientGroupSelectProps } from './view';
 import JobBrowserBFFClient from '../../../lib/JobBrowserBFFClient';
+import { AsyncProcessState, AsyncProcess } from '../../Table';
+import { Spin, Alert } from 'antd';
+import { UIError } from '../../../redux/types/error';
 
 /* For Component */
 export interface DataProps {
@@ -15,7 +18,8 @@ export interface DataProps {
 type TheProps = Omit<DataProps & ClientGroupSelectProps, "options">;
 
 interface DataState {
-    options: Array<OptionValue<string>> | null;
+    // options: Array<OptionValue<string>> | null;
+    process: AsyncProcess<Array<OptionValue<string>>>;
 }
 
 export default class Data extends React.Component<TheProps, DataState> {
@@ -23,7 +27,11 @@ export default class Data extends React.Component<TheProps, DataState> {
     constructor(props: TheProps) {
         super(props);
         this.state = {
-            options: null
+            process: {
+                status: AsyncProcessState.NONE
+            }
+            // options: null,
+            // status: AsyncProcessState.NONE
         };
         this.stopped = false;
     }
@@ -33,10 +41,26 @@ export default class Data extends React.Component<TheProps, DataState> {
     }
 
     async componentDidMount() {
-        const options = await this.fetchOptions();
-        if (!this.stopped) {
+        try {
+            const options = await this.fetchOptions();
+            if (!this.stopped) {
+                this.setState({
+                    process: {
+                        status: AsyncProcessState.SUCCESS,
+                        result: options
+                    }
+                });
+            }
+        } catch (ex) {
+            // TOODO: catch and propagate JSONRPC errors
             this.setState({
-                options
+                process: {
+                    status: AsyncProcessState.ERROR,
+                    error: {
+                        code: 0,
+                        message: ex.message
+                    }
+                }
             });
         }
     }
@@ -62,16 +86,27 @@ export default class Data extends React.Component<TheProps, DataState> {
         return clientGroupOptions;
     }
 
-    render() {
-        if (this.state.options) {
-            return <View
-                onChange={this.props.onChange}
-                options={this.state.options}
-                defaultValue={this.props.defaultValue}
-            />;
-        } else {
-            return "loading...";
-        }
+    renderLoading() {
+        return <Spin />;
+    }
 
+    renderError(error: UIError) {
+        return <Alert type="error" message={error.message} />;
+    }
+
+    render() {
+        switch (this.state.process.status) {
+            case AsyncProcessState.NONE:
+            case AsyncProcessState.PROCESSING:
+                return this.renderLoading();
+            case AsyncProcessState.SUCCESS:
+                return <View
+                    onChange={this.props.onChange}
+                    options={this.state.process.result}
+                    defaultValue={this.props.defaultValue}
+                />;
+            case AsyncProcessState.ERROR:
+                return this.renderError(this.state.process.error);
+        }
     }
 }
