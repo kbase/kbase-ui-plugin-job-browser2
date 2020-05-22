@@ -19,7 +19,7 @@ interface DataState {
     dataSource: DataSource<Job>;
 }
 
-const myJobsSearchRequests = new JobsRequest();
+const jobsSearchRequests = new JobsRequest();
 
 export default class Data extends React.Component<DataProps, DataState> {
     constructor(props: DataProps) {
@@ -47,7 +47,7 @@ export default class Data extends React.Component<DataProps, DataState> {
             });
         }
 
-        const task = myJobsSearchRequests.spawn({
+        const task = jobsSearchRequests.spawn({
             token: this.props.token,
             username: this.props.username,
             serviceWizardURL: this.props.serviceWizardURL,
@@ -61,7 +61,7 @@ export default class Data extends React.Component<DataProps, DataState> {
                 return;
             }
             // const jobsFetchedAt = new Date().getTime();
-            myJobsSearchRequests.done(task);
+            jobsSearchRequests.done(task);
 
             const { limit, offset } = searchExpression;
             const page = Math.ceil((offset + limit) / limit);

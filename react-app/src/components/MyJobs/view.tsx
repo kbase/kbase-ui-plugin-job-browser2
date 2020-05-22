@@ -7,11 +7,12 @@
 // 3rd party imports
 import React from "react";
 import {
-    Form, Button, Select, DatePicker, Popconfirm, Tooltip,
+    Form, Button, Select, Popconfirm, Tooltip,
     Modal, Switch
 } from 'antd';
 
-import moment, { Moment } from 'moment';
+// import moment, { Moment } from 'moment';
+import dayjs from 'dayjs';
 
 // project imports
 import {
@@ -35,6 +36,7 @@ import UILink from '../UILink';
 import Table2, { Column, AsyncProcessState, DataSource, TableConfig } from "../Table";
 import FilterEditor, { JobFilter } from "../FilterEditor";
 import { SearchOutlined, InfoCircleOutlined, CloseOutlined } from "@ant-design/icons";
+import DatePicker from "../DatePicker";
 
 const CANCEL_TIMEOUT = 10000;
 
@@ -385,7 +387,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return false;
     }
 
-    onRangeFromChange(date: Moment | null, dateString: string) {
+    onRangeFromChange(date: dayjs.Dayjs | null, dateString: string) {
         // TODO: if the range ends up null (how?), should it default
         // to the previously selected preset? For now, just go back to lastHourl.
         if (date === null) {
@@ -425,7 +427,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         });
     }
 
-    onRangeToChange(date: Moment | null, dateString: string) {
+    onRangeToChange(date: dayjs.Dayjs | null, dateString: string) {
         // TODO: if the range ends up null (how?), should it default
         // to the previously selected preset? For now, just go back to lastHourl.
         if (date === null) {
@@ -475,7 +477,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             <DatePicker
                                 showTime={true}
                                 allowClear={false}
-                                value={moment(timeRange.start)}
+                                value={dayjs(timeRange.start)}
                                 onChange={this.onRangeFromChange.bind(this)}
                             />
                         </Form.Item>
@@ -483,7 +485,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                             <DatePicker
                                 showTime={true}
                                 allowClear={false}
-                                value={moment(timeRange.end)}
+                                value={dayjs(timeRange.end)}
                                 onChange={this.onRangeToChange.bind(this)}
                             />
                         </Form.Item>
@@ -874,7 +876,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
 
     renderView() {
         return <React.Fragment>
-            <div>{this.renderControlBar()}</div>
+            <div className="-controlBar">{this.renderControlBar()}</div>
             {this.renderJobsTable()}
             {this.renderJobDetail()}
         </React.Fragment>;
