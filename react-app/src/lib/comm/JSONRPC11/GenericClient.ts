@@ -4,10 +4,8 @@ export interface GenericClientParams {
     url: string;
     module: string;
     token?: string;
-    timeout?: number;
+    timeout: number;
 }
-
-const DEFAULT_TIMEOUT = 10000;
 
 export interface JSONPayload<T> {
     version: string;
@@ -74,7 +72,7 @@ export class GenericClient {
         this.url = url;
         this.token = token || null;
         this.module = module;
-        this.timeout = timeout || DEFAULT_TIMEOUT;
+        this.timeout = timeout;
     }
 
     protected makePayload<T>(method: string, param: T): JSONPayload<T> {
@@ -146,7 +144,7 @@ export class GenericClient {
         const headers: any = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
-        }
+        };
         if (this.token) {
             headers['Authorization'] = this.token;
         }
@@ -180,7 +178,7 @@ export class AuthorizedGenericClient extends GenericClient {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'Authorization': this.token
-        }
+        };
         const response = await axios.post(this.url, params, {
             headers,
             timeout: this.timeout

@@ -99,7 +99,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             // TODO: admin??
             admin: this.props.admin,
             // TODO: from config
-            timeout: 10000
+            timeout: SERVICE_TIMEOUT
         });
 
         return serviceJobToUIJob(jobs.jobs[0], 'UNKNOWN');
@@ -153,7 +153,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             // an indefinite limit? For now, just use 1000.
             const limit = 1000;
             // TODO: get from somewhere else... 
-            const timeout = 10000;
+            const timeout = SERVICE_TIMEOUT;
             // TODO: get from somewhere else...
             const newLog = await this.getJobLog(offset, limit, timeout, this.props.admin);
 
@@ -189,8 +189,6 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         // TODO: how to mimic offset at end of log (above, done), and 
         // an indefinite limit? For now, just use 1000.
         const limit = 1000;
-        // TODO: get from somewhere else... 
-        const timeout = 10000;
 
         const poller = async () => {
             const job = await this.getJob();
@@ -201,7 +199,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     loop();
                     return;
                 case JobStateType.RUN:
-                    var log = await this.getJobLog(0, limit, timeout, this.props.admin);
+                    var log = await this.getJobLog(0, limit, SERVICE_TIMEOUT, this.props.admin);
                     this.setState({
                         status: JobLogState.ACTIVE_LOADED,
                         log,
@@ -210,7 +208,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                     loop();
                     break;
                 default:
-                    var log = await this.getJobLog(0, limit, timeout, this.props.admin);
+                    var log = await this.getJobLog(0, limit, SERVICE_TIMEOUT, this.props.admin);
                     this.setState({
                         status: JobLogState.FINISHED_LOADED,
                         log,
@@ -235,9 +233,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         // TODO: how to mimic offset at end of log (above, done), and 
         // an indefinite limit? For now, just use 1000.
         const limit = 1000;
-        // TODO: get from somewhere else... 
-        const timeout = 10000;
-        // TODO: get from somewhere else...
+
 
         let log;
         switch (this.currentJobState(job).type) {
@@ -256,7 +252,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 this.startQueuedPolling();
                 return;
             case JobStateType.RUN:
-                log = await this.getJobLog(0, limit, timeout, this.props.admin);
+                log = await this.getJobLog(0, limit, SERVICE_TIMEOUT, this.props.admin);
                 this.setState({
                     status: JobLogState.ACTIVE_LOADED,
                     log,
@@ -264,7 +260,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 });
                 return;
             default:
-                log = await this.getJobLog(0, limit, timeout, this.props.admin);
+                log = await this.getJobLog(0, limit, SERVICE_TIMEOUT, this.props.admin);
                 this.setState({
                     status: JobLogState.FINISHED_LOADED,
                     log,
