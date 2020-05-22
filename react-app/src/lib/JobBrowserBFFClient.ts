@@ -29,7 +29,7 @@ export interface FilterSpec {
     workspace_id?: Array<number>;
     status?: Array<string>;
     user?: Array<string>;
-    // client_group?: Array<string>;
+    client_group?: Array<string>;
     app_id?: Array<string>;
     app_module?: Array<string>;
     app_function?: Array<string>;
@@ -315,6 +315,10 @@ export interface CancelJobResult {
     canceled: boolean;
 }
 
+export interface GetClientGroupsResult {
+    client_groups: Array<ClientGroup>;
+}
+
 export default class JobBrowserBFFClient extends DynamicServiceClient {
     module: string = 'JobBrowserBFF';
 
@@ -336,5 +340,9 @@ export default class JobBrowserBFFClient extends DynamicServiceClient {
 
     async cancel_job(params: CancelJobParams): Promise<CancelJobResult> {
         return await this.callFunc<CancelJobParams, CancelJobResult>('cancel_job', params);
+    }
+
+    async get_client_groups(): Promise<GetClientGroupsResult> {
+        return await this.callFuncNoParams<GetClientGroupsResult>('get_client_groups');
     }
 }

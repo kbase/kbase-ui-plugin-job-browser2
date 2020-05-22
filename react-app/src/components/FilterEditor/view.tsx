@@ -10,6 +10,7 @@ import AppSelect from './AppSelect';
 import AppFunctionSelect from './AppFunctionSelect';
 import AppModuleSelect from './AppModuleSelect';
 import UserSelect from './UserSelect';
+import ClientGroupsSelect from './ClientGroupsSelect';
 
 /**
  * A set of job status filter options used to populate and control a set of checkboxes provided
@@ -180,21 +181,34 @@ export default class FilterEditor extends React.Component<FilterEditorProps, Fil
             onChange={this.onAppFunctionSelect.bind(this)} />;
     }
 
-    renderClientGroupSelector() {
-        const data = [
-            {
-                label: 'My ClientGroup',
-                value: 'my-value'
+    onClientGroupSelect(clientGroups: Array<string>) {
+        this.setState({
+            filter: {
+                ...this.state.filter,
+                client_group: clientGroups
             }
-        ];
-        const options = data.map(({ value, label }) => {
-            return <Select.Option
-                key={value}
-                value={value}>{label}</Select.Option>;
         });
-        return <Select >
-            {options}
-        </Select>;
+    }
+
+    renderClientGroupSelector() {
+        return <ClientGroupsSelect
+            defaultValue={this.state.filter.client_group}
+            onChange={this.onClientGroupSelect.bind(this)} />;
+
+        // const data = [
+        //     {
+        //         label: 'My ClientGroup',
+        //         value: 'my-value'
+        //     }
+        // ];
+        // const options = data.map(({ value, label }) => {
+        //     return <Select.Option
+        //         key={value}
+        //         value={value}>{label}</Select.Option>;
+        // });
+        // return <Select >
+        //     {options}
+        // </Select>;
     }
 
     renderStatusField() {

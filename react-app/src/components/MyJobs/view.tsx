@@ -657,10 +657,10 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         const columns: Array<Column<Job>> = [
             {
                 id: 'jobid',
-                label: 'Job Id',
+                label: 'Job',
                 render: (job: Job) => {
                     const title = <div>
-                        <p><span style={{ color: 'silver' }}>Job ID</span>{' '}{job.id}</p>
+                        <p><span style={{ color: 'silver' }}>Job</span>{' '}{job.id}</p>
                         <p>Click to view job log and detail</p>
                     </div>;
                     return (
