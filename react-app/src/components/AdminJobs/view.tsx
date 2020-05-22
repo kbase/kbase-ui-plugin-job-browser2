@@ -16,7 +16,7 @@ import {
 // project imports
 import {
     Job, JobsSearchExpression, TimeRangePresets,
-    TimeRange, SortSpec, JobContextType
+    TimeRange, SortSpec
 } from '../../redux/store';
 import JobDetail from '../JobDetail';
 
@@ -29,7 +29,6 @@ import './style.css';
 import Monitor from '../Monitor';
 import PubSub from '../../lib/PubSub';
 import { JobEvent, JobStateType } from '../../redux/types/jobState';
-import NarrativeLink from '../NarrativeLink';
 import { JobContextNarrative } from '../../lib/JobBrowserBFFClient';
 import UILink from '../UILink';
 import Table2, { Column, AsyncProcessState, DataSource, TableConfig } from "../Table";
@@ -690,45 +689,45 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
                     );
                 }
             },
-            {
-                id: 'narrative',
-                label: 'Narrative',
-                render: (job: Job) => {
-                    switch (job.request.context.type) {
-                        case JobContextType.NARRATIVE:
-                            const title = job.request.context.title;
-                            if (job.request.context.isTemporary) {
-                                return (
-                                    <Tooltip title={'A temporary, unsaved narrative'}>
-                                        <NarrativeLink narrativeID={job.request.context.workspace.id}>
-                                            Unsaved Narrative
-                                        </NarrativeLink>
-                                    </Tooltip>
-                                );
-                            } else {
-                                return (
-                                    <Tooltip title={title || 'n/a'}>
-                                        <NarrativeLink narrativeID={job.request.context.workspace.id}>
-                                            {title || 'n/a'}
-                                        </NarrativeLink>
-                                    </Tooltip>
-                                );
-                            }
+            // {
+            //     id: 'narrative',
+            //     label: 'Narrative',
+            //     render: (job: Job) => {
+            //         switch (job.request.context.type) {
+            //             case JobContextType.NARRATIVE:
+            //                 const title = job.request.context.title;
+            //                 if (job.request.context.isTemporary) {
+            //                     return (
+            //                         <Tooltip title={'A temporary, unsaved narrative'}>
+            //                             <NarrativeLink narrativeID={job.request.context.workspace.id}>
+            //                                 Unsaved Narrative
+            //                             </NarrativeLink>
+            //                         </Tooltip>
+            //                     );
+            //                 } else {
+            //                     return (
+            //                         <Tooltip title={title || 'n/a'}>
+            //                             <NarrativeLink narrativeID={job.request.context.workspace.id}>
+            //                                 {title || 'n/a'}
+            //                             </NarrativeLink>
+            //                         </Tooltip>
+            //                     );
+            //                 }
 
 
-                        case JobContextType.WORKSPACE:
-                            if (job.request.context.workspace.isAccessible) {
-                                return job.request.context.workspace.name;
-                            } else {
-                                return 'inaccessible workspace';
-                            }
-                        case JobContextType.EXPORT:
-                            return 'export job';
-                        case JobContextType.UNKNOWN:
-                            return 'unknown';
-                    }
-                }
-            },
+            //             case JobContextType.WORKSPACE:
+            //                 if (job.request.context.workspace.isAccessible) {
+            //                     return job.request.context.workspace.name;
+            //                 } else {
+            //                     return 'inaccessible workspace';
+            //                 }
+            //             case JobContextType.EXPORT:
+            //                 return 'export job';
+            //             case JobContextType.UNKNOWN:
+            //                 return 'unknown';
+            //         }
+            //     }
+            // },
             {
                 id: 'app',
                 label: 'App',
