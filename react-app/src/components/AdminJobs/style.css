@@ -105,10 +105,14 @@
     align-items: center;
 }
 
-.AdminJobs .Table-row>.Table-cell:nth-child(2) {
+/* .AdminJobs .Table-row>.Table-cell:nth-child(2) {
     flex: 1 1 0px;
-}
+} */
 
+
+.AdminJobs .Table-row>.Table-cell:nth-child(2) {
+    flex: 0 0 9em;
+}
 
 .AdminJobs .Table-row>.Table-cell:nth-child(3) {}
 
@@ -130,14 +134,10 @@
 
 .AdminJobs .Table-row>.Table-cell:nth-child(8) {
     flex: 0 0 8em;
-}
-
-.AdminJobs .Table-row>.Table-cell:nth-child(9) {
-    flex: 0 0 8em;
     align-items: center;
 }
 
-.AdminJobs .Table-row>.Table-cell:nth-child(10) {
+.AdminJobs .Table-row>.Table-cell:nth-child(9) {
     flex: 0 0 4em;
     align-items: center;
 
