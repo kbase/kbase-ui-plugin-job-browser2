@@ -134,13 +134,11 @@
 
 .AdminJobs .Table-row>.Table-cell:nth-child(8) {
     flex: 0 0 8em;
-    align-items: center;
 }
 
 .AdminJobs .Table-row>.Table-cell:nth-child(9) {
     flex: 0 0 4em;
     align-items: center;
-
 }
 
 .AdminJobs .-controlBar {

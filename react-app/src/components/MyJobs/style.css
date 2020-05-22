@@ -130,7 +130,6 @@
 
 .MyJobs .Table-row>.Table-cell:nth-child(8) {
     flex: 0 0 8em;
-    align-items: center;
 }
 
 .MyJobs .Table-row>.Table-cell:nth-child(9) {
