@@ -25,6 +25,8 @@ if (DEPLOY_ENV === "prod") {
 } else {
     HOST = `${DEPLOY_ENV}.kbase.us`;
 }
+// HOST="kbase.us"
+console.log(`STARTING PROXY WITH HOST: ${HOST}`)
 
 
 module.exports = function (app) {

@@ -601,6 +601,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         icon={<CloseOutlined />}
                         danger
                         size="small"
+                        style={{ height: '22px', width: '22px' }}
                         data-k-b-testhook-button="cancel"
                     />
                 </Popconfirm>

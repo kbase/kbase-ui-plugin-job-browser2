@@ -596,6 +596,7 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
                         icon={<CloseOutlined />}
                         danger
                         size="small"
+                        style={{ height: '22px', width: '22px' }}
                         data-k-b-testhook-button="cancel"
                     />
                 </Popconfirm>

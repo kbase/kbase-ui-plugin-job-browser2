@@ -3,7 +3,7 @@ import { Tag, Tooltip } from 'antd';
 import { Job } from '../redux/store';
 import { NiceElapsedTime, NiceRelativeTime, NiceTimeDuration } from '@kbase/ui-components';
 import { JobStateType, JobEvent } from '../redux/types/jobState';
-import { LoadingOutlined, Loading3QuartersOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const STALE_AFTER = 300000;
 
@@ -75,7 +75,7 @@ export default class JobStatusBadge extends React.Component<JobStatusProps, JobS
             case JobStateType.RUN:
                 return (
                     <span>
-                        <Loading3QuartersOutlined /> Running
+                        <LoadingOutlined /> Running
                     </span>
                 );
             case JobStateType.COMPLETE:
