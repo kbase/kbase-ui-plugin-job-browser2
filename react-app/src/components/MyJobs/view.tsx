@@ -834,6 +834,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
     updateTableConfig(config: TableConfig) {
+        if (this.limit === config.rowsPerPage) {
+            return;
+        }
         this.limit = config.rowsPerPage;
         if (this.props.dataSource.status === AsyncProcessState.SUCCESS ||
             this.props.dataSource.status === AsyncProcessState.REPROCESSING) {
