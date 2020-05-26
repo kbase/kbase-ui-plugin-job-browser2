@@ -114,7 +114,9 @@
     flex: 0 0 9em;
 }
 
-.AdminJobs .Table-row>.Table-cell:nth-child(3) {}
+.AdminJobs .Table-row>.Table-cell:nth-child(3) {
+    min-width: 10em;
+}
 
 .AdminJobs .Table-row>.Table-cell:nth-child(4) {
     flex: 0 0 8em;

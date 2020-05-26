@@ -107,10 +107,13 @@
 
 .MyJobs .Table-row>.Table-cell:nth-child(2) {
     flex: 1 1 0px;
+    min-width: 10em;
 }
 
 
-.MyJobs .Table-row>.Table-cell:nth-child(3) {}
+.MyJobs .Table-row>.Table-cell:nth-child(3) {
+    min-width: 10em;
+}
 
 .MyJobs .Table-row>.Table-cell:nth-child(4) {
     flex: 0 0 8em;
