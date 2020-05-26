@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Select, Checkbox } from 'antd';
+import { Form, Button, Checkbox } from 'antd';
 import { JobSearchStatus } from '../../redux/store';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
