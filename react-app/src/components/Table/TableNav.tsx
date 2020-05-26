@@ -66,12 +66,12 @@ export default class TableNav extends React.Component<TableNavProps, TableNavSta
     }
 
     renderNextButton(state: NavStateOk) {
-        const disabled = (state.page === state.pageCount);
+        const disabled = (state.pageCount === 0 || state.page === state.pageCount);
         return <Button icon={<CaretRightFilled />} onClick={() => { this.gotoNextPage(state); }} disabled={disabled} />;
     }
 
     renderLastButton(state: NavStateOk) {
-        const disabled = (state.page === state.pageCount);
+        const disabled = (state.pageCount === 0 || state.page === state.pageCount);
         return <Button icon={<StepForwardOutlined />} onClick={() => { this.gotoLastPage(state); }} disabled={disabled} />;
     }
 
@@ -98,12 +98,18 @@ export default class TableNav extends React.Component<TableNavProps, TableNavSta
     }
 
     renderPageInfo(state: NavStateOk) {
+        if (state.pageCount === 0) {
+            return;
+        }
         return <span>
             page {this.renderNumber(state.page)} of {this.renderNumber(state.pageCount)}
         </span>;
     }
 
     renderTotal(state: NavStateOk) {
+        if (state.pageCount === 0) {
+            return 'no jobs';
+        }
         return <span>
             ({this.renderNumber(state.total)} {state.total === 1 ? this.props.noun.singular : this.props.noun.plural})
         </span>;
