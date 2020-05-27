@@ -240,6 +240,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     }
                 },
                 () => {
+                    // Because this may obsolete the page. 
+                    // This is a simplification, for sure.
+                    this.offset = 0;
                     this.doSearch(true);
                 }
             );
@@ -548,6 +551,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         this.setState({
             filter
         }, () => {
+            // Because this may obsolete the page. 
+            // This is a simplification, for sure.
+            this.limit = 0;
             this.doSearch(false);
         });
     }
