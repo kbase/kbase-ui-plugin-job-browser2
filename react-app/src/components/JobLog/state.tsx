@@ -80,11 +80,15 @@ export interface JobLogsStateProps {
 type JobLogsStateState = JobLogView;
 
 export default class JobLogsState extends React.Component<JobLogsStateProps, JobLogsStateState> {
+    pollTimer: number | null;
+    stopping: boolean;
     constructor(props: JobLogsStateProps) {
         super(props);
         this.state = {
             status: JobLogState.NONE
         };
+        this.pollTimer = null;
+        this.stopping = false;
     }
 
     async getJob(): Promise<Job> {
@@ -134,6 +138,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
 
     startPolling() {
         const poller = async () => {
+            this.pollTimer = null;
             const state = this.state;
             if (state.status !== JobLogState.ACTIVE_LOADED) {
                 this.setState({
@@ -161,6 +166,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
                 case JobStateType.CREATE:
                 case JobStateType.QUEUE:
                     // should not occur!
+
                     this.startQueuedPolling();
                     break;
                 case JobStateType.RUN:
@@ -180,7 +186,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             }
         };
         const loop = () => {
-            setTimeout(poller, POLLING_INTERVAL);
+            this.pollTimer = window.setTimeout(poller, POLLING_INTERVAL);
         };
         loop();
     }
@@ -191,21 +197,23 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const limit = 1000;
 
         const poller = async () => {
+            this.pollTimer = null;
             const job = await this.getJob();
             switch (this.currentJobState(job).type) {
                 case JobStateType.CREATE:
                 case JobStateType.QUEUE:
                     // still queued, eh?
                     loop();
-                    return;
+                    break;
                 case JobStateType.RUN:
-                    var log = await this.getJobLog(0, limit, SERVICE_TIMEOUT, this.props.admin);
-                    this.setState({
-                        status: JobLogState.ACTIVE_LOADED,
-                        log,
-                        job
-                    });
-                    loop();
+                    this.startPolling();
+                    // var log = await this.getJobLog(0, limit, SERVICE_TIMEOUT, this.props.admin);
+                    // this.setState({
+                    //     status: JobLogState.ACTIVE_LOADED,
+                    //     log,
+                    //     job
+                    // });
+                    // loop();
                     break;
                 default:
                     var log = await this.getJobLog(0, limit, SERVICE_TIMEOUT, this.props.admin);
@@ -218,7 +226,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         };
 
         const loop = () => {
-            setTimeout(poller, POLLING_INTERVAL);
+            this.pollTimer = window.setTimeout(poller, POLLING_INTERVAL);
         };
 
         loop();
@@ -274,10 +282,17 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         this.getInitialJobLog();
     }
 
+    componentWillUnmount() {
+        this.stopping = true;
+        if (this.pollTimer) {
+            window.clearTimeout(this.pollTimer);
+        }
+    }
+
     renderLoading() {
         return (
             <div>
-                Loading ... <Spin />
+                UI is Loading ... <Spin />
             </div>
         );
     }
@@ -285,7 +300,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
     renderQueued() {
         return (
             <div>
-                Queued ... <Spin />
+                Job is Queued ... <Spin />
             </div>
         );
     }
@@ -296,11 +311,11 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         );
     }
 
-    render() {
-        return this.renderLoading();
-    }
+    // render() {
+    //     return this.renderLoading();
+    // }
 
-    renderx() {
+    render() {
         const state = this.state;
         switch (state.status) {
             case JobLogState.NONE:
