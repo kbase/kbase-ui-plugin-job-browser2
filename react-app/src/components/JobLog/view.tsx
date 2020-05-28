@@ -59,6 +59,9 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         }
         this.scrollToBottom();
     }
+    componentWillUnmount() {
+
+    }
     scrollToBottom() {
         if (this.bodyRef.current === null) {
             return;
@@ -408,7 +411,4 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             {this.renderJobLog()}
         </div>;
     }
-    // render() {
-    //     return this.renderJobLog();
-    // }
 }

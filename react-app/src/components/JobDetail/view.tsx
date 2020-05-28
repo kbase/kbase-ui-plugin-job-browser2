@@ -57,6 +57,7 @@ class JobLogGate extends React.Component<JobLogGateProps, JobLogGateState> {
             <Alert type="error" message={view.error} />
         );
     }
+
     render() {
         switch (this.props.view.status) {
             case JobLogState.NONE:
@@ -150,6 +151,7 @@ export default class JobDetail extends React.Component<JobDetailProps, JobDetail
             selectedTab
         });
     }
+
     render() {
         const tabs = [{
             tab: 'log',

@@ -22,7 +22,7 @@ import {
 import JobDetail from '../JobDetail';
 
 // kbase imports (or should be kbase imports)
-import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
+// import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
 import JobStatusBadge from '../JobStatusBadge';
 
 // file imports
@@ -37,6 +37,8 @@ import Table2, { Column, AsyncProcessState, DataSource, TableConfig } from "../T
 import FilterEditor, { JobFilter } from "../FilterEditor";
 import { SearchOutlined, InfoCircleOutlined, CloseOutlined } from "@ant-design/icons";
 import DatePicker from "../DatePicker";
+import NiceRelativeTime from "../NiceRelativeTime";
+import NiceElapsedTime from "../NiceElapsedTime";
 
 const CANCEL_TIMEOUT = 10000;
 
@@ -764,6 +766,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                 label: 'Queued',
                 render: (job: Job) => {
                     var [queueState, nextState] = this.lastEventLike(job, JobStateType.QUEUE);
+
                     if (queueState) {
                         if (nextState) {
                             return <NiceElapsedTime

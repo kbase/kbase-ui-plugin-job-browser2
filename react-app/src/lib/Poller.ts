@@ -46,6 +46,7 @@ export class Poller {
     }
 
     stop() {
+        this.stopPolling();
         this.pubsubProxy.off();
     }
 
@@ -125,7 +126,12 @@ export class Poller {
         const pollWaitLoop = () => {
             // This will fire another polling request after the interval passes,
             // via a timeout.
-            this.waitTimer = window.setTimeout(this.runPoll.bind(this), this.params.pollInterval);
+            if (this.status === PollerState.STOPPED) {
+                return;
+            }
+            this.waitTimer = window.setTimeout(
+                this.runPoll.bind(this), this.params.pollInterval
+            );
             this.statusCount = 0;
             pollWaitProgressLoop();
         };
@@ -227,6 +233,7 @@ export class Poller {
     }
 
     stopPolling() {
+        this.status = PollerState.STOPPED;
         if (this.waitTimer) {
             window.clearInterval(this.waitTimer);
         }

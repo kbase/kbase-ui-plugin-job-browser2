@@ -21,7 +21,6 @@ import {
 import JobDetail from '../JobDetail';
 
 // kbase imports (or should be kbase imports)
-import { NiceRelativeTime, NiceElapsedTime } from '@kbase/ui-components';
 import JobStatusBadge from '../JobStatusBadge';
 
 // file imports
@@ -38,6 +37,8 @@ import { SearchOutlined, InfoCircleOutlined, CloseOutlined } from "@ant-design/i
 import dayjs from 'dayjs';
 import DatePicker from "../DatePicker";
 import { SERVICE_TIMEOUT } from "../../constants";
+import NiceRelativeTime from "../NiceRelativeTime";
+import NiceElapsedTime from "../NiceElapsedTime";
 
 /**
  * This version of the job status defines the set of strings that may be used
