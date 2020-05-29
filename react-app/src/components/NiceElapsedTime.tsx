@@ -42,15 +42,20 @@ export default class NiceElapsedTime extends React.Component<NiceElapsedTimeProp
         }, CLOCK_INTERVAL_SECOND);
     }
 
+    stopClock() {
+        if (this.clockTimer) {
+            window.clearInterval(this.clockTimer);
+        }
+    }
+
     componentDidMount() {
         if (!this.props.to && this.props.useClock) {
             this.startClock();
         }
     }
+
     componentWillUnmount() {
-        if (this.clockTimer) {
-            window.clearInterval(this.clockTimer);
-        }
+        this.stopClock();
     }
     render() {
         let elapsed;

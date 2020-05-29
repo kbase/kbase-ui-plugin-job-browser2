@@ -653,8 +653,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
 
-    getCreateAt(job: Job): Date {
-        return new Date(job.eventHistory[0].at);
+    getCreateAt(job: Job): number {
+        return job.eventHistory[0].at;
     }
 
     renderNarrativeLink(context: JobContextNarrative) {
@@ -758,7 +758,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                 id: 'submitted',
                 label: 'Submitted',
                 render: (job: Job) => {
-                    return <NiceRelativeTime time={this.getCreateAt(job)} />;
+                    const createAt = this.getCreateAt(job);
+                    return <NiceRelativeTime time={new Date(createAt)} key={createAt} />;
                 }
             },
             {
@@ -770,12 +771,14 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     if (queueState) {
                         if (nextState) {
                             return <NiceElapsedTime
+                                key={queueState.at}
                                 from={queueState.at}
                                 to={nextState.at}
                                 precision={2}
                                 useClock={false} />;
                         } else {
                             return <NiceElapsedTime
+                                key={queueState.at}
                                 from={queueState.at}
                                 precision={2}
                                 useClock={true} />;
@@ -793,12 +796,14 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                     if (runState) {
                         if (nextState) {
                             return <NiceElapsedTime
+                                key={runState.at}
                                 from={runState.at}
                                 to={nextState.at}
                                 precision={2}
                                 useClock={false} />;
                         } else {
                             return <NiceElapsedTime
+                                key={runState.at}
                                 from={runState.at}
                                 precision={2}
                                 useClock={true} />;
