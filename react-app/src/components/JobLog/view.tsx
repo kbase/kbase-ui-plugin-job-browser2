@@ -7,7 +7,7 @@ import { ClickParam } from 'antd/lib/menu';
 import Papa from 'papaparse';
 import ButtonGroup from 'antd/lib/button/button-group';
 import { JobStateType } from '../../redux/types/jobState';
-import { CaretRightOutlined, DownloadOutlined, PauseOutlined } from '@ant-design/icons';
+import { CaretRightOutlined, DownloadOutlined, PauseOutlined, ArrowDownOutlined } from '@ant-design/icons';
 
 enum PlayState {
     NONE,
@@ -383,6 +383,8 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
             </ButtonGroup>
         );
     }
+
+
     renderToolbar() {
         const disabled = this.props.log.length === 0;
         const menu = (
@@ -400,6 +402,10 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
                         <Button icon={<DownloadOutlined />}></Button>
                     </Dropdown>
                 </ButtonGroup>
+                {' '}
+                <Tooltip title="Jump to bottom of log">
+                    <Button icon={<ArrowDownOutlined />} onClick={this.scrollToBottom.bind(this)} />
+                </Tooltip>
                 {' '}
                 {this.renderPlayPause()}
             </div>
