@@ -78,12 +78,6 @@ export default class NiceRelativeTime extends React.Component<NiceRelativeTimePr
         this.startIntervalTimer();
     }
 
-    componentWillReceiveProps() {
-        this.setState({
-            now: new Date()
-        });
-    }
-
     componentWillUnmount() {
         if (this.nowTimer) {
             window.clearInterval(this.nowTimer);
