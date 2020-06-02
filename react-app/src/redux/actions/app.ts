@@ -60,6 +60,9 @@ export function mainLoad() {
                 config: {
                     services: {
                         ServiceWizard: { url: serviceWizardURL }
+                    },
+                    dynamicServices: {
+                        JobBrowserBFF: jobBrowserBFFConfig
                     }
                 }
             }
@@ -78,7 +81,8 @@ export function mainLoad() {
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: userAuthorization.token,
             url: serviceWizardURL,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: jobBrowserBFFConfig.version
         });
 
         try {

@@ -12,6 +12,7 @@ import { EpochTime } from '../types/base';
 import { ComponentLoadingState } from '../store/base';
 import { UIError } from '../types/error';
 import { SERVICE_TIMEOUT } from '../../constants';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 // Loading
 export interface UserJobsLoadLoading extends Action<ActionType.USER_JOBS_LOAD_LOADING> {
@@ -107,6 +108,7 @@ interface UserJobsParam {
     token: string,
     searchExpression: JobsSearchExpression;
     serviceWizardURL: string,
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 type UserJobsResult = {
@@ -116,12 +118,13 @@ type UserJobsResult = {
 };
 
 class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
-    request({ token, searchExpression, serviceWizardURL }: UserJobsParam): Task<UserJobsResult> {
+    request({ token, searchExpression, serviceWizardURL, jobBrowserBFFConfig }: UserJobsParam): Task<UserJobsResult> {
 
         const jobBrowserBFF = new JobBrowserBFFClient({
             token,
             url: serviceWizardURL,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: jobBrowserBFFConfig.version
         });
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
@@ -195,9 +198,12 @@ export function userJobsLoad() {
                 config: {
                     services: {
                         ServiceWizard: { url: serviceWizardURL }
+                    },
+                    dynamicServices: {
+                        JobBrowserBFF: jobBrowserBFFConfig
                     }
                 }
-            },
+            }
         } = getState();
 
         if (!userAuthorization) {
@@ -234,7 +240,8 @@ export function userJobsLoad() {
         const task = userJobsSearchRequest.spawn({
             token: userAuthorization.token,
             serviceWizardURL,
-            searchExpression
+            searchExpression,
+            jobBrowserBFFConfig
         });
 
 
@@ -267,12 +274,16 @@ export function userJobsSearch(searchExpression: JobsSearchExpression) {
                 config: {
                     services: {
                         ServiceWizard: { url: serviceWizardURL }
+                    },
+                    dynamicServices: {
+                        JobBrowserBFF: jobBrowserBFFConfig
                     }
                 }
             },
             views: {
                 userJobsView
             }
+
         } = getState();
 
         if (!userAuthorization) {
@@ -298,7 +309,8 @@ export function userJobsSearch(searchExpression: JobsSearchExpression) {
         const task = userJobsSearchRequest.spawn({
             token: userAuthorization.token,
             serviceWizardURL,
-            searchExpression
+            searchExpression,
+            jobBrowserBFFConfig
         });
 
         const { jobs, foundCount, totalCount } = await task.promise;
@@ -336,6 +348,9 @@ export function userJobsRefreshSearch() {
                 config: {
                     services: {
                         ServiceWizard: { url: serviceWizardURL }
+                    },
+                    dynamicServices: {
+                        JobBrowserBFF: jobBrowserBFFConfig
                     }
                 }
             },
@@ -374,7 +389,8 @@ export function userJobsRefreshSearch() {
         const task = userJobsSearchRequest.spawn({
             token: userAuthorization.token,
             serviceWizardURL,
-            searchExpression
+            searchExpression,
+            jobBrowserBFFConfig
         });
 
         const { jobs, foundCount, totalCount } = await task.promise;
@@ -440,6 +456,9 @@ export function userJobsCancelJob(jobID: string, timeout: number) {
                 config: {
                     services: {
                         ServiceWizard: { url: serviceWizardURL }
+                    },
+                    dynamicServices: {
+                        JobBrowserBFF: jobBrowserBFFConfig
                     }
                 }
             }
@@ -459,7 +478,8 @@ export function userJobsCancelJob(jobID: string, timeout: number) {
         const client = new JobBrowserBFFClient({
             url: serviceWizardURL,
             token: userAuthorization.token,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: jobBrowserBFFConfig.version
         });
         client
             .cancel_job({

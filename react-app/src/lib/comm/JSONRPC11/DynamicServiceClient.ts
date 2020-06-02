@@ -23,7 +23,7 @@ var moduleCache = new Cache<any>({
 export interface DynamicServiceClientParams {
     token: string;
     url: string;
-    version?: string;
+    version: string;
     timeout: number;
     rpcContext?: any;
     urlBaseOverride?: string;

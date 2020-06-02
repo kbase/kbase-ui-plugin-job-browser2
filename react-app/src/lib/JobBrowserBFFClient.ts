@@ -150,8 +150,9 @@ export interface AppInfo {
     module_name: string;
     function_name: string;
     title: string;
-    client_groups: Array<ClientGroup>;
+    // client_groups: Array<ClientGroup>;
     type: AppType;
+    icon_url?: string;
 }
 
 export interface Context {

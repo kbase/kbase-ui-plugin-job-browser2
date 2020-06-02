@@ -2,6 +2,7 @@ import { Dispatch, Action } from 'redux';
 import { connect } from 'react-redux';
 import JobLogState from './state';
 import { StoreState } from '../../redux/store';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 export interface OwnProps {
 }
@@ -10,6 +11,7 @@ interface StateProps {
     token: string;
     njsURL: string;
     serviceWizardURL: string;
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 interface DispatchProps { }
@@ -22,6 +24,9 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
                 services: {
                     NarrativeJobService: { url: njsURL },
                     ServiceWizard: { url: serviceWizardURL }
+                },
+                dynamicServices: {
+                    JobBrowserBFF: jobBrowserBFFConfig
                 }
             }
         }
@@ -34,7 +39,7 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
         token = userAuthorization.token;
     }
 
-    return { token, njsURL, serviceWizardURL };
+    return { token, njsURL, serviceWizardURL, jobBrowserBFFConfig };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {

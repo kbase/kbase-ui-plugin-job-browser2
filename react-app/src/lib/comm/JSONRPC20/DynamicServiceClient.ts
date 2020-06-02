@@ -35,7 +35,7 @@ var moduleCache = new Cache<ServiceStatus>({
  */
 
 export interface DynamicServiceClientParams extends ServiceClientParams {
-    version?: string;
+    version: string;
     // module: string;
 }
 

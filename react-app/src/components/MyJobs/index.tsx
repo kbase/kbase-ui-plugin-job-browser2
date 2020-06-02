@@ -5,6 +5,7 @@ import Data from './data';
 import {
     StoreState
 } from '../../redux/store';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 export interface OwnProps {
 }
@@ -13,6 +14,8 @@ interface StateProps {
     token: string;
     username: string;
     serviceWizardURL: string;
+    narrativeMethodStoreURL: string;
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 interface DispatchProps {
@@ -24,7 +27,11 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
         app: {
             config: {
                 services: {
-                    ServiceWizard: { url: serviceWizardURL }
+                    ServiceWizard: { url: serviceWizardURL },
+                    NarrativeMethodStore: { url: narrativeMethodStoreURL }
+                },
+                dynamicServices: {
+                    JobBrowserBFF: jobBrowserBFFConfig
                 }
             }
         }
@@ -38,7 +45,9 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
 
     return {
         token, username,
-        serviceWizardURL
+        serviceWizardURL,
+        narrativeMethodStoreURL,
+        jobBrowserBFFConfig
     };
 }
 

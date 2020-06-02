@@ -104,10 +104,6 @@ export interface NiceRelativeTimeOptions {
 export function niceRelativeTime(someDate: Date, options: NiceRelativeTimeOptions = {}) {
     const nowDate = options.now || new Date();
 
-    if ((nowDate.getTime() - someDate.getTime()) < 0) {
-        console.log('NEGATIVE nice relative time', someDate.getTime(), options, options.now?.getTime(), nowDate.getTime() - someDate.getTime());
-    }
-
     const elapsedRaw = nowDate.getTime() - someDate.getTime();
     const elapsed = Math.round(elapsedRaw / SECOND_MS);
     const elapsedAbs = Math.abs(elapsed);

@@ -8,11 +8,14 @@ import { message } from 'antd';
 import { JobStateType } from '../../redux/types/jobState';
 import { SERVICE_TIMEOUT } from '../../constants';
 import { JSONRPC20Exception } from '../../lib/comm/JSONRPC20/JSONRPC20';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 export interface DataProps {
     token: string;
     username: string;
     serviceWizardURL: string;
+    narrativeMethodStoreURL: string;
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 interface DataState {
@@ -51,7 +54,8 @@ export default class Data extends React.Component<DataProps, DataState> {
             token: this.props.token,
             username: this.props.username,
             serviceWizardURL: this.props.serviceWizardURL,
-            searchExpression
+            searchExpression,
+            jobBrowserBFFConfig: this.props.jobBrowserBFFConfig
         });
 
         try {
@@ -114,7 +118,8 @@ export default class Data extends React.Component<DataProps, DataState> {
         const client = new JobBrowserBFFClient({
             url: this.props.serviceWizardURL,
             token: this.props.token,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: this.props.jobBrowserBFFConfig.version
         });
         client
             .cancel_job({
@@ -156,6 +161,7 @@ export default class Data extends React.Component<DataProps, DataState> {
             search={this.search.bind(this)}
             cancelJob={this.cancelJob.bind(this)}
             refreshSearch={this.refreshSearch.bind(this)}
+            narrativeMethodStoreURL={this.props.narrativeMethodStoreURL}
         />;
     }
 }

@@ -6,6 +6,7 @@ import { serviceJobToUIJob } from '../../redux/actions/utils';
 import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
 import { JobEvent, JobStateType } from '../../redux/types/jobState';
 import { SERVICE_TIMEOUT } from '../../constants';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 const POLLING_INTERVAL = 5000;
 
@@ -75,6 +76,7 @@ export interface JobLogsStateProps {
     njsURL: string;
     serviceWizardURL: string;
     admin: boolean;
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 type JobLogsStateState = JobLogView;
@@ -95,7 +97,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: this.props.jobBrowserBFFConfig.version
         });
 
         const jobs = await jobBrowserBFF.get_jobs({
@@ -113,7 +116,8 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
         const jobBrowserBFF = new JobBrowserBFFClient({
             token: this.props.token,
             url: this.props.serviceWizardURL,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: this.props.jobBrowserBFFConfig.version
         });
 
 

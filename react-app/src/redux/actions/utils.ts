@@ -194,8 +194,8 @@ export function serviceJobToUIJob(job: JobInfo, username: string): Job {
             moduleName: job.app.module_name,
             functionName: job.app.function_name,
             title: job.app.title,
-            clientGroups: job.app.client_groups,
-            type: job.app.type
+            type: job.app.type,
+            iconURL: job.app.icon_url
         };
     } else {
         app = null;

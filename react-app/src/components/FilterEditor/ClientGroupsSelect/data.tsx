@@ -7,11 +7,13 @@ import JobBrowserBFFClient from '../../../lib/JobBrowserBFFClient';
 import { AsyncProcessState, AsyncProcess } from '../../Table';
 import { Spin, Alert } from 'antd';
 import { UIError } from '../../../redux/types/error';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 /* For Component */
 export interface DataProps {
     token: string;
     serviceWizardURL: string;
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 // type TheProps = Omit<DataProps & FilterEditorProps, "narratives">;
@@ -70,7 +72,8 @@ export default class Data extends React.Component<TheProps, DataState> {
         const client = new JobBrowserBFFClient({
             token,
             url: serviceWizardURL,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: this.props.jobBrowserBFFConfig.version
         });
         const clientGroups = await client.get_client_groups();
         const clientGroupOptions = clientGroups.client_groups
