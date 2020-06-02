@@ -123,6 +123,7 @@ export interface MyJobsProps {
     /** Triggers a redux action to cancel the indicated job */
     cancelJob: (jobID: string, timeout: number) => void;
     // searchExpression: JobsSearchExpression;
+    narrativeMethodStoreURL: string;
 }
 
 /**
@@ -737,11 +738,22 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
                         return 'n/a';
                     }
                     if (job.request.app.type === 'narrative') {
+                        let icon;
+                        if (job.request.app.iconURL) {
+                            const url = [
+                                this.props.narrativeMethodStoreURL.split('/').slice(0, -1).join('/'),
+                                job.request.app.iconURL
+                            ].join('/');
+                            icon = <span>
+                                <img src={url} height='24px' alt={job.request.app.title} />
+                                {' '}
+                            </span>;
+                        }
                         return (
                             <Tooltip title={appTitle}>
                                 <UILink path={`catalog/apps/${job.request.app.id}`}
                                     openIn='new-tab'>
-                                    {appTitle}
+                                    {icon}{appTitle}
                                 </UILink>
                             </Tooltip>
                         );

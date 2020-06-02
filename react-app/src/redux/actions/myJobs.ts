@@ -5,13 +5,12 @@ import {
     MyJobsViewData, JobSearchState
 } from '../store';
 import { AppError } from '@kbase/ui-components';
-import { serviceJobToUIJob, extractTimeRange } from './utils';
 import { ThunkDispatch } from 'redux-thunk';
-import CancelableRequest, { Task } from '../../lib/CancelableRequest';
-import JobBrowserBFFClient, { QueryJobsParams } from '../../lib/JobBrowserBFFClient';
+import JobBrowserBFFClient from '../../lib/JobBrowserBFFClient';
 import { EpochTime } from '../types/base';
 import { UIError } from '../types/error';
 import { SERVICE_TIMEOUT } from '../../constants';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 // MY JOBS TAB
 
@@ -110,6 +109,7 @@ interface MyJobsParam {
     searchExpression: JobsSearchExpression;
     username: string,
     serviceWizardURL: string,
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 type MyJobsResult = {
@@ -118,72 +118,73 @@ type MyJobsResult = {
     totalCount: number;
 };
 
-class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
-    request({ token, searchExpression, username, serviceWizardURL }: MyJobsParam): Task<MyJobsResult> {
-        const jobBrowserBFF = new JobBrowserBFFClient({
-            token,
-            url: serviceWizardURL,
-            timeout: SERVICE_TIMEOUT
-        });
+// class MyJobsRequests extends CancelableRequest<MyJobsParam, MyJobsResult> {
+//     request({ token, searchExpression, username, serviceWizardURL, jobBrowserBFFConfig }: MyJobsParam): Task<MyJobsResult> {
+//         const jobBrowserBFF = new JobBrowserBFFClient({
+//             token,
+//             url: serviceWizardURL,
+//             timeout: SERVICE_TIMEOUT,
+//             version: jobBrowserBFFConfig.version
+//         });
 
-        const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
+//         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
 
-        // let filter: FilterSpec;
-        // let s: JobsSearchExpression;
-        // if (searchExpression.
+//         // let filter: FilterSpec;
+//         // let s: JobsSearchExpression;
+//         // if (searchExpression.
 
-        // const filter: FilterSpec = {
-        //     status: searchExpression.jobStatus
-        // };
+//         // const filter: FilterSpec = {
+//         //     status: searchExpression.jobStatus
+//         // };
 
-        // TODO: better parsing of search, or do it before here...
-        // const searchTerms = searchExpression.query.split(/\s+/);
+//         // TODO: better parsing of search, or do it before here...
+//         // const searchTerms = searchExpression.query.split(/\s+/);
 
-        const queryParams: QueryJobsParams = {
-            time_span: {
-                from: timeRangeStart,
-                to: timeRangeEnd
-            }, // TODO: really handle sort
-            offset: searchExpression.offset,
-            limit: searchExpression.limit,
-            timeout: SERVICE_TIMEOUT,
-            // search: {
-            //     terms: searchTerms
-            // },
-            filter: searchExpression.filter
-        };
+//         const queryParams: QueryJobsParams = {
+//             time_span: {
+//                 from: timeRangeStart,
+//                 to: timeRangeEnd
+//             }, // TODO: really handle sort
+//             offset: searchExpression.offset,
+//             limit: searchExpression.limit,
+//             timeout: SERVICE_TIMEOUT,
+//             // search: {
+//             //     terms: searchTerms
+//             // },
+//             filter: searchExpression.filter
+//         };
 
-        if (searchExpression.sort) {
-            switch (searchExpression.sort.field) {
-                case 'created':
-                    queryParams.sort = [{
-                        key: 'created',
-                        direction: searchExpression.sort.direction
-                    }];
-            }
-        }
+//         if (searchExpression.sort) {
+//             switch (searchExpression.sort.field) {
+//                 case 'created':
+//                     queryParams.sort = [{
+//                         key: 'created',
+//                         direction: searchExpression.sort.direction
+//                     }];
+//             }
+//         }
 
-        const promise = jobBrowserBFF
-            .query_jobs(queryParams)
-            .then(({ jobs, found_count, total_count }) => {
-                return {
-                    jobs: jobs.map((jobInfo) => {
-                        return serviceJobToUIJob(jobInfo, username);
-                    }),
-                    foundCount: found_count,
-                    totalCount: total_count
-                };
-            });
+//         const promise = jobBrowserBFF
+//             .query_jobs(queryParams)
+//             .then(({ jobs, found_count, total_count }) => {
+//                 return {
+//                     jobs: jobs.map((jobInfo) => {
+//                         return serviceJobToUIJob(jobInfo, username);
+//                     }),
+//                     foundCount: found_count,
+//                     totalCount: total_count
+//                 };
+//             });
 
-        const task: Task<MyJobsResult> = {
-            id: this.newID(),
-            promise,
-            isCanceled: false
-        };
-        this.pendingTasks.set(task.id, task);
-        return task;
-    }
-}
+//         const task: Task<MyJobsResult> = {
+//             id: this.newID(),
+//             promise,
+//             isCanceled: false
+//         };
+//         this.pendingTasks.set(task.id, task);
+//         return task;
+//     }
+// }
 
 export function myJobsLoad() {
     return async (dispatch: ThunkDispatch<StoreState, void, Action>, getState: () => StoreState) => {
@@ -266,6 +267,9 @@ export function myJobsCancelJob(jobID: string, timeout: number) {
                 config: {
                     services: {
                         ServiceWizard: { url: serviceWizardURL }
+                    },
+                    dynamicServices: {
+                        JobBrowserBFF: jobBrowserBFFConfig
                     }
                 }
             }
@@ -285,7 +289,8 @@ export function myJobsCancelJob(jobID: string, timeout: number) {
         const client = new JobBrowserBFFClient({
             url: serviceWizardURL,
             token: userAuthorization.token,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: jobBrowserBFFConfig.version
         });
         client
             .cancel_job({

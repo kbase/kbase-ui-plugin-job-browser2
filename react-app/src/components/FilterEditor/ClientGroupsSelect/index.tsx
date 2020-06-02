@@ -3,12 +3,14 @@ import { Action, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import Component from './data';
 import { StoreState } from '../../../redux/store';
+import { DynamicServiceConfig } from '@kbase/ui-components/lib/redux/integration/store';
 
 export interface OwnProps { }
 
 interface StateProps {
     token: string;
     serviceWizardURL: string;
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 interface DispatchProps {
@@ -21,6 +23,9 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
             config: {
                 services: {
                     ServiceWizard: { url: serviceWizardURL },
+                },
+                dynamicServices: {
+                    JobBrowserBFF: jobBrowserBFFConfig
                 }
             }
         }
@@ -32,7 +37,7 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
 
     const { token } = userAuthorization;
 
-    return { token, serviceWizardURL };
+    return { token, serviceWizardURL, jobBrowserBFFConfig };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {

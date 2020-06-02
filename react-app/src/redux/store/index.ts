@@ -71,8 +71,9 @@ export interface App {
     moduleName: string;
     functionName: string;
     title: string;
-    clientGroups: Array<ClientGroup>;
+    // clientGroups: Array<ClientGroup>;
     type: AppType;
+    iconURL?: string;
 }
 
 // TODO: this needs to represent narrative / workspace / export job / unknown
@@ -493,6 +494,10 @@ export type UserJobsView =
 //     UserJobsView |
 //     PublicAppStatsView |
 //     UserRunSummaryView
+
+// export interface DynamicServiceConfig {
+//     version: string;
+// }
 
 export interface MyStoreState {
     views: {

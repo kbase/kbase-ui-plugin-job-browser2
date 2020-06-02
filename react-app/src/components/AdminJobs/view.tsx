@@ -121,6 +121,7 @@ export interface AdminJobsProps {
     /** Triggers a redux action to cancel the indicated job */
     cancelJob: (jobID: string, timeout: number) => void;
     // searchExpression: JobsSearchExpression;
+    narrativeMethodStoreURL: string;
 }
 
 /**
@@ -240,6 +241,7 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
                     }
                 },
                 () => {
+                    this.offset = 0;
                     this.doSearch(true);
                 }
             );
@@ -544,6 +546,7 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
         this.setState({
             filter
         }, () => {
+            this.limit = 0;
             this.doSearch(false);
         });
     }
@@ -742,11 +745,22 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
                         return 'n/a';
                     }
                     if (job.request.app.type === 'narrative') {
+                        let icon;
+                        if (job.request.app.iconURL) {
+                            const url = [
+                                this.props.narrativeMethodStoreURL.split('/').slice(0, -1).join('/'),
+                                job.request.app.iconURL
+                            ].join('/');
+                            icon = <span>
+                                <img src={url} height='24px' alt={job.request.app.title} />
+                                {' '}
+                            </span>;
+                        }
                         return (
                             <Tooltip title={appTitle}>
                                 <UILink path={`catalog/apps/${job.request.app.id}`}
                                     openIn='new-tab'>
-                                    {appTitle}
+                                    {icon}{appTitle}
                                 </UILink>
                             </Tooltip>
                         );

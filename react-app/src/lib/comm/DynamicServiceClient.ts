@@ -52,7 +52,6 @@ export abstract class DynamicServiceClient extends ServiceClient {
         super(params);
         const { version } = params;
 
-
         this.version = version || null;
         if (this.version === 'auto') {
             this.version = null;

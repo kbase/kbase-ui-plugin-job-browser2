@@ -3,12 +3,14 @@ import CancelableRequest, { Task } from "../../lib/CancelableRequest";
 import JobBrowserBFFClient, { QueryJobsParams } from "../../lib/JobBrowserBFFClient";
 import { extractTimeRange, serviceJobToUIJob } from "../../redux/actions/utils";
 import { SERVICE_TIMEOUT } from "../../constants";
+import { DynamicServiceConfig } from "@kbase/ui-components/lib/redux/integration/store";
 
 interface UserJobsParam {
     token: string,
     searchExpression: JobsSearchExpression;
     username: string,
     serviceWizardURL: string;
+    jobBrowserBFFConfig: DynamicServiceConfig;
 }
 
 type UserJobsResult = {
@@ -18,11 +20,12 @@ type UserJobsResult = {
 };
 
 export default class UserJobsRequest extends CancelableRequest<UserJobsParam, UserJobsResult> {
-    request({ token, searchExpression, username, serviceWizardURL }: UserJobsParam): Task<UserJobsResult> {
+    request({ token, searchExpression, username, serviceWizardURL, jobBrowserBFFConfig }: UserJobsParam): Task<UserJobsResult> {
         const jobBrowserBFF = new JobBrowserBFFClient({
             token,
             url: serviceWizardURL,
-            timeout: SERVICE_TIMEOUT
+            timeout: SERVICE_TIMEOUT,
+            version: jobBrowserBFFConfig.version
         });
 
         const [timeRangeStart, timeRangeEnd] = extractTimeRange(searchExpression.timeRange);
