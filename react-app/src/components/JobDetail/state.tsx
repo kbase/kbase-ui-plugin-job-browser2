@@ -144,6 +144,7 @@ export default class JobLogsState extends React.Component<JobLogsStateProps, Job
             version: this.props.jobBrowserBFFConfig.version
         });
 
+        console.log('get job log admin?', this.props.admin);
         const jobLog = await jobBrowserBFF.get_job_log({
             job_id: this.props.jobID,
             offset, limit, timeout: SERVICE_TIMEOUT,

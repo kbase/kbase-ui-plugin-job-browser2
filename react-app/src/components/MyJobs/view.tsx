@@ -227,6 +227,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     onChangeTimeRange(value: string) {
         // TODO: should narrow the string value
         if (value === "customRange") {
+            // TODO: utilize dates from time range presets.
             this.setState({
                 showDates: true,
                 timeRange: { kind: "literal", start: Date.now(), end: Date.now() }
@@ -393,74 +394,119 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return false;
     }
 
-    onRangeFromChange(date: dayjs.Dayjs | null, dateString: string) {
+    // onRangeFromChange(date: dayjs.Dayjs | null, dateString: string) {
+    //     // TODO: if the range ends up null (how?), should it default
+    //     // to the previously selected preset? For now, just go back to lastHourl.
+    //     if (date === null) {
+    //         this.setState({
+    //             timeRange: {
+    //                 kind: "preset",
+    //                 preset: "lastHour"
+    //             }
+    //         });
+    //         return;
+    //     }
+
+    //     // handle logic of switching from 'preset' to 'literal'
+    //     let existingTimeRange = this.state.timeRange;
+    //     let timeRange: TimeRange;
+    //     switch (existingTimeRange.kind) {
+    //         case "preset":
+    //             timeRange = {
+    //                 kind: "literal",
+    //                 start: date.valueOf(),
+    //                 end: Infinity
+    //             };
+    //             break;
+    //         case "literal":
+    //             timeRange = {
+    //                 kind: "literal",
+    //                 start: date.valueOf(),
+    //                 end: existingTimeRange.end
+    //             };
+    //             break;
+    //         default:
+    //             return;
+    //     }
+
+    //     this.setState({
+    //         timeRange
+    //     });
+    // }
+
+    // onRangeToChange(date: dayjs.Dayjs | null, dateString: string) {
+    //     // TODO: if the range ends up null (how?), should it default
+    //     // to the previously selected preset? For now, just go back to lastHourl.
+    //     if (date === null) {
+    //         this.setState({
+    //             timeRange: {
+    //                 kind: "preset",
+    //                 preset: "lastHour"
+    //             }
+    //         });
+    //         return;
+    //     }
+
+    //     let existingTimeRange = this.state.timeRange;
+    //     let timeRange: TimeRange;
+    //     switch (existingTimeRange.kind) {
+    //         case "preset":
+    //             timeRange = {
+    //                 kind: "literal",
+    //                 start: Infinity,
+    //                 end: date.valueOf()
+    //             };
+    //             break;
+    //         case "literal":
+    //             timeRange = {
+    //                 kind: "literal",
+    //                 start: existingTimeRange.start,
+    //                 end: date.valueOf()
+    //             };
+    //             break;
+    //         default:
+    //             return;
+    //     }
+
+    //     this.setState({
+    //         timeRange
+    //     });
+    // }
+
+    onRangeChange(range: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null) {
         // TODO: if the range ends up null (how?), should it default
         // to the previously selected preset? For now, just go back to lastHourl.
-        if (date === null) {
-            this.setState({
-                timeRange: {
-                    kind: "preset",
-                    preset: "lastHour"
-                }
-            });
+        // if (range === null) {
+        //     this.setState({
+        //         timeRange: {
+        //             kind: "preset",
+        //             preset: "lastHour"
+        //         }
+        //     });
+        //     return;
+        // }
+
+        if (!range) {
             return;
         }
 
-        // handle logic of switching from 'preset' to 'literal'
+        const [fromDate, toDate] = range;
+
         let existingTimeRange = this.state.timeRange;
         let timeRange: TimeRange;
         switch (existingTimeRange.kind) {
             case "preset":
                 timeRange = {
                     kind: "literal",
-                    start: date.valueOf(),
-                    end: Infinity
+                    start: fromDate ? fromDate.valueOf() : 0,
+                    end: toDate ? toDate.valueOf() : Infinity
                 };
                 break;
             case "literal":
                 timeRange = {
                     kind: "literal",
-                    start: date.valueOf(),
-                    end: existingTimeRange.end
-                };
-                break;
-            default:
-                return;
-        }
-
-        this.setState({
-            timeRange
-        });
-    }
-
-    onRangeToChange(date: dayjs.Dayjs | null, dateString: string) {
-        // TODO: if the range ends up null (how?), should it default
-        // to the previously selected preset? For now, just go back to lastHourl.
-        if (date === null) {
-            this.setState({
-                timeRange: {
-                    kind: "preset",
-                    preset: "lastHour"
-                }
-            });
-            return;
-        }
-
-        let existingTimeRange = this.state.timeRange;
-        let timeRange: TimeRange;
-        switch (existingTimeRange.kind) {
-            case "preset":
-                timeRange = {
-                    kind: "literal",
-                    start: Infinity,
-                    end: date.valueOf()
-                };
-                break;
-            case "literal":
-                timeRange = {
-                    kind: "literal",
-                    start: existingTimeRange.start,
-                    end: date.valueOf()
+                    start: fromDate ? fromDate.valueOf() : 0,
+                    end: toDate ? toDate.valueOf() : Infinity
                 };
                 break;
             default:
@@ -479,20 +525,12 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
             if (timeRange.kind === "literal") {
                 dateControls = (
                     <React.Fragment>
-                        <Form.Item label="From">
-                            <DatePicker
-                                showTime={true}
+                        <Form.Item label="Date Range">
+                            <DatePicker.RangePicker
+                                showTime
                                 allowClear={false}
-                                value={dayjs(timeRange.start)}
-                                onChange={this.onRangeFromChange.bind(this)}
-                            />
-                        </Form.Item>
-                        <Form.Item label="To">
-                            <DatePicker
-                                showTime={true}
-                                allowClear={false}
-                                value={dayjs(timeRange.end)}
-                                onChange={this.onRangeToChange.bind(this)}
+                                value={[dayjs(timeRange.start), dayjs(timeRange.end)]}
+                                onCalendarChange={this.onRangeChange.bind(this)}
                             />
                         </Form.Item>
                     </React.Fragment>
