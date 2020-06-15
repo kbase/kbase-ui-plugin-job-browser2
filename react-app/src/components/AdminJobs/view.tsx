@@ -580,7 +580,7 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
         this.setState({
             filter
         }, () => {
-            this.limit = 0;
+            this.offset = 0;
             this.doSearch(false);
         });
     }

@@ -594,7 +594,7 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         }, () => {
             // Because this may obsolete the page. 
             // This is a simplification, for sure.
-            this.limit = 0;
+            this.offset = 0;
             this.doSearch(false);
         });
     }
