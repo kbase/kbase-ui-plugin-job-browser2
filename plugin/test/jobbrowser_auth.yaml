@@ -7,17 +7,6 @@ specs:
       - subtask: login
       - action: navigate
         path: jobbrowser
-      - wait: forText
-        timeout: 10000
-        title: Job browser should begin to appear
-        text: Job Browser
-        selector:
-          type: absolute
-          path:
-            - type: plugin
-              value: mainwindow
-            - type: label
-              value: title
       - subtask: plugin
       - wait: forElement
         selector:
