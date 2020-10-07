@@ -1,29 +1,19 @@
 ## Plugin Configuration
 ---
 package:
-    author: KBase Developer
-    name: jobbrowser
-    description: The jobbrowser panel and associated widgets
-    type: legacy
-source:
-    ## sources are relative to build/plugins/PACKAGE/source/javascript
-    ## NB: need to quote file names, otherwise
-    modules:
-    styles:
-        # - file: styles.css
+  author: KBase Developer
+  name: job-browser2
+  description: The job browser panel and associated widgets
+  type: legacy
 install:
+  route:
     routes:
-        - path: ['jobbrowser', {type: 'rest', name: 'pathParams'}]
-          queryParams:
-              tab: {}
-          widget: kb_iframe_loader
-          authorization: true
-          params:
-                view: browse
-                plugin: job-browser2
-    menu:
-        - name: jobbrowser
-          definition:
-              path: ['jobbrowser']
-              label: Jobs
-              icon: suitcase
+      - path: "jobbrowser?:-tab"
+        authorization: true
+        view: browse
+  menu:
+    - name: jobbrowser
+      definition:
+        path: ["jobbrowser"]
+        label: Jobs
+        icon: suitcase

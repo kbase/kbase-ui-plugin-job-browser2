@@ -30,7 +30,7 @@ For hacking on this plugin, the short version, however, goes like this:
 -   Start up kbase-ui with this plugin installed from the local source tree:
     ```bash
     cd kbase-ui
-    make dev-start plugins="jobbrowser"
+    make dev-start plugins="job-browser2"
     ```
 
 > Note: In order to develop any aspect of kbase-ui, you should be familiar with (what KBase is)[https://kbase.us]

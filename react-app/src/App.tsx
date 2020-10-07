@@ -18,7 +18,7 @@ import { AuthGate } from '@kbase/ui-components';
 
 // project
 import Main from './components/Main';
-import ErrorBoundary from './components/ErrorBoundary'
+import ErrorBoundary from './components/ErrorBoundary';
 
 // file
 import './App.css';
