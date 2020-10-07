@@ -3,11 +3,14 @@ import './style.css';
 import { Job } from '../../redux/store';
 import { JobLogEntry } from './state';
 import { Table, Tooltip, Empty, Button, Dropdown, Menu, Spin } from 'antd';
-import { ClickParam } from 'antd/lib/menu';
+// import { ClickParam } from 'antd/lib/menu';
 import Papa from 'papaparse';
 import ButtonGroup from 'antd/lib/button/button-group';
 import { JobStateType } from '../../redux/types/jobState';
 import { CaretRightOutlined, DownloadOutlined, PauseOutlined, ArrowDownOutlined } from '@ant-design/icons';
+// TODO: replace with ClickParam when fixed upstream
+// https://github.com/ant-design/ant-design/issues/25467
+import { MenuInfo } from 'rc-menu/lib/interface';
 
 enum PlayState {
     NONE,
@@ -310,11 +313,11 @@ export default class JobLogs extends React.Component<JobLogProps, JobLogState> {
         download('job-log.' + type, contentType, content);
     }
 
-    onMenuClick(param: ClickParam | undefined) {
+    onMenuClick(param: MenuInfo | undefined) {
         if (!param) {
             return;
         }
-        this.downloadLog(param.key, this.props.log);
+        this.downloadLog(param.key.toString(), this.props.log);
     }
 
     onPlayLog() {
