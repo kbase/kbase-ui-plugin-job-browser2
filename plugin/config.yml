@@ -5,15 +5,15 @@ package:
   name: job-browser2
   description: The job browser panel and associated widgets
   type: legacy
-install:
+services:
   route:
     routes:
-      - path: "jobbrowser?:-tab"
+      - path: jobbrowser?:-tab
         authorization: true
         view: browse
   menu:
-    - name: jobbrowser
-      definition:
-        path: ["jobbrowser"]
+    items:
+      - name: jobbrowser
+        path: jobbrowser
         label: Jobs
         icon: suitcase
