@@ -27,7 +27,7 @@ export abstract class ServiceClient {
 
         return (result[0] as unknown) as ReturnType;
     }
-    async callFuncEmptyResult<ParamType, ReturnType>(funcName: string, params: ParamType): Promise<void> {
+    async callFuncEmptyResult<ParamType>(funcName: string, params: ParamType): Promise<void> {
         const client = new JSONRPCClient({ url: this.url, timeout: this.timeout, authorization: this.authorization });
         const method = this.module + '.' + funcName;
         const result = await client.callMethod(method, [params], { timeout: this.timeout });

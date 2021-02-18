@@ -52,7 +52,7 @@ export default class TableResizer {
 
     onHasRows(body: HTMLElement) {
         // need a special hack to keep the no-data display happy.
-        delete body.style.flex;
+        body.style.flex = '';
     }
 
     async getRowsPerPage() {

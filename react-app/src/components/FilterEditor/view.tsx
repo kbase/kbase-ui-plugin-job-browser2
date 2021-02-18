@@ -129,8 +129,6 @@ export default class FilterEditor extends React.Component<FilterEditorProps, Fil
         });
     }
 
-
-
     /* Rendering */
     renderUserSelector() {
         return <UserSelect

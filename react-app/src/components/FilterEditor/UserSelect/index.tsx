@@ -9,7 +9,7 @@ export interface OwnProps { }
 interface StateProps {
     token: string;
     username: string;
-    authURL: string;
+    userProfileServiceURL: string;
 }
 
 interface DispatchProps {
@@ -21,7 +21,7 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
         app: {
             config: {
                 services: {
-                    Auth: { url: authURL },
+                    UserProfile: { url: userProfileServiceURL },
                 }
             }
         }
@@ -33,7 +33,7 @@ function mapStateToProps(state: StoreState, props: OwnProps): StateProps {
 
     const { token, username } = userAuthorization;
 
-    return { token, username, authURL };
+    return { token, username, userProfileServiceURL };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>, ownProps: OwnProps): DispatchProps {

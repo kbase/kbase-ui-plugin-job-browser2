@@ -44,7 +44,7 @@ export default class NarrativeJobServiceClient extends ServiceClient {
     module: string = 'NarrativeJobService';
 
     async cancelJob(param: CancelJobParam): Promise<void> {
-        return await this.callFuncEmptyResult<CancelJobParam, void>('cancel_job', param);
+        return await this.callFuncEmptyResult<CancelJobParam>('cancel_job', param);
     }
 
     async getJobLogs(param: GetJobLogsParam): Promise<GetJobLogsResult> {
