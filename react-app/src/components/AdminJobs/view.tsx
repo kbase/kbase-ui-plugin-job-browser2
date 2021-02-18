@@ -8,7 +8,7 @@
 import React from "react";
 import {
     Form, Button, Select, Popconfirm, Tooltip,
-    Modal, Switch
+    Modal, Switch, Input
 } from 'antd';
 
 // import moment, { Moment } from 'moment';
@@ -39,13 +39,15 @@ import DatePicker from "../DatePicker";
 import { SERVICE_TIMEOUT } from "../../constants";
 import NiceRelativeTime from "../NiceRelativeTime";
 import NiceElapsedTime from "../NiceElapsedTime";
+import Search from "antd/lib/transfer/search";
+import { isUndefined } from "node:util";
 
 /**
  * This version of the job status defines the set of strings that may be used
  * in the ui controls.
  *
  */
-type JobStatusFilterKey = "queued" | "running" | "canceled" | "success" | "error";
+// type JobStatusFilterKey = "queued" | "running" | "canceled" | "success" | "error";
 
 
 
@@ -356,6 +358,25 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
             timeRange
         });
     }
+
+    onChangeJobID(ev?: React.ChangeEvent<HTMLInputElement>) {
+        if (ev) {
+            this.setState({
+                filter: {
+                    job_id: [ev.target.value],
+                    ...this.state.filter
+                }
+            });
+        } else {
+            this.setState({
+                filter: {
+                    job_id: undefined,
+                    ...this.state.filter
+                }
+            });
+        }
+    }
+
     renderSearchInput() {
         let dateControls;
         if (this.state.showDates) {
@@ -392,6 +413,12 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
                     </Select>
                 </Form.Item>
                 {dateControls}
+
+                <Form.Item style={{width: '17em'}}>
+                    <Tooltip title="Search by job id">
+                        <Input placeholder="Job ID" onChange={this.onChangeJobID.bind(this)}/>
+                    </Tooltip>
+                </Form.Item>
 
                 <Form.Item>
                     <Tooltip title="Clicking this button triggers a search to be run using all of the current search input">
