@@ -8,7 +8,7 @@
 import React from "react";
 import {
     Form, Button, Select, Popconfirm, Tooltip,
-    Modal, Switch
+    Modal, Switch, Input
 } from 'antd';
 
 // import moment, { Moment } from 'moment';
@@ -39,13 +39,15 @@ import DatePicker from "../DatePicker";
 import { SERVICE_TIMEOUT } from "../../constants";
 import NiceRelativeTime from "../NiceRelativeTime";
 import NiceElapsedTime from "../NiceElapsedTime";
+import Search from "antd/lib/transfer/search";
+import { isUndefined } from "node:util";
 
 /**
  * This version of the job status defines the set of strings that may be used
  * in the ui controls.
  *
  */
-type JobStatusFilterKey = "queued" | "running" | "canceled" | "success" | "error";
+// type JobStatusFilterKey = "queued" | "running" | "canceled" | "success" | "error";
 
 
 
@@ -190,29 +192,6 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
         };
     }
 
-    async componentDidMount() {
-
-    }
-
-    // onResize(rowsPerPage: number) {
-    //     // It would be nice to rely upon the table component to trigger a 
-    //     // change even if we change the rows per page ... but we change the 
-    //     // rows per page via the table props, not by a trigger.
-    //     // Perhaps by wrapping the table or subclassing it?
-
-    //     this.limit = rowsPerPage;
-    //     this.offset = this.currentPage * rowsPerPage;
-
-    //     // This causes the table to rerender, but without triggering a
-    //     // re-search;
-    //     // this.setState({
-    //     //     rowsPerPage
-    //     // });
-
-    //     // This triggers a fresh search.
-    //     this.doSearch(false);
-    // }
-
     componentDidUpdate() {
         if (this.props.dataSource.status === AsyncProcessState.PROCESSING ||
             this.props.dataSource.status === AsyncProcessState.REPROCESSING) {
@@ -257,44 +236,6 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
         this.doSearch(true);
     }
 
-    // onTableChanged(pagination: PaginationConfig, filters: any, sorter: SorterResult<Job>) {
-    //     console.log('table changed??', pagination);
-    //     // Calculate offset and limit based on current pagination
-    //     const currentPage = (pagination.current || 1) - 1;
-    //     const currentPageSize = pagination.pageSize || 5;
-
-    //     this.currentPage = pagination.current || 0;
-    //     this.offset = currentPage * currentPageSize;
-    //     this.limit = currentPageSize;
-
-    //     // Calculate the sort spec 
-    //     // Only create at sort order is supported.
-    //     switch (sorter.columnKey) {
-    //         case 'createAt':
-    //             switch (sorter.order) {
-    //                 case 'ascend':
-    //                     this.sorting = {
-    //                         field: 'created',
-    //                         direction: 'ascending'
-    //                     };
-    //                     break;
-    //                 case 'descend':
-    //                 default:
-    //                     this.sorting = {
-    //                         field: 'created',
-    //                         direction: 'descending'
-    //                     };
-    //             }
-    //             break;
-    //         default:
-    //             this.sorting = {
-    //                 field: 'created',
-    //                 direction: 'descending'
-    //             };
-    //     }
-
-    //     this.doSearch(false);
-    // }
     onFirstPage() {
         if (this.props.dataSource.status !== AsyncProcessState.SUCCESS) {
             return;
@@ -385,98 +326,7 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
         return false;
     }
 
-    // onRangeFromChange(date: dayjs.Dayjs | null, dateString: string) {
-    //     // TODO: if the range ends up null (how?), should it default
-    //     // to the previously selected preset? For now, just go back to lastHourl.
-    //     if (date === null) {
-    //         this.setState({
-    //             timeRange: {
-    //                 kind: "preset",
-    //                 preset: "lastHour"
-    //             }
-    //         });
-    //         return;
-    //     }
-
-    //     // handle logic of switching from 'preset' to 'literal'
-    //     let existingTimeRange = this.state.timeRange;
-    //     let timeRange: TimeRange;
-    //     switch (existingTimeRange.kind) {
-    //         case "preset":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: date.valueOf(),
-    //                 end: Infinity
-    //             };
-    //             break;
-    //         case "literal":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: date.valueOf(),
-    //                 end: existingTimeRange.end
-    //             };
-    //             break;
-    //         default:
-    //             return;
-    //     }
-
-    //     this.setState({
-    //         timeRange
-    //     });
-    // }
-
-    // onRangeToChange(date: dayjs.Dayjs | null, dateString: string) {
-    //     // TODO: if the range ends up null (how?), should it default
-    //     // to the previously selected preset? For now, just go back to lastHourl.
-    //     if (date === null) {
-    //         this.setState({
-    //             timeRange: {
-    //                 kind: "preset",
-    //                 preset: "lastHour"
-    //             }
-    //         });
-    //         return;
-    //     }
-
-    //     let existingTimeRange = this.state.timeRange;
-    //     let timeRange: TimeRange;
-    //     switch (existingTimeRange.kind) {
-    //         case "preset":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: Infinity,
-    //                 end: date.valueOf()
-    //             };
-    //             break;
-    //         case "literal":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: existingTimeRange.start,
-    //                 end: date.valueOf()
-    //             };
-    //             break;
-    //         default:
-    //             return;
-    //     }
-
-    //     this.setState({
-    //         timeRange
-    //     });
-    // }
-
     onRangeChange(range: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null) {
-        // TODO: if the range ends up null (how?), should it default
-        // to the previously selected preset? For now, just go back to lastHourl.
-        // if (range === null) {
-        //     this.setState({
-        //         timeRange: {
-        //             kind: "preset",
-        //             preset: "lastHour"
-        //         }
-        //     });
-        //     return;
-        // }
-
         if (!range) {
             return;
         }
@@ -508,6 +358,25 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
             timeRange
         });
     }
+
+    onChangeJobID(ev?: React.ChangeEvent<HTMLInputElement>) {
+        if (ev) {
+            this.setState({
+                filter: {
+                    job_id: [ev.target.value],
+                    ...this.state.filter
+                }
+            });
+        } else {
+            this.setState({
+                filter: {
+                    job_id: undefined,
+                    ...this.state.filter
+                }
+            });
+        }
+    }
+
     renderSearchInput() {
         let dateControls;
         if (this.state.showDates) {
@@ -544,6 +413,12 @@ export default class AdminJobs extends React.Component<AdminJobsProps, AdminJobs
                     </Select>
                 </Form.Item>
                 {dateControls}
+
+                <Form.Item style={{width: '17em'}}>
+                    <Tooltip title="Search by job id">
+                        <Input placeholder="Job ID" onChange={this.onChangeJobID.bind(this)}/>
+                    </Tooltip>
+                </Form.Item>
 
                 <Form.Item>
                     <Tooltip title="Clicking this button triggers a search to be run using all of the current search input">

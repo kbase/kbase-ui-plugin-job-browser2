@@ -55,7 +55,12 @@ export default class Data extends React.Component<TheProps, DataState> {
             .reduce((options, app) => {
                 const { id } = app;
 
-                const [moduleId, functionId] = id.split('/');
+                let [moduleId, functionId] = id.split('/');
+
+                if (typeof functionId === 'undefined') {
+                    functionId = moduleId;
+                    moduleId = 'unknown';
+                }
 
                 const option = options.get(functionId);
                 if (!option) {
@@ -72,7 +77,7 @@ export default class Data extends React.Component<TheProps, DataState> {
             .map(([key, value]) => {
                 return {
                     value: key,
-                    label: `${key} (${Array.from(value.values()).join(',')})`
+                    label: `${key} (${Array.from(value.values()).join(', ')})`
                 };
             })
             .sort((a, b) => {

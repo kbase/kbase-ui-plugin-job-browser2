@@ -35,28 +35,17 @@ export default class UserSelect extends React.Component<UserSelectProps, UserSel
     }
 
     renderUserSelector() {
-        const options = this.props.options
-            .map((option) => {
-                return <Select.Option
-                    key={option.value}
-                    value={option.value}>{option.label}</Select.Option>;
-            });
         const defaultValue = this.props.defaultValue ? this.props.defaultValue[0] : undefined;
+
         return <Select<string>
             showSearch
             allowClear
             onChange={this.onChange.bind(this)}
             onSearch={this.onSearch.bind(this)}
+            filterOption={false}
             defaultValue={defaultValue}
-        // filterOption={(filterTerm, option) => {
-        //     if (!option.props.children) {
-        //         return true;
-        //     }
-        //     return String(option.props.children).toLowerCase().indexOf(filterTerm.toLowerCase()) >= 0;
-        // }}
-        >
-            {options}
-        </Select>;
+            options={this.props.options}
+        />;
     }
     render() {
         return this.renderUserSelector();
