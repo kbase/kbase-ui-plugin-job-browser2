@@ -2,13 +2,13 @@ import React from 'react';
 import View, { UserSelectProps } from './view';
 import { OptionValue } from '../../../lib/types';
 // import { SERVICE_TIMEOUT } from '../../../constants';
-import AuthClient from '../../../lib/comm/coreServices/Auth2';
+import { UserProfileClient } from '../../../lib/comm/coreServices/UserProfile';
 
 /* For Component */
 export interface DataProps {
     token: string;
     username: string;
-    authURL: string;
+    userProfileServiceURL: string;
 }
 
 // type TheProps = Omit<DataProps & FilterEditorProps, "narratives">;
@@ -42,15 +42,15 @@ export default class Data extends React.Component<TheProps, DataState> {
     }
 
     async search(term: string) {
-        const { token, authURL } = this.props;
-        const client = new AuthClient({
-            url: authURL,
-            authorization: token
+        const { token, userProfileServiceURL } = this.props;
+        const client = new UserProfileClient({
+            url: userProfileServiceURL,
+            authorization: token,
+            timeout:  10000
         });
         const users = await client.searchUsers(term);
-        const options = Array.from(Object.entries(users))
-            .map(([username, realname]) => {
-
+        const options = users
+            .map(({username, realname}) => {
                 return {
                     value: username,
                     label: `${realname} (${username})`

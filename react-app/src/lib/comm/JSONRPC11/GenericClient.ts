@@ -179,6 +179,7 @@ export class AuthorizedGenericClient extends GenericClient {
             'Accept': 'application/json',
             'Authorization': this.token
         };
+        // TODO: switch to fetch from ajax.
         const response = await axios.post(this.url, params, {
             headers,
             timeout: this.timeout
