@@ -258,48 +258,9 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
     }
 
     onSubmit(fields: any) {
-        // event.preventDefault();
         this.doSearch(true);
     }
 
-    // onTableChanged(pagination: PaginationConfig, filters: any, sorter: SorterResult<Job>) {
-    //     console.log('table changed??', pagination);
-    //     // Calculate offset and limit based on current pagination
-    //     const currentPage = (pagination.current || 1) - 1;
-    //     const currentPageSize = pagination.pageSize || 5;
-
-    //     this.currentPage = pagination.current || 0;
-    //     this.offset = currentPage * currentPageSize;
-    //     this.limit = currentPageSize;
-
-    //     // Calculate the sort spec 
-    //     // Only create at sort order is supported.
-    //     switch (sorter.columnKey) {
-    //         case 'createAt':
-    //             switch (sorter.order) {
-    //                 case 'ascend':
-    //                     this.sorting = {
-    //                         field: 'created',
-    //                         direction: 'ascending'
-    //                     };
-    //                     break;
-    //                 case 'descend':
-    //                 default:
-    //                     this.sorting = {
-    //                         field: 'created',
-    //                         direction: 'descending'
-    //                     };
-    //             }
-    //             break;
-    //         default:
-    //             this.sorting = {
-    //                 field: 'created',
-    //                 direction: 'descending'
-    //             };
-    //     }
-
-    //     this.doSearch(false);
-    // }
     onFirstPage() {
         if (this.props.dataSource.status !== AsyncProcessState.SUCCESS) {
             return;
@@ -394,99 +355,8 @@ export default class MyJobs extends React.Component<MyJobsProps, MyJobsState> {
         return false;
     }
 
-    // onRangeFromChange(date: dayjs.Dayjs | null, dateString: string) {
-    //     // TODO: if the range ends up null (how?), should it default
-    //     // to the previously selected preset? For now, just go back to lastHourl.
-    //     if (date === null) {
-    //         this.setState({
-    //             timeRange: {
-    //                 kind: "preset",
-    //                 preset: "lastHour"
-    //             }
-    //         });
-    //         return;
-    //     }
-
-    //     // handle logic of switching from 'preset' to 'literal'
-    //     let existingTimeRange = this.state.timeRange;
-    //     let timeRange: TimeRange;
-    //     switch (existingTimeRange.kind) {
-    //         case "preset":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: date.valueOf(),
-    //                 end: Infinity
-    //             };
-    //             break;
-    //         case "literal":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: date.valueOf(),
-    //                 end: existingTimeRange.end
-    //             };
-    //             break;
-    //         default:
-    //             return;
-    //     }
-
-    //     this.setState({
-    //         timeRange
-    //     });
-    // }
-
-    // onRangeToChange(date: dayjs.Dayjs | null, dateString: string) {
-    //     // TODO: if the range ends up null (how?), should it default
-    //     // to the previously selected preset? For now, just go back to lastHourl.
-    //     if (date === null) {
-    //         this.setState({
-    //             timeRange: {
-    //                 kind: "preset",
-    //                 preset: "lastHour"
-    //             }
-    //         });
-    //         return;
-    //     }
-
-    //     let existingTimeRange = this.state.timeRange;
-    //     let timeRange: TimeRange;
-    //     switch (existingTimeRange.kind) {
-    //         case "preset":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: Infinity,
-    //                 end: date.valueOf()
-    //             };
-    //             break;
-    //         case "literal":
-    //             timeRange = {
-    //                 kind: "literal",
-    //                 start: existingTimeRange.start,
-    //                 end: date.valueOf()
-    //             };
-    //             break;
-    //         default:
-    //             return;
-    //     }
-
-    //     this.setState({
-    //         timeRange
-    //     });
-    // }
-
-    onRangeChange(range: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null) {
-        // TODO: if the range ends up null (how?), should it default
-        // to the previously selected preset? For now, just go back to lastHourl.
-        // if (range === null) {
-        //     this.setState({
-        //         timeRange: {
-        //             kind: "preset",
-        //             preset: "lastHour"
-        //         }
-        //     });
-        //     return;
-        // }
-
-        if (!range) {
+     onRangeChange(range: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null) {
+         if (!range) {
             return;
         }
 

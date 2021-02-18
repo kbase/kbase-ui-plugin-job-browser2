@@ -246,33 +246,6 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
         this.props.config(config);
     }
 
-    // calcRowsPerPage(): Promise<number> {
-    //     return new Promise<number>((resolve, reject) => {
-    //         let tries = 20;
-    //         const start = new Date().getTime();
-    //         const loop = () => {
-    //             window.setTimeout(() => {
-    //                 const body = this.bodyRef.current;
-    //                 const elapsed = new Date().getTime() - start;
-    //                 if (body === null) {
-    //                     // throw new Error('No table body!');
-    //                     if (tries === 0) {
-    //                         console.log('body???', this.bodyRef);
-    //                         reject(new Error(`Table body not found after ${elapsed}ms`));
-    //                     }
-    //                     tries -= 1;
-    //                     loop();
-    //                 } else {
-    //                     const height = body.offsetHeight;
-    //                     resolve(Math.floor(height / ROW_HEIGHT));
-    //                 }
-    //             }, 100);
-    //         };
-    //         loop();
-    //     });
-
-    // }
-
     calcRowsPerPage(): number {
         const body = this.bodyRef.current;
         if (body === null) {
@@ -283,21 +256,11 @@ export default class Table2<D> extends React.Component<TableProps<D>, Table2Stat
         }
     }
 
-    // mouseHeldListener() {
-    //     console.log('mouse held down?');
-    //     window.removeEventListener('mouseup', this.mouseHeldListener);
-    // }
-
     resizeListener() {
-        // window.addEventListener('mouseup', this.mouseHeldListener.bind(this));
         if (this.resizing) {
             return;
         }
         this.resizing = true;
-        // window.requestAnimationFrame(() => {
-        //     this.resizing = false;
-        //     this.setRowsPerPage();
-        // });
 
         window.setTimeout(() => {
             this.resizing = false;
